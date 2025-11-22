@@ -1,0 +1,83 @@
+/* src/pages/AuthCallback/AuthCallback.module.css */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.message {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.countdown {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.closeButton {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background: #5a6fd8;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(102, 126, 234, 0.3);
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.successIcon {
+  font-size: 48px;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.instruction {
+  font-size: 14px;
+  color: #666;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

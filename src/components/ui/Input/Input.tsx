@@ -1,4 +1,3 @@
-// src/components/ui/Input/Input.tsx
 import React from 'react';
 import styles from './Input.module.css';
 
@@ -10,8 +9,13 @@ interface InputProps {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  name?: string;
+  autoComplete?: string;
 }
 
+/**
+ * Компонент текстового поля ввода с базовой стилизацией и доступностью
+ */
 const Input: React.FC<InputProps> = ({
   type,
   placeholder,
@@ -20,6 +24,8 @@ const Input: React.FC<InputProps> = ({
   required = false,
   disabled = false,
   className = '',
+  name,
+  autoComplete,
 }) => {
   return (
     <input
@@ -30,6 +36,8 @@ const Input: React.FC<InputProps> = ({
       required={required}
       disabled={disabled}
       className={`${styles.input} ${className}`}
+      name={name}
+      autoComplete={autoComplete}
     />
   );
 };
