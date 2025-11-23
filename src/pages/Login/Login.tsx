@@ -5,6 +5,9 @@ import Input from '../../components/ui/Input/Input';
 import styles from './Login.module.css';
 import { supabase } from '../../lib/supabase';
 
+/**
+ * Компонент аутентификации с поддержкой входа, регистрации и восстановления пароля
+ */
 const Login: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -17,7 +20,6 @@ const Login: React.FC = () => {
 
   const { signUp, signIn } = useAuth();
 
-  // Очистка формы при изменении режима
   useEffect(() => {
     clearForm();
   }, [isSignUp, isForgotPassword]);
@@ -41,14 +43,14 @@ const Login: React.FC = () => {
         const redirectUrl = `${window.location.origin}/recovery-callback`;
         
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
-      });
+          redirectTo: redirectUrl,
+        });
       
-      if (error) throw error;
+        if (error) throw error;
       
-      setSuccessMessage(`Password reset instructions have been sent to ${email}. Please check your email.`);
-      setEmail('');
-    } else if (isSignUp) {
+        setSuccessMessage(`Password reset instructions have been sent to ${email}. Please check your email.`);
+        setEmail('');
+      } else if (isSignUp) {
         const result = await signUp(email, password, username);
         
         if (result.needsEmailConfirmation) {
@@ -60,14 +62,14 @@ const Login: React.FC = () => {
         await signIn(email, password);
       }
     } catch (err) {
-    const errorMessage = err instanceof Error 
-      ? err.message 
-      : 'An unexpected error occurred';
-    setError(errorMessage);
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'An unexpected error occurred';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSwitchToSignIn = () => {
     setIsSignUp(false);

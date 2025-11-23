@@ -4,48 +4,45 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import styles from './RecoveryCallback.module.css';
 
+/**
+ * Обрабатывает callback от Supabase после перехода по ссылке восстановления пароля
+ */
 const RecoveryCallback: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const handleRecoveryCallback = async () => {
-    const searchParams = new URLSearchParams(location.search);
-    const type = searchParams.get('type');
-    
-    if (type !== 'recovery' && !location.hash.includes('type=recovery')) {
-      navigate('/login?error=invalid_recovery_type', { replace: true });
-      return;
-    }
       try {
         // Supabase автоматически обрабатывает токен из URL
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error('Session error:', sessionError);
           navigate('/login?error=session_error', { replace: true });
           return;
         }
 
-        // RecoveryCallback.tsx
         if (session?.user) {
-            navigate('/password-recovery', { replace: true });
+          navigate('/password-recovery', { replace: true });
         } else {
-        // Если сессии нет, пробуем извлечь токен из URL
-        const hashParams = new URLSearchParams(location.hash.replace('#', ''));
-        const accessToken = hashParams.get('access_token');
-        
-        if (accessToken) {
-            navigate('/password-recovery', { replace: true });
-        } else {
-            navigate('/login?error=recovery_failed', { replace: true });
-        }
+          // Попытка ручного извлечения токена из хэша
+          if (location.hash) {
+            const hashParams = new URLSearchParams(location.hash.replace('#', ''));
+            const accessToken = hashParams.get('access_token');
+            const tokenType = hashParams.get('token_type');
+            
+            if (accessToken && tokenType === 'bearer') {
+              navigate('/password-recovery', { replace: true });
+              return;
+            }
+          }
+          
+          navigate('/login?error=recovery_failed', { replace: true });
         }
 
       } catch (err) {
-        console.error('Recovery callback error:', err);
         navigate('/login?error=recovery_error', { replace: true });
       }
     };

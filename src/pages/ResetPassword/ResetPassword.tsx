@@ -1,21 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/ui/Button/Button';
 import Input from '../../components/ui/Input/Input';
 import styles from './ResetPassword.module.css';
 
+/**
+ * Компонент для установки нового пароля после восстановления
+ */
 const ResetPassword: React.FC = () => {
-const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isValidRecovery, setIsValidRecovery] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkRecoverySession = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          setIsValidRecovery(false);
+          setError('Failed to verify recovery session.');
+          return;
+        }
+
+        if (!session?.user?.email) {
+          setIsValidRecovery(false);
+          setError('Invalid recovery session. Please use a valid password reset link.');
+          
+          if (session?.user) {
+            await supabase.auth.signOut();
+          }
+          return;
+        }
+
+        setIsValidRecovery(true);
+        
+      } catch (err) {
+        setIsValidRecovery(false);
+        setError('Failed to verify recovery session.');
+      }
+    };
+
+    checkRecoverySession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,10 +74,12 @@ const [password, setPassword] = useState('');
 
       if (error) throw error;
 
-      setSuccessMessage('Password updated successfully! Redirecting to dashboard...');
+      setSuccessMessage('Password updated successfully! Redirecting to login...');
+      
+      await supabase.auth.signOut();
       
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
+        navigate('/login', { replace: true });
       }, 2000);
 
     } catch (err) {
@@ -61,7 +96,12 @@ const [password, setPassword] = useState('');
     return (
       <div className={styles.container}>
         <div className={styles.card}>
-          <div className={styles.loading}>Verifying recovery session...</div>
+          <div className={styles.loading}>
+            <div>Checking recovery link...</div>
+            <div className={styles.loadingSubtext}>
+              This should only take a moment
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -71,7 +111,7 @@ const [password, setPassword] = useState('');
     return (
       <div className={styles.container}>
         <div className={styles.card}>
-          <h1 className={styles.title}>Access Denied</h1>
+          <h1 className={styles.title}>Cannot Reset Password</h1>
           <div className={styles.error}>
             {error}
           </div>
@@ -153,17 +193,16 @@ const [password, setPassword] = useState('');
 
           <div className={styles.footer}>
             <button
-                type="button"
-                onClick={async () => {
-                // Выходим из временной сессии восстановления
+              type="button"
+              onClick={async () => {
                 await supabase.auth.signOut();
                 navigate('/login');
-                }}
-                className={styles.backButton}
+              }}
+              className={styles.backButton}
             >
-                Back to Login
+              Back to Login
             </button>
-            </div>
+          </div>
         </form>
       </div>
     </div>

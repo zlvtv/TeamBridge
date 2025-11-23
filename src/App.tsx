@@ -31,34 +31,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 /**
- * Маршруты для неаутентифицированных пользователей
+ * Специальный маршрут для восстановления пароля
+ * Разрешает доступ даже при временной recovery сессии
  */
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isInitialized } = useAuth();
-  
-  if (!isInitialized) return <LoadingState />;
-  if (user) return <Navigate to="/dashboard" replace />;
-  
-  return <>{children}</>;
-};
-
-const RecoveryRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const RecoveryProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isInitialized } = useAuth();
   
   if (!isInitialized) return <LoadingState />;
   
-  // RecoveryRoute не проверяет user, но может проверять другие условия
-  // если нужно, можно добавить дополнительную проверку
-  return <>{children}</>;
-};
-
-const EmailConfirmationRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isInitialized } = useAuth();
-  
-  if (!isInitialized) return <LoadingState />;
-  
-  // Можно добавить дополнительную проверку, что это действительно callback подтверждения
-  // но обычно это безопасно, так как без валидного токена ничего не произойдет
   return <>{children}</>;
 };
 
@@ -66,59 +46,36 @@ const EmailConfirmationRoute: React.FC<{ children: React.ReactNode }> = ({ child
  * Основной компонент маршрутизации
  */
 function AppContent() {
-  const { user } = useAuth();
+  const { user, isInitialized } = useAuth();
+
+  if (!isInitialized) {
+    return <LoadingState />;
+  }
+
+  if (!user) {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/recovery-callback" element={<RecoveryCallback />} />
+          <Route 
+            path="/password-recovery" 
+            element={
+              <RecoveryProtectedRoute>
+                <ResetPassword />
+              </RecoveryProtectedRoute>
+            } 
+          />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    );
+  }
 
   return (
     <Router>
       <Routes>
-        {/* Публичные маршруты */}
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login key={user ? 'authenticated' : 'unauthenticated'} />
-            </PublicRoute>
-          } 
-        />
-
-        <Route 
-          path="/reset-password" 
-          element={
-            <PublicRoute>
-              <ResetPassword />
-            </PublicRoute>
-          } 
-        />
-
-        {/* Callback маршруты - открытые для всех */}
-        <Route 
-          path="/auth/callback" 
-          element={
-            <EmailConfirmationRoute>
-              <AuthCallback />
-            </EmailConfirmationRoute>
-          } 
-        />
-
-        <Route 
-          path="/recovery-callback" 
-          element={
-            <RecoveryRoute>
-              <RecoveryCallback />
-            </RecoveryRoute>
-          } 
-        />  
-
-        <Route 
-          path="/password-recovery" 
-          element={
-            <RecoveryRoute>
-              <ResetPassword />
-            </RecoveryRoute>
-          } 
-        />
-
-        {/* Защищенные маршруты */}
         <Route 
           path="/" 
           element={
@@ -137,8 +94,18 @@ function AppContent() {
           } 
         />
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/recovery-callback" element={<RecoveryCallback />} />
+        <Route 
+          path="/password-recovery" 
+          element={
+            <RecoveryProtectedRoute>
+              <ResetPassword />
+            </RecoveryProtectedRoute>
+          } 
+        />
+        
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
