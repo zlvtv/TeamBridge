@@ -1,0 +1,32 @@
+/* src/components/task/TaskBoard/TaskBoard.module.css */
+.board {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.board__columns {
+  display: flex;
+  gap: var(--space-m);
+  overflow-x: auto;
+  padding: var(--space-xs);
+  flex: 1;
+  min-height: 0;
+}
+
+.board__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.board__empty h3 {
+  margin-bottom: var(--space-s);
+  color: var(--color-text);
+}

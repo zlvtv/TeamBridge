@@ -1,0 +1,73 @@
+/* src/components/chat/ProjectChat/ProjectChat.module.css */
+.chat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat__header {
+  padding-bottom: var(--space-m);
+  margin-bottom: var(--space-l);
+}
+
+.chat__header h3 {
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--color-text);
+  font-size: 18px;
+}
+
+.chat__subtitle {
+  margin: 0;
+  color: var(--color-text-light);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chat__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.chat__emptyIcon {
+  font-size: 48px;
+  margin-bottom: var(--space-m);
+}
+
+.chat__empty h4 {
+  margin: 0 0 var(--space-s) 0;
+  color: var(--color-text);
+  font-size: 18px;
+}
+
+.chat__empty p {
+  max-width: 400px;
+  margin: 0 auto var(--space-l);
+  line-height: 1.6;
+}
+
+.chat__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  max-width: 300px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  background-color: #f8fafc;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+}
+
+.feature__icon {
+  font-size: 16px;
+}

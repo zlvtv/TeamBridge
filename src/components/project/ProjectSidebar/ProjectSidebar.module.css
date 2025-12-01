@@ -1,0 +1,113 @@
+/* src/components/project/ProjectSidebar/ProjectSidebar.module.css */
+.sidebar {
+  width: 280px;
+  background-color: var(--color-surface);
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  position: sticky;
+  top: 80px;
+}
+
+.sidebar__header {
+  padding: var(--space-l) var(--space-m);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.sidebar__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.sidebar__button {
+  padding: var(--space-xs) var(--space-s);
+  font-size: 12px;
+}
+
+.sidebar__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-m) 0;
+}
+
+.sidebar__loading {
+  padding: var(--space-l);
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.sidebar__empty {
+  padding: var(--space-xl) var(--space-l);
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.sidebar__emptyHint {
+  font-size: 12px;
+  margin-top: var(--space-xs);
+  opacity: 0.7;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: 0 var(--space-m);
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.projectItem:hover {
+  background-color: #f8fafc;
+}
+
+.projectItem--active {
+  background-color: #eff6ff;
+  border-color: var(--color-primary);
+}
+
+.projectItem__color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.projectItem__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.projectItem__name {
+  font-weight: 500;
+  color: var(--color-text);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projectItem__description {
+  font-size: 12px;
+  color: var(--color-text-light);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
