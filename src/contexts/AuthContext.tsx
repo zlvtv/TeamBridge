@@ -146,7 +146,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: session.user.id,
           email: session.user.email || '',
           username: profile?.username || session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user',
-          full_name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+          full_name: profile?.full_name || 
+                    session.user.user_metadata?.full_name || 
+                    session.user.user_metadata?.username || 
+                    session.user.email?.split('@')[0] || 
+                    'User', // ✅ Резервный цепочкой
           avatar_url: profile?.avatar_url || session.user.user_metadata?.avatar_url || null,
         };
 
@@ -253,11 +257,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email,
     password,
     options: {
-      data: { username },
+      data: {
+        username,
+        full_name: username, // ✅ Добавляем full_name = username
+      },
     },
   });
 
-  // ✅ НЕ выбрасываем ошибку! Возвращаем оба значения
   return { data, error };
 };
 

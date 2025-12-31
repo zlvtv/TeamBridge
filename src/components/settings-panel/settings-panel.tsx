@@ -5,11 +5,19 @@ import ProfileModal from '../../components/modals/profile-modal/profile-modal';
 import styles from './settings-panel.module.css';
 
 const SettingsPanel: React.FC = () => {
-  const { theme, toggleTheme, isProfileOpen, openProfile } = useUI();
+  const { theme, toggleTheme, isProfileOpen, openProfile, closeProfile } = useUI();
   const handleThemeClick = () => {
     console.log('🌙 [SettingsPanel] Кнопка темы нажата');
     toggleTheme();
   };
+  const handleProfileClick = () => {
+    if (isProfileOpen) {
+      closeProfile();
+    } else {
+      openProfile();
+    }
+  };
+  
   return (
     <div className={styles['settings-panel']}>
       <button
@@ -21,9 +29,9 @@ const SettingsPanel: React.FC = () => {
       </button>
 
       <button
-        data-profile-button // ← помечаем для поиска
+        data-profile-button
         className={styles['settings-panel__avatar-btn']}
-        onClick={openProfile}
+        onClick={handleProfileClick} // ✅ Меняем с openProfile → на переключение
         aria-label="Профиль"
       >
         👤

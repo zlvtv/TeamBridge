@@ -20,20 +20,21 @@ const Dashboard: React.FC = () => {
   const { organizations, currentOrganization, isLoading: orgLoading } = useOrganization();
   const { currentProject } = useProject();
 
-  // ✅ Показываем лоадер ТОЛЬКО при инициализации, не при отсутствии орг
   if (orgLoading) {
     return <div className={styles.loading}>Загрузка организаций...</div>;
   }
 
-  // ✅ Если нет организаций — показываем пустой экран с подсказкой
   if (organizations.length === 0) {
     return <EmptyDashboard />;
   }
 
   return (
     <div className={`${styles.dashboard} ${theme}`}>
-      <OrgIconPanel />
-      <SettingsPanel />
+      {/* ✅ Панели: снизу, но выровнены по вертикали */}
+      <div className={styles['dashboard__panels-container']}>
+        <OrgIconPanel />
+        <SettingsPanel />
+      </div>
 
       <main className={styles['dashboard__main']}>
         <MainHeader />
@@ -41,11 +42,12 @@ const Dashboard: React.FC = () => {
 
         {!isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
-            <div
-              className={styles['dashboard__chat']}
-              style={{ width: `${chatWidth}px` }}
-            >
-              {currentProject ? <ProjectChat /> : <div className={styles['chat-placeholder']}>Выберите проект</div>}
+            <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
+              {currentProject ? (
+                <ProjectChat />
+              ) : (
+                <div className={styles['chat-placeholder']}>Выберите проект</div>
+              )}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>

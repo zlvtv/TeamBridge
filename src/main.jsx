@@ -4,29 +4,32 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './styles/globals.css';
 
-// ✅ Проверяем хэш ДО запуска React
 const handleAuthCallback = () => {
   const hash = window.location.hash;
 
-  // Если есть access_token, refresh_token или confirmation — это callback от Supabase
-  if (
-    hash.includes('access_token') ||
-    hash.includes('refresh_token') ||
-    hash.includes('confirmation') ||
-    hash.includes('recovery') ||
-    hash.includes('redirect_url')
-  ) {
-    // Перенаправляем на /confirm, чтобы там обработать
-    window.location.href = '/confirm';
-    return true;
+  if (hash) {
+    const urlParams = new URLSearchParams(hash.replace('#', '?'));
+
+    const accessToken = urlParams.get('access_token');
+    const type = urlParams.get('type');
+
+    if (accessToken) {
+      if (type === 'recovery') {
+        // ✅ Сохраняем токен в localStorage и редиректим
+        localStorage.setItem('auth_recovery_token', accessToken);
+        window.location.href = '/reset-password';
+        return true;
+      } else if (type === 'signup' || type === 'magiclink' || type === 'invite') {
+        window.location.href = '/confirm';
+        return true;
+      }
+    }
   }
 
   return false;
 };
 
-// Если это callback — не запускаем React
 if (!handleAuthCallback()) {
-  // Запускаем прилоtжение
   createRoot(document.getElementById('root')).render(
       <App />
   );

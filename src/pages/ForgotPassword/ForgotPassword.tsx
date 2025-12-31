@@ -77,17 +77,17 @@ const ForgotPassword: React.FC = () => {
         </h1>
 
         {success ? (
-          <>
-            <p className={styles.subtitle}>
-              На адрес <strong>{email}</strong> отправлено письмо с инструкциями.
-            </p>
-            <p className={styles.tip}>
-              Если письмо не пришло — проверьте папку «Спам».
-            </p>
-            <button className={styles.submit} onClick={() => navigate('/login')}>
-              Войти
-            </button>
-          </>
+  <div className={styles.successContainer}>
+    <p className={styles.subtitle}>
+      На адрес <strong>{email}</strong> отправлено письмо с инструкциями.
+    </p>
+    <p className={styles.spamHint}>
+      Если письмо не пришло — проверьте папку «Спам».
+    </p>
+    <button className={styles.submit} onClick={() => navigate('/login')}>
+      Войти
+    </button>
+  </div>
         ) : (
           <>
             <p className={styles.subtitle}>

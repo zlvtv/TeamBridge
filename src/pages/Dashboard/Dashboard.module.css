@@ -1,10 +1,44 @@
 /* src/pages/Dashboard/Dashboard.module.css */
+
+:root {
+  --color-surface: #f8fafc;
+  --color-primary: #4f46e5;
+  --border-color: #e2e8f0;
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --panel-width: 64px;
+  --panel-gap: 16px;
+  --settings-panel-height: 92px;
+  --panel-top-offset: 20px;
+  --panel-bottom-offset: 20px;
+}
+
+:root.dark {
+  --color-surface: #1e1e1e;
+  --border-color: #333;
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
 .dashboard {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 
+/* Панели — выровнены по вертикали, снизу */
+.dashboard__panels-container {
+  position: fixed;
+  left: 20px;
+  top: var(--panel-top-offset);
+  width: var(--panel-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--panel-gap);
+  z-index: 100;
+  /* Контейнер не задаёт высоту — только позицию */
+}
+
+/* Увеличиваем отступ слева — чтобы дашборд не прилипал */
 .dashboard__main {
   margin: 20px 20px 20px 100px;
   width: calc(100% - 140px);
@@ -39,4 +73,16 @@
   border-radius: var(--border-radius-md);
   background: var(--color-surface);
   margin: 16px;
+} 
+
+body {
+  margin: 0;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.dark {
+  background: #111;
+  color: #f3f4f6;
 }

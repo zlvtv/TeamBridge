@@ -1,81 +1,65 @@
-/* src/components/org-icon-panel/org-icon-panel.module.css */
 .org-icon-panel {
-  position: fixed;
-  left: 20px;
-  top: 20px;
-  width: 60px;
+  width: 64px;
   background: var(--color-surface);
   border-radius: 16px;
-  padding: 12px 8px;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  padding: 12px 0;
+  box-sizing: border-box;
+  z-index: 100;
   box-shadow: var(--shadow-medium);
-  z-index: 10;
-  height: calc(100vh - 40px);
-  overflow: hidden;
-  transition: box-shadow 0.2s ease;
+  overflow: visible;
 }
 
-/* Тень — по теме */
-.org-icon-panel {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.dark .org-icon-panel {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* Кнопки */
 .org-icon-panel__search-btn,
 .org-icon-panel__create-org-btn {
   width: 40px;
   height: 40px;
   border: none;
   border-radius: 12px;
-  font-size: 18px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s, background 0.2s;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 18px;
+  flex-shrink: 0; 
 }
 
 .org-icon-panel__search-btn {
-  background: var(--color-primary);
-  color: white;
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.org-icon-panel__search-btn:hover {
+  background: #e2e8f0;
 }
 
 .org-icon-panel__create-org-btn {
-  background: #10b981;
+  background: #4f46e5;
   color: white;
 }
 
-.org-icon-panel__search-btn:hover,
 .org-icon-panel__create-org-btn:hover {
-  transform: scale(1.05);
+  background: #4338ca;
 }
 
-.org-icon-panel__create-org-btn:hover {
-  background: #0d9488;
-}
-
-/* Контейнер организаций — с прокруткой */
+/* ✅ Фиксированная высота контейнера иконок */
 .org-icon-panel__orgs {
-  flex: 1;
-  width: 100%;
-  overflow-y: auto; /* ✅ ОБЯЗАТЕЛЬНО: включаем скролл */
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
   padding: 4px 0;
+  margin-top: 4px;
+  overflow-y: auto; /* резерв */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) transparent;
-  /* Разрешаем перехват скролла */
-  overscroll-behavior: contain;
-  /* Курсор при наведении */
-  cursor: default;
+  scrollbar-color: #4f46e5 #f1f5f9;
+  flex-shrink: 0;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar {
@@ -83,46 +67,69 @@
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 3px;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
+  background: #4f46e5;
   border-radius: 3px;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-hover);
+  background: #4338ca;
 }
 
-/* Иконки */
+/* ✅ Фиксированные иконки — НИКОГДА не сжимаются */
 .org-icon-panel__org-btn {
   width: 40px;
   height: 40px;
   border: none;
-  background: #6b7280;
-  color: white;
-  border-radius: 10px;
-  font-weight: bold;
+  border-radius: 12px;
+  background: #f1f5f9;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1e293b;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .org-icon-panel__org-btn:hover {
-  transform: scale(1.05);
+  background: #e2e8f0;
 }
 
 .org-icon-panel__org-btn--active {
-  box-shadow: 0 0 1px 1px var(--color-primary);
-  transform: scale(1.05);
+  background: #4f46e5;
+  color: white;
 }
 
+/* Тема */
 @media (prefers-color-scheme: dark) {
   .org-icon-panel {
     background: #1e1e1e;
+    border-color: #333;
+  }
+
+  .org-icon-panel__search-btn,
+  .org-icon-panel__org-btn {
+    background: #333;
+    color: white;
+  }
+
+  .org-icon-panel__search-btn:hover,
+  .org-icon-panel__org-btn:hover {
+    background: #444;
+  }
+
+  .org-icon-panel__orgs::-webkit-scrollbar-track {
+    background: #333;
+  }
+
+  .org-icon-panel__orgs::-webkit-scrollbar-thumb {
+    background: #4f46e5;
   }
 }
