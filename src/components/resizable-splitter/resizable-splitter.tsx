@@ -43,7 +43,7 @@ const ResizableSplitter: React.FC = () => {
   return (
     <div
       ref={splitterRef}
-      className={styles.splitter}
+      className={styles['resizable-splitter']}
       onMouseDown={handleMouseDown}
       title="Перетащите, чтобы изменить ширину"
     />

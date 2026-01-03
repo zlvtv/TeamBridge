@@ -4,6 +4,7 @@
   flex-direction: column;
   gap: 16px;
   min-width: 360px;
+  padding: 16px;
 }
 
 .field {
@@ -18,10 +19,34 @@
   color: var(--color-text);
 }
 
+.input {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input::placeholder {
+  color: var(--color-text-light);
+}
+
 .errorMessage {
-  color: #ef4444;
+  color: var(--color-error);
   font-size: 13px;
   margin-top: -4px;
+  padding: 4px 8px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--color-error);
 }
 
 .actions {
@@ -29,4 +54,40 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-secondary {
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -39,33 +39,51 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  // Синхронизация с localStorage
+  // 🔹 1. Инициализация темы при монтировании
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
-      setTheme('dark');
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    setTheme(initialTheme);
+
+    const html = document.documentElement;
+    if (savedTheme) {
+      html.classList.add('manual-theme');
     } else {
-      setTheme('light');
+      html.classList.remove('manual-theme');
+    }
+
+    if (initialTheme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
     }
   }, []);
 
-  // Применяем тему к body
+  // 🔹 2. Применение темы при каждом изменении `theme`
   useEffect(() => {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-  localStorage.setItem('theme', theme);
-  console.log('🎨 [UI] Тема применена:', theme);
-}, [theme]);
+    const html = document.documentElement;
+    if (theme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
 
-  const setChatWidth = useCallback((width: number) => {
-    setChatWidthState(Math.max(300, Math.min(width, 800)));
-  }, []);
+    // Обновляем признак ручного выбора
+    html.classList.add('manual-theme');
+
+    localStorage.setItem('theme', theme);
+
+    console.log('🎨 [UI] Тема обновлена:', theme, '| classList:', html.classList);
+  }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  }, []);
+
+  const setChatWidth = useCallback((width: number) => {
+    setChatWidthState(Math.max(300, Math.min(width, 800)));
   }, []);
 
   const openSearch = useCallback(() => setIsSearchOpen(true), []);

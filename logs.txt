@@ -1,0 +1,1130 @@
+0 verbose cli /opt/homebrew/Cellar/node/25.2.1/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.6.2
+2 info using node@v25.2.1
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/zzhil/Projects/TeamBridge/.npmrc
+5 silly config load:file:/Users/zzhil/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm install
+8 verbose argv "install"
+9 verbose logfile logs-max:10 dir:/Users/zzhil/.npm/_logs/2026-01-02T09_46_27_620Z-
+10 verbose logfile /Users/zzhil/.npm/_logs/2026-01-02T09_46_27_620Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/acorn-jsx' ]
+15 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/acorn' ]
+16 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/ajv' ]
+17 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/ansi-styles' ]
+18 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/argparse' ]
+19 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/autoprefixer' ]
+20 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/balanced-match' ]
+21 silly reify mark retired [
+21 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/baseline-browser-mapping'
+21 silly reify ]
+22 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/brace-expansion' ]
+23 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/browserslist' ]
+24 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/callsites' ]
+25 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/caniuse-lite' ]
+26 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/chalk' ]
+27 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/color-convert' ]
+28 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/color-name' ]
+29 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/concat-map' ]
+30 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/convert-source-map' ]
+31 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/cookie' ]
+32 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/cross-spawn' ]
+33 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/cssesc' ]
+34 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/csstype' ]
+35 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/date-fns' ]
+36 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/debug' ]
+37 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/deep-is' ]
+38 silly reify mark retired [
+38 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/electron-to-chromium'
+38 silly reify ]
+39 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/esbuild' ]
+40 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/escalade' ]
+41 silly reify mark retired [
+41 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/escape-string-regexp'
+41 silly reify ]
+42 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/eslint' ]
+43 silly reify mark retired [
+43 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-plugin-react-hooks'
+43 silly reify ]
+44 silly reify mark retired [
+44 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-plugin-react-refresh'
+44 silly reify ]
+45 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-scope' ]
+46 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-visitor-keys' ]
+47 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/espree' ]
+48 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/esquery' ]
+49 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/esrecurse' ]
+50 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/estraverse' ]
+51 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/esutils' ]
+52 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/fast-deep-equal' ]
+53 silly reify mark retired [
+53 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fast-json-stable-stringify'
+53 silly reify ]
+54 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/fast-levenshtein' ]
+55 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/fdir' ]
+56 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/file-entry-cache' ]
+57 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/find-up' ]
+58 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/flat-cache' ]
+59 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/flatted' ]
+60 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/fraction.js' ]
+61 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/fsevents' ]
+62 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/gensync' ]
+63 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/glob-parent' ]
+64 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/globals' ]
+65 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/has-flag' ]
+66 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/hermes-estree' ]
+67 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/hermes-parser' ]
+68 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/ignore' ]
+69 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/import-fresh' ]
+70 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/imurmurhash' ]
+71 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/is-extglob' ]
+72 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/is-glob' ]
+73 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/js-tokens' ]
+74 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/isexe' ]
+75 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/js-yaml' ]
+76 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/jsesc' ]
+77 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/json-buffer' ]
+78 silly reify mark retired [
+78 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json-schema-traverse'
+78 silly reify ]
+79 silly reify mark retired [
+79 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json-stable-stringify-without-jsonify'
+79 silly reify ]
+80 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/json5' ]
+81 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/keyv' ]
+82 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/levn' ]
+83 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/locate-path' ]
+84 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/lodash.merge' ]
+85 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/lru-cache' ]
+86 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/lucide-react' ]
+87 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/minimatch' ]
+88 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/ms' ]
+89 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/nanoid' ]
+90 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/natural-compare' ]
+91 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/node-releases' ]
+92 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/normalize-range' ]
+93 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/optionator' ]
+94 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/p-limit' ]
+95 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/p-locate' ]
+96 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/parent-module' ]
+97 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/path-exists' ]
+98 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/path-key' ]
+99 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/picocolors' ]
+100 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/picomatch' ]
+101 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/postcss' ]
+102 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-nested' ]
+103 silly reify mark retired [
+103 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-selector-parser'
+103 silly reify ]
+104 silly reify mark retired [
+104 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-value-parser'
+104 silly reify ]
+105 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/prelude-ls' ]
+106 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/punycode' ]
+107 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/react' ]
+108 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/react-dom' ]
+109 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/react-refresh' ]
+110 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/react-router' ]
+111 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/react-router-dom' ]
+112 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/resolve-from' ]
+113 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/rollup' ]
+114 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/scheduler' ]
+115 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/semver' ]
+116 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/set-cookie-parser' ]
+117 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/shebang-command' ]
+118 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/shebang-regex' ]
+119 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/source-map-js' ]
+120 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/strip-json-comments' ]
+121 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/supports-color' ]
+122 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/tinyglobby' ]
+123 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/tslib' ]
+124 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/type-check' ]
+125 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/undici-types' ]
+126 silly reify mark retired [
+126 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/update-browserslist-db'
+126 silly reify ]
+127 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/uri-js' ]
+128 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/util-deprecate' ]
+129 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/which' ]
+130 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/word-wrap' ]
+131 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/vite' ]
+132 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/ws' ]
+133 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/yallist' ]
+134 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/yocto-queue' ]
+135 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/zod' ]
+136 silly reify mark retired [
+136 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/zod-validation-error'
+136 silly reify ]
+137 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/code-frame' ]
+138 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/compat-data' ]
+139 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/core' ]
+140 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/generator' ]
+141 silly reify mark retired [
+141 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-compilation-targets'
+141 silly reify ]
+142 silly reify mark retired [
+142 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-globals'
+142 silly reify ]
+143 silly reify mark retired [
+143 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-module-imports'
+143 silly reify ]
+144 silly reify mark retired [
+144 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-module-transforms'
+144 silly reify ]
+145 silly reify mark retired [
+145 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-plugin-utils'
+145 silly reify ]
+146 silly reify mark retired [
+146 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-string-parser'
+146 silly reify ]
+147 silly reify mark retired [
+147 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-validator-identifier'
+147 silly reify ]
+148 silly reify mark retired [
+148 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-validator-option'
+148 silly reify ]
+149 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helpers' ]
+150 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/parser' ]
+151 silly reify mark retired [
+151 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/plugin-transform-react-jsx-self'
+151 silly reify ]
+152 silly reify mark retired [
+152 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/plugin-transform-react-jsx-source'
+152 silly reify ]
+153 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/template' ]
+154 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/traverse' ]
+155 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/types' ]
+156 silly reify mark retired [
+156 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@esbuild/darwin-arm64'
+156 silly reify ]
+157 silly reify mark retired [
+157 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/config-array'
+157 silly reify ]
+158 silly reify mark retired [
+158 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/config-helpers'
+158 silly reify ]
+159 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/core' ]
+160 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/eslintrc' ]
+161 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/js' ]
+162 silly reify mark retired [
+162 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/object-schema'
+162 silly reify ]
+163 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/plugin-kit' ]
+164 silly reify mark retired [
+164 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/eslint-utils'
+164 silly reify ]
+165 silly reify mark retired [
+165 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/regexpp'
+165 silly reify ]
+166 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/core' ]
+167 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/node' ]
+168 silly reify mark retired [
+168 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/module-importer'
+168 silly reify ]
+169 silly reify mark retired [
+169 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/retry'
+169 silly reify ]
+170 silly reify mark retired [
+170 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/gen-mapping'
+170 silly reify ]
+171 silly reify mark retired [
+171 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/remapping'
+171 silly reify ]
+172 silly reify mark retired [
+172 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/resolve-uri'
+172 silly reify ]
+173 silly reify mark retired [
+173 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/sourcemap-codec'
+173 silly reify ]
+174 silly reify mark retired [
+174 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/trace-mapping'
+174 silly reify ]
+175 silly reify mark retired [
+175 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@rolldown/pluginutils'
+175 silly reify ]
+176 silly reify mark retired [
+176 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@rollup/rollup-darwin-arm64'
+176 silly reify ]
+177 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/auth-js' ]
+178 silly reify mark retired [
+178 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/postgrest-js'
+178 silly reify ]
+179 silly reify mark retired [
+179 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/functions-js'
+179 silly reify ]
+180 silly reify mark retired [
+180 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/realtime-js'
+180 silly reify ]
+181 silly reify mark retired [
+181 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/storage-js'
+181 silly reify ]
+182 silly reify mark retired [
+182 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/supabase-js'
+182 silly reify ]
+183 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__core' ]
+184 silly reify mark retired [
+184 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__template'
+184 silly reify ]
+185 silly reify mark retired [
+185 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__traverse'
+185 silly reify ]
+186 silly reify mark retired [
+186 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__generator'
+186 silly reify ]
+187 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/estree' ]
+188 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/json-schema' ]
+189 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/node' ]
+190 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/phoenix' ]
+191 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/react' ]
+192 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/react-dom' ]
+193 silly reify mark retired [ '/Users/zzhil/Projects/TeamBridge/node_modules/@types/ws' ]
+194 silly reify mark retired [
+194 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@vitejs/plugin-react'
+194 silly reify ]
+195 silly reify moves {
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/acorn-jsx': '/Users/zzhil/Projects/TeamBridge/node_modules/.acorn-jsx-XRoNAfo0',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/acorn': '/Users/zzhil/Projects/TeamBridge/node_modules/.acorn-C2EUZ4NU',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/ajv': '/Users/zzhil/Projects/TeamBridge/node_modules/.ajv-Fzuo7hjO',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/ansi-styles': '/Users/zzhil/Projects/TeamBridge/node_modules/.ansi-styles-mejDEgyk',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/argparse': '/Users/zzhil/Projects/TeamBridge/node_modules/.argparse-UgdUueTT',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/autoprefixer': '/Users/zzhil/Projects/TeamBridge/node_modules/.autoprefixer-TBn67hQu',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/balanced-match': '/Users/zzhil/Projects/TeamBridge/node_modules/.balanced-match-A9zBQJlI',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/baseline-browser-mapping': '/Users/zzhil/Projects/TeamBridge/node_modules/.baseline-browser-mapping-HnqD9wfV',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/brace-expansion': '/Users/zzhil/Projects/TeamBridge/node_modules/.brace-expansion-vTydNhT7',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/browserslist': '/Users/zzhil/Projects/TeamBridge/node_modules/.browserslist-A1664AEJ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/callsites': '/Users/zzhil/Projects/TeamBridge/node_modules/.callsites-7aqUW9bW',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/caniuse-lite': '/Users/zzhil/Projects/TeamBridge/node_modules/.caniuse-lite-1O8AOJjl',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/chalk': '/Users/zzhil/Projects/TeamBridge/node_modules/.chalk-w31bdjxj',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/color-convert': '/Users/zzhil/Projects/TeamBridge/node_modules/.color-convert-Wt0SkuES',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/color-name': '/Users/zzhil/Projects/TeamBridge/node_modules/.color-name-vYNpHb1C',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/concat-map': '/Users/zzhil/Projects/TeamBridge/node_modules/.concat-map-FQlY4Asp',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/convert-source-map': '/Users/zzhil/Projects/TeamBridge/node_modules/.convert-source-map-89CVOYcH',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/cookie': '/Users/zzhil/Projects/TeamBridge/node_modules/.cookie-VykQezMM',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/cross-spawn': '/Users/zzhil/Projects/TeamBridge/node_modules/.cross-spawn-4BzrcHPH',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/cssesc': '/Users/zzhil/Projects/TeamBridge/node_modules/.cssesc-ojt7Dlm2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/csstype': '/Users/zzhil/Projects/TeamBridge/node_modules/.csstype-PRnaiEEr',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/date-fns': '/Users/zzhil/Projects/TeamBridge/node_modules/.date-fns-W3dYRKTN',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/debug': '/Users/zzhil/Projects/TeamBridge/node_modules/.debug-ict2KhM0',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/deep-is': '/Users/zzhil/Projects/TeamBridge/node_modules/.deep-is-8MDM96Ah',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/electron-to-chromium': '/Users/zzhil/Projects/TeamBridge/node_modules/.electron-to-chromium-sxQKhHJY',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/esbuild': '/Users/zzhil/Projects/TeamBridge/node_modules/.esbuild-GwI1kxFQ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/escalade': '/Users/zzhil/Projects/TeamBridge/node_modules/.escalade-Xv85A8xK',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/escape-string-regexp': '/Users/zzhil/Projects/TeamBridge/node_modules/.escape-string-regexp-tMsd2GPs',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint': '/Users/zzhil/Projects/TeamBridge/node_modules/.eslint-Eyt2hdJJ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-plugin-react-hooks': '/Users/zzhil/Projects/TeamBridge/node_modules/.eslint-plugin-react-hooks-ICXG2l9o',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-plugin-react-refresh': '/Users/zzhil/Projects/TeamBridge/node_modules/.eslint-plugin-react-refresh-BlKpZWvp',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-scope': '/Users/zzhil/Projects/TeamBridge/node_modules/.eslint-scope-WVzP4KZg',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/eslint-visitor-keys': '/Users/zzhil/Projects/TeamBridge/node_modules/.eslint-visitor-keys-g9dFAab8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/espree': '/Users/zzhil/Projects/TeamBridge/node_modules/.espree-9Uys6mj0',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/esquery': '/Users/zzhil/Projects/TeamBridge/node_modules/.esquery-k55xN3yO',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/esrecurse': '/Users/zzhil/Projects/TeamBridge/node_modules/.esrecurse-9xFls3hC',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/estraverse': '/Users/zzhil/Projects/TeamBridge/node_modules/.estraverse-PCwa7i9z',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/esutils': '/Users/zzhil/Projects/TeamBridge/node_modules/.esutils-0ne042Te',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fast-deep-equal': '/Users/zzhil/Projects/TeamBridge/node_modules/.fast-deep-equal-RCfDcgXq',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fast-json-stable-stringify': '/Users/zzhil/Projects/TeamBridge/node_modules/.fast-json-stable-stringify-1C5fCZAm',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fast-levenshtein': '/Users/zzhil/Projects/TeamBridge/node_modules/.fast-levenshtein-sEv7iZLy',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fdir': '/Users/zzhil/Projects/TeamBridge/node_modules/.fdir-0mWhPaXz',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/file-entry-cache': '/Users/zzhil/Projects/TeamBridge/node_modules/.file-entry-cache-oepPGr12',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/find-up': '/Users/zzhil/Projects/TeamBridge/node_modules/.find-up-q89WWSBv',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/flat-cache': '/Users/zzhil/Projects/TeamBridge/node_modules/.flat-cache-9WgMPAmg',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/flatted': '/Users/zzhil/Projects/TeamBridge/node_modules/.flatted-KIqIr6Ag',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fraction.js': '/Users/zzhil/Projects/TeamBridge/node_modules/.fraction.js-7bRKlEKv',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/fsevents': '/Users/zzhil/Projects/TeamBridge/node_modules/.fsevents-DdfyGauS',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/gensync': '/Users/zzhil/Projects/TeamBridge/node_modules/.gensync-SbbkGYr4',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/glob-parent': '/Users/zzhil/Projects/TeamBridge/node_modules/.glob-parent-WkcRop8d',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/globals': '/Users/zzhil/Projects/TeamBridge/node_modules/.globals-yAVLDpNl',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/has-flag': '/Users/zzhil/Projects/TeamBridge/node_modules/.has-flag-K4RfsnBy',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/hermes-estree': '/Users/zzhil/Projects/TeamBridge/node_modules/.hermes-estree-26V1cr1p',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/hermes-parser': '/Users/zzhil/Projects/TeamBridge/node_modules/.hermes-parser-wKRHuOcq',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/ignore': '/Users/zzhil/Projects/TeamBridge/node_modules/.ignore-w6AvR0S7',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/import-fresh': '/Users/zzhil/Projects/TeamBridge/node_modules/.import-fresh-Sui6Y640',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/imurmurhash': '/Users/zzhil/Projects/TeamBridge/node_modules/.imurmurhash-WB8Y2wzV',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/is-extglob': '/Users/zzhil/Projects/TeamBridge/node_modules/.is-extglob-9Lo2oVe9',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/is-glob': '/Users/zzhil/Projects/TeamBridge/node_modules/.is-glob-TTlfNki2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/js-tokens': '/Users/zzhil/Projects/TeamBridge/node_modules/.js-tokens-6F9yKmfl',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/isexe': '/Users/zzhil/Projects/TeamBridge/node_modules/.isexe-9j8DwWsb',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/js-yaml': '/Users/zzhil/Projects/TeamBridge/node_modules/.js-yaml-sVFj15Jo',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/jsesc': '/Users/zzhil/Projects/TeamBridge/node_modules/.jsesc-pwLjNhmy',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json-buffer': '/Users/zzhil/Projects/TeamBridge/node_modules/.json-buffer-F7fgbg2r',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json-schema-traverse': '/Users/zzhil/Projects/TeamBridge/node_modules/.json-schema-traverse-08VyeGon',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json-stable-stringify-without-jsonify': '/Users/zzhil/Projects/TeamBridge/node_modules/.json-stable-stringify-without-jsonify-3EgJ9upN',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/json5': '/Users/zzhil/Projects/TeamBridge/node_modules/.json5-ywK6sOw0',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/keyv': '/Users/zzhil/Projects/TeamBridge/node_modules/.keyv-BBR8Rv1Y',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/levn': '/Users/zzhil/Projects/TeamBridge/node_modules/.levn-mu6TlUnX',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/locate-path': '/Users/zzhil/Projects/TeamBridge/node_modules/.locate-path-B2ksdo5S',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/lodash.merge': '/Users/zzhil/Projects/TeamBridge/node_modules/.lodash.merge-alPBoPuA',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/lru-cache': '/Users/zzhil/Projects/TeamBridge/node_modules/.lru-cache-WXkzq4XQ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/lucide-react': '/Users/zzhil/Projects/TeamBridge/node_modules/.lucide-react-KV0pa6gL',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/minimatch': '/Users/zzhil/Projects/TeamBridge/node_modules/.minimatch-0gvdiHCe',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/ms': '/Users/zzhil/Projects/TeamBridge/node_modules/.ms-VgxduI5c',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/nanoid': '/Users/zzhil/Projects/TeamBridge/node_modules/.nanoid-MbxAatdT',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/natural-compare': '/Users/zzhil/Projects/TeamBridge/node_modules/.natural-compare-YBQyvryR',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/node-releases': '/Users/zzhil/Projects/TeamBridge/node_modules/.node-releases-i9I3qWUI',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/normalize-range': '/Users/zzhil/Projects/TeamBridge/node_modules/.normalize-range-sZnLIwAo',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/optionator': '/Users/zzhil/Projects/TeamBridge/node_modules/.optionator-lew3ePmb',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/p-limit': '/Users/zzhil/Projects/TeamBridge/node_modules/.p-limit-LCEbBJbA',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/p-locate': '/Users/zzhil/Projects/TeamBridge/node_modules/.p-locate-R8RD4sam',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/parent-module': '/Users/zzhil/Projects/TeamBridge/node_modules/.parent-module-cRxGi2Ke',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/path-exists': '/Users/zzhil/Projects/TeamBridge/node_modules/.path-exists-Jkv5kNAj',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/path-key': '/Users/zzhil/Projects/TeamBridge/node_modules/.path-key-jyG9VXxu',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/picocolors': '/Users/zzhil/Projects/TeamBridge/node_modules/.picocolors-6JMEYqBV',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/picomatch': '/Users/zzhil/Projects/TeamBridge/node_modules/.picomatch-1vzVCG2f',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss': '/Users/zzhil/Projects/TeamBridge/node_modules/.postcss-FgBh8Acp',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-nested': '/Users/zzhil/Projects/TeamBridge/node_modules/.postcss-nested-EomWnUIP',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-selector-parser': '/Users/zzhil/Projects/TeamBridge/node_modules/.postcss-selector-parser-ogHJFVUF',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/postcss-value-parser': '/Users/zzhil/Projects/TeamBridge/node_modules/.postcss-value-parser-MXwJJGwX',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/prelude-ls': '/Users/zzhil/Projects/TeamBridge/node_modules/.prelude-ls-uoXbc3hl',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/punycode': '/Users/zzhil/Projects/TeamBridge/node_modules/.punycode-A2Jcp4nJ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/react': '/Users/zzhil/Projects/TeamBridge/node_modules/.react-QNPpIlU8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/react-dom': '/Users/zzhil/Projects/TeamBridge/node_modules/.react-dom-4L8RT6va',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/react-refresh': '/Users/zzhil/Projects/TeamBridge/node_modules/.react-refresh-0Slkr3s8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/react-router': '/Users/zzhil/Projects/TeamBridge/node_modules/.react-router-mTHZaLyc',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/react-router-dom': '/Users/zzhil/Projects/TeamBridge/node_modules/.react-router-dom-Lq24ADXz',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/resolve-from': '/Users/zzhil/Projects/TeamBridge/node_modules/.resolve-from-qhTFHtdx',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/rollup': '/Users/zzhil/Projects/TeamBridge/node_modules/.rollup-R0xJ9HZR',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/scheduler': '/Users/zzhil/Projects/TeamBridge/node_modules/.scheduler-kWJFGK5n',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/semver': '/Users/zzhil/Projects/TeamBridge/node_modules/.semver-VNSqefp2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/set-cookie-parser': '/Users/zzhil/Projects/TeamBridge/node_modules/.set-cookie-parser-3ZY8viXe',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/shebang-command': '/Users/zzhil/Projects/TeamBridge/node_modules/.shebang-command-2KwvJI5h',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/shebang-regex': '/Users/zzhil/Projects/TeamBridge/node_modules/.shebang-regex-e73zWV8U',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/source-map-js': '/Users/zzhil/Projects/TeamBridge/node_modules/.source-map-js-7ZyECny8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/strip-json-comments': '/Users/zzhil/Projects/TeamBridge/node_modules/.strip-json-comments-JncJbAuc',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/supports-color': '/Users/zzhil/Projects/TeamBridge/node_modules/.supports-color-UDodtdAw',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/tinyglobby': '/Users/zzhil/Projects/TeamBridge/node_modules/.tinyglobby-3NkH0a1l',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/tslib': '/Users/zzhil/Projects/TeamBridge/node_modules/.tslib-wKIKjqjj',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/type-check': '/Users/zzhil/Projects/TeamBridge/node_modules/.type-check-aXacedez',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/undici-types': '/Users/zzhil/Projects/TeamBridge/node_modules/.undici-types-NbDx45O2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/update-browserslist-db': '/Users/zzhil/Projects/TeamBridge/node_modules/.update-browserslist-db-zx9Cn9p8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/uri-js': '/Users/zzhil/Projects/TeamBridge/node_modules/.uri-js-2fvkyeev',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/util-deprecate': '/Users/zzhil/Projects/TeamBridge/node_modules/.util-deprecate-3YjO1A3W',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/which': '/Users/zzhil/Projects/TeamBridge/node_modules/.which-SXMUIcWJ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/word-wrap': '/Users/zzhil/Projects/TeamBridge/node_modules/.word-wrap-ABCOvzls',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/vite': '/Users/zzhil/Projects/TeamBridge/node_modules/.vite-zm0QnZA2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/ws': '/Users/zzhil/Projects/TeamBridge/node_modules/.ws-JMiLmVB5',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/yallist': '/Users/zzhil/Projects/TeamBridge/node_modules/.yallist-Nq1X9hyx',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/yocto-queue': '/Users/zzhil/Projects/TeamBridge/node_modules/.yocto-queue-xntFYIBL',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/zod': '/Users/zzhil/Projects/TeamBridge/node_modules/.zod-3TUz2K3j',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/zod-validation-error': '/Users/zzhil/Projects/TeamBridge/node_modules/.zod-validation-error-WdTYQmUC',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/code-frame': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.code-frame-eoxC2b6X',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/compat-data': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.compat-data-JA4SuOj1',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/core': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.core-WFee2sEO',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/generator': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.generator-vQXgqtTe',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-compilation-targets': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-compilation-targets-cKGziErn',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-globals': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-globals-DmhjWBdh',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-module-imports': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-module-imports-nZjS3PHM',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-module-transforms': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-module-transforms-FDv6P1BU',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-plugin-utils': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-plugin-utils-8EcNyXYK',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-string-parser': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-string-parser-yaDkqxF8',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-validator-identifier': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-validator-identifier-g4VuLZ26',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helper-validator-option': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helper-validator-option-BREQW5Oe',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/helpers': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.helpers-VBuyfiwD',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/parser': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.parser-JSC7dPaP',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/plugin-transform-react-jsx-self': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.plugin-transform-react-jsx-self-VOemaphS',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/plugin-transform-react-jsx-source': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.plugin-transform-react-jsx-source-3Gez3LIh',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/template': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.template-bkJkfR0s',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/traverse': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.traverse-Nqu6o46K',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/types': '/Users/zzhil/Projects/TeamBridge/node_modules/@babel/.types-47GBBuTD',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@esbuild/darwin-arm64': '/Users/zzhil/Projects/TeamBridge/node_modules/@esbuild/.darwin-arm64-OfZQ5oZO',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/config-array': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.config-array-kRORROpH',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/config-helpers': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.config-helpers-0S1v1QMm',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/core': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.core-WirGFhWv',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/eslintrc': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.eslintrc-7GwRrhvG',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/js': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.js-EV2YodKo',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/object-schema': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.object-schema-Ir3gjvKe',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/plugin-kit': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint/.plugin-kit-VcnnyJx7',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/eslint-utils': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/.eslint-utils-e0ohfkqV',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/regexpp': '/Users/zzhil/Projects/TeamBridge/node_modules/@eslint-community/.regexpp-EFJSyS58',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/core': '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/.core-iSoSD9u7',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/node': '/Users/zzhil/Projects/TeamBridge/node_modules/@humanfs/.node-9rKQNrKd',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/module-importer': '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/.module-importer-jcRzTcoT',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/retry': '/Users/zzhil/Projects/TeamBridge/node_modules/@humanwhocodes/.retry-8FBiMbv2',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/gen-mapping': '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/.gen-mapping-DlTyAM9v',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/remapping': '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/.remapping-kB2tcWKj',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/resolve-uri': '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/.resolve-uri-zpA9eVLQ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/sourcemap-codec': '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/.sourcemap-codec-n1z9i4QD',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/trace-mapping': '/Users/zzhil/Projects/TeamBridge/node_modules/@jridgewell/.trace-mapping-b8hS1Aol',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@rolldown/pluginutils': '/Users/zzhil/Projects/TeamBridge/node_modules/@rolldown/.pluginutils-JLIB7IVK',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@rollup/rollup-darwin-arm64': '/Users/zzhil/Projects/TeamBridge/node_modules/@rollup/.rollup-darwin-arm64-vvQs8CvZ',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/auth-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.auth-js-25WjBrsP',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/postgrest-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.postgrest-js-byg80q26',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/functions-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.functions-js-u7EyfmCq',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/realtime-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.realtime-js-sIaKMR8r',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/storage-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.storage-js-C43zozbG',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/supabase-js': '/Users/zzhil/Projects/TeamBridge/node_modules/@supabase/.supabase-js-50GZDyKU',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__core': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.babel__core-AFlSfZiW',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__template': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.babel__template-NVT2WAm9',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__traverse': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.babel__traverse-r6FYqu9f',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/babel__generator': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.babel__generator-9Ri1etPT',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/estree': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.estree-OjQSFjif',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/json-schema': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.json-schema-8y1akqDb',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/node': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.node-cJ3irZhK',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/phoenix': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.phoenix-33goX3op',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/react': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.react-wtPu2zTj',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/react-dom': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.react-dom-FQoztk5W',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@types/ws': '/Users/zzhil/Projects/TeamBridge/node_modules/@types/.ws-UXmchpy6',
+195 silly reify   '/Users/zzhil/Projects/TeamBridge/node_modules/@vitejs/plugin-react': '/Users/zzhil/Projects/TeamBridge/node_modules/@vitejs/.plugin-react-DIh58gEv'
+195 silly reify }
+196 silly audit bulk request {
+196 silly audit   '@babel/code-frame': [ '7.27.1' ],
+196 silly audit   '@babel/compat-data': [ '7.28.5' ],
+196 silly audit   '@babel/core': [ '7.28.5' ],
+196 silly audit   '@babel/generator': [ '7.28.5' ],
+196 silly audit   '@babel/helper-compilation-targets': [ '7.27.2' ],
+196 silly audit   '@babel/helper-globals': [ '7.28.0' ],
+196 silly audit   '@babel/helper-module-imports': [ '7.27.1' ],
+196 silly audit   '@babel/helper-module-transforms': [ '7.28.3' ],
+196 silly audit   '@babel/helper-plugin-utils': [ '7.27.1' ],
+196 silly audit   '@babel/helper-string-parser': [ '7.27.1' ],
+196 silly audit   '@babel/helper-validator-identifier': [ '7.28.5' ],
+196 silly audit   '@babel/helper-validator-option': [ '7.27.1' ],
+196 silly audit   '@babel/helpers': [ '7.28.4' ],
+196 silly audit   '@babel/parser': [ '7.28.5' ],
+196 silly audit   '@babel/plugin-transform-react-jsx-self': [ '7.27.1' ],
+196 silly audit   '@babel/plugin-transform-react-jsx-source': [ '7.27.1' ],
+196 silly audit   '@babel/template': [ '7.27.2' ],
+196 silly audit   '@babel/traverse': [ '7.28.5' ],
+196 silly audit   '@babel/types': [ '7.28.5' ],
+196 silly audit   '@esbuild/aix-ppc64': [ '0.25.12' ],
+196 silly audit   '@esbuild/android-arm': [ '0.25.12' ],
+196 silly audit   '@esbuild/android-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/android-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/darwin-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/darwin-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/freebsd-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/freebsd-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-arm': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-ia32': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-loong64': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-mips64el': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-ppc64': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-riscv64': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-s390x': [ '0.25.12' ],
+196 silly audit   '@esbuild/linux-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/netbsd-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/netbsd-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/openbsd-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/openbsd-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/openharmony-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/sunos-x64': [ '0.25.12' ],
+196 silly audit   '@esbuild/win32-arm64': [ '0.25.12' ],
+196 silly audit   '@esbuild/win32-ia32': [ '0.25.12' ],
+196 silly audit   '@esbuild/win32-x64': [ '0.25.12' ],
+196 silly audit   '@eslint-community/eslint-utils': [ '4.9.0' ],
+196 silly audit   'eslint-visitor-keys': [ '3.4.3', '4.2.1' ],
+196 silly audit   '@eslint-community/regexpp': [ '4.12.2' ],
+196 silly audit   '@eslint/config-array': [ '0.21.1' ],
+196 silly audit   '@eslint/config-helpers': [ '0.4.2' ],
+196 silly audit   '@eslint/core': [ '0.17.0' ],
+196 silly audit   '@eslint/eslintrc': [ '3.3.1' ],
+196 silly audit   globals: [ '14.0.0', '16.5.0' ],
+196 silly audit   '@eslint/js': [ '9.39.1' ],
+196 silly audit   '@eslint/object-schema': [ '2.1.7' ],
+196 silly audit   '@eslint/plugin-kit': [ '0.4.1' ],
+196 silly audit   '@humanfs/core': [ '0.19.1' ],
+196 silly audit   '@humanfs/node': [ '0.16.7' ],
+196 silly audit   '@humanwhocodes/module-importer': [ '1.0.1' ],
+196 silly audit   '@humanwhocodes/retry': [ '0.4.3' ],
+196 silly audit   '@jridgewell/gen-mapping': [ '0.3.13' ],
+196 silly audit   '@jridgewell/remapping': [ '2.3.5' ],
+196 silly audit   '@jridgewell/resolve-uri': [ '3.1.2' ],
+196 silly audit   '@jridgewell/sourcemap-codec': [ '1.5.5' ],
+196 silly audit   '@jridgewell/trace-mapping': [ '0.3.31' ],
+196 silly audit   '@rolldown/pluginutils': [ '1.0.0-beta.47' ],
+196 silly audit   '@rollup/rollup-android-arm-eabi': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-android-arm64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-darwin-arm64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-darwin-x64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-freebsd-arm64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-freebsd-x64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-arm-gnueabihf': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-arm-musleabihf': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-arm64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-arm64-musl': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-loong64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-ppc64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-riscv64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-riscv64-musl': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-s390x-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-x64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-linux-x64-musl': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-openharmony-arm64': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-win32-arm64-msvc': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-win32-ia32-msvc': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-win32-x64-gnu': [ '4.53.3' ],
+196 silly audit   '@rollup/rollup-win32-x64-msvc': [ '4.53.3' ],
+196 silly audit   '@supabase/auth-js': [ '2.84.0' ],
+196 silly audit   '@supabase/functions-js': [ '2.84.0' ],
+196 silly audit   '@supabase/postgrest-js': [ '2.84.0' ],
+196 silly audit   '@supabase/realtime-js': [ '2.84.0' ],
+196 silly audit   '@supabase/storage-js': [ '2.84.0' ],
+196 silly audit   '@supabase/supabase-js': [ '2.84.0' ],
+196 silly audit   '@types/babel__core': [ '7.20.5' ],
+196 silly audit   '@types/babel__generator': [ '7.27.0' ],
+196 silly audit   '@types/babel__template': [ '7.4.4' ],
+196 silly audit   '@types/babel__traverse': [ '7.28.0' ],
+196 silly audit   '@types/estree': [ '1.0.8' ],
+196 silly audit   '@types/json-schema': [ '7.0.15' ],
+196 silly audit   '@types/node': [ '24.10.1' ],
+196 silly audit   '@types/phoenix': [ '1.6.6' ],
+196 silly audit   '@types/react': [ '19.2.6' ],
+196 silly audit   '@types/react-dom': [ '19.2.3' ],
+196 silly audit   '@types/ws': [ '8.18.1' ],
+196 silly audit   '@vitejs/plugin-react': [ '5.1.1' ],
+196 silly audit   acorn: [ '8.15.0' ],
+196 silly audit   'acorn-jsx': [ '5.3.2' ],
+196 silly audit   ajv: [ '6.12.6' ],
+196 silly audit   'ansi-styles': [ '4.3.0' ],
+196 silly audit   argparse: [ '2.0.1' ],
+196 silly audit   autoprefixer: [ '10.4.22' ],
+196 silly audit   'balanced-match': [ '1.0.2' ],
+196 silly audit   'baseline-browser-mapping': [ '2.8.30' ],
+196 silly audit   'brace-expansion': [ '1.1.12' ],
+196 silly audit   browserslist: [ '4.28.0' ],
+196 silly audit   callsites: [ '3.1.0' ],
+196 silly audit   'caniuse-lite': [ '1.0.30001756' ],
+196 silly audit   chalk: [ '4.1.2' ],
+196 silly audit   'color-convert': [ '2.0.1' ],
+196 silly audit   'color-name': [ '1.1.4' ],
+196 silly audit   'concat-map': [ '0.0.1' ],
+196 silly audit   'convert-source-map': [ '2.0.0' ],
+196 silly audit   cookie: [ '1.0.2' ],
+196 silly audit   'cross-spawn': [ '7.0.6' ],
+196 silly audit   cssesc: [ '3.0.0' ],
+196 silly audit   csstype: [ '3.2.3' ],
+196 silly audit   'date-fns': [ '4.1.0' ],
+196 silly audit   debug: [ '4.4.3' ],
+196 silly audit   'deep-is': [ '0.1.4' ],
+196 silly audit   'electron-to-chromium': [ '1.5.259' ],
+196 silly audit   esbuild: [ '0.25.12' ],
+196 silly audit   escalade: [ '3.2.0' ],
+196 silly audit   'escape-string-regexp': [ '4.0.0' ],
+196 silly audit   eslint: [ '9.39.1' ],
+196 silly audit   'eslint-plugin-react-hooks': [ '7.0.1' ],
+196 silly audit   'eslint-plugin-react-refresh': [ '0.4.24' ],
+196 silly audit   'eslint-scope': [ '8.4.0' ],
+196 silly audit   espree: [ '10.4.0' ],
+196 silly audit   esquery: [ '1.6.0' ],
+196 silly audit   esrecurse: [ '4.3.0' ],
+196 silly audit   estraverse: [ '5.3.0' ],
+196 silly audit   esutils: [ '2.0.3' ],
+196 silly audit   'fast-deep-equal': [ '3.1.3' ],
+196 silly audit   'fast-json-stable-stringify': [ '2.1.0' ],
+196 silly audit   'fast-levenshtein': [ '2.0.6' ],
+196 silly audit   fdir: [ '6.5.0' ],
+196 silly audit   'file-entry-cache': [ '8.0.0' ],
+196 silly audit   'find-up': [ '5.0.0' ],
+196 silly audit   'flat-cache': [ '4.0.1' ],
+196 silly audit   flatted: [ '3.3.3' ],
+196 silly audit   'fraction.js': [ '5.3.4' ],
+196 silly audit   fsevents: [ '2.3.3' ],
+196 silly audit   gensync: [ '1.0.0-beta.2' ],
+196 silly audit   'glob-parent': [ '6.0.2' ],
+196 silly audit   'has-flag': [ '4.0.0' ],
+196 silly audit   'hermes-estree': [ '0.25.1' ],
+196 silly audit   'hermes-parser': [ '0.25.1' ],
+196 silly audit   ignore: [ '5.3.2' ],
+196 silly audit   'import-fresh': [ '3.3.1' ],
+196 silly audit   imurmurhash: [ '0.1.4' ],
+196 silly audit   'is-extglob': [ '2.1.1' ],
+196 silly audit   'is-glob': [ '4.0.3' ],
+196 silly audit   isexe: [ '2.0.0' ],
+196 silly audit   'js-tokens': [ '4.0.0' ],
+196 silly audit   'js-yaml': [ '4.1.1' ],
+196 silly audit   jsesc: [ '3.1.0' ],
+196 silly audit   'json-buffer': [ '3.0.1' ],
+196 silly audit   'json-schema-traverse': [ '0.4.1' ],
+196 silly audit   'json-stable-stringify-without-jsonify': [ '1.0.1' ],
+196 silly audit   json5: [ '2.2.3' ],
+196 silly audit   keyv: [ '4.5.4' ],
+196 silly audit   levn: [ '0.4.1' ],
+196 silly audit   'locate-path': [ '6.0.0' ],
+196 silly audit   'lodash.merge': [ '4.6.2' ],
+196 silly audit   'lru-cache': [ '5.1.1' ],
+196 silly audit   'lucide-react': [ '0.554.0' ],
+196 silly audit   minimatch: [ '3.1.2' ],
+196 silly audit   ms: [ '2.1.3' ],
+196 silly audit   nanoid: [ '3.3.11' ],
+196 silly audit   'natural-compare': [ '1.4.0' ],
+196 silly audit   'node-releases': [ '2.0.27' ],
+196 silly audit   'normalize-range': [ '0.1.2' ],
+196 silly audit   optionator: [ '0.9.4' ],
+196 silly audit   'p-limit': [ '3.1.0' ],
+196 silly audit   'p-locate': [ '5.0.0' ],
+196 silly audit   'parent-module': [ '1.0.1' ],
+196 silly audit   'path-exists': [ '4.0.0' ],
+196 silly audit   'path-key': [ '3.1.1' ],
+196 silly audit   picocolors: [ '1.1.1' ],
+196 silly audit   picomatch: [ '4.0.3' ],
+196 silly audit   postcss: [ '8.5.6' ],
+196 silly audit   'postcss-nested': [ '7.0.2' ],
+196 silly audit   'postcss-selector-parser': [ '7.1.0' ],
+196 silly audit   'postcss-value-parser': [ '4.2.0' ],
+196 silly audit   'prelude-ls': [ '1.2.1' ],
+196 silly audit   punycode: [ '2.3.1' ],
+196 silly audit   react: [ '19.2.0' ],
+196 silly audit   'react-dom': [ '19.2.0' ],
+196 silly audit   'react-refresh': [ '0.18.0' ],
+196 silly audit   'react-router': [ '7.9.6' ],
+196 silly audit   'react-router-dom': [ '7.9.6' ],
+196 silly audit   'resolve-from': [ '4.0.0' ],
+196 silly audit   rollup: [ '4.53.3' ],
+196 silly audit   scheduler: [ '0.27.0' ],
+196 silly audit   semver: [ '6.3.1' ],
+196 silly audit   'set-cookie-parser': [ '2.7.2' ],
+196 silly audit   'shebang-command': [ '2.0.0' ],
+196 silly audit   'shebang-regex': [ '3.0.0' ],
+196 silly audit   'source-map-js': [ '1.2.1' ],
+196 silly audit   'strip-json-comments': [ '3.1.1' ],
+196 silly audit   'supports-color': [ '7.2.0' ],
+196 silly audit   tinyglobby: [ '0.2.15' ],
+196 silly audit   tslib: [ '2.8.1' ],
+196 silly audit   'type-check': [ '0.4.0' ],
+196 silly audit   'undici-types': [ '7.16.0' ],
+196 silly audit   'update-browserslist-db': [ '1.1.4' ],
+196 silly audit   'uri-js': [ '4.4.1' ],
+196 silly audit   'util-deprecate': [ '1.0.2' ],
+196 silly audit   vite: [ '7.2.4' ],
+196 silly audit   which: [ '2.0.2' ],
+196 silly audit   'word-wrap': [ '1.2.5' ],
+196 silly audit   ws: [ '8.18.3' ],
+196 silly audit   yallist: [ '3.1.1' ],
+196 silly audit   'yocto-queue': [ '0.1.0' ],
+196 silly audit   zod: [ '4.1.12' ],
+196 silly audit   'zod-validation-error': [ '4.0.2' ]
+196 silly audit }
+197 http cache @vitejs/plugin-react@https://registry.npm.taobao.org/@vitejs/plugin-react/-/plugin-react-5.1.1.tgz 1ms (cache hit)
+198 http cache @types/ws@https://registry.npm.taobao.org/@types/ws/-/ws-8.18.1.tgz 0ms (cache hit)
+199 http cache @types/react-dom@https://registry.npm.taobao.org/@types/react-dom/-/react-dom-19.2.3.tgz 0ms (cache hit)
+200 http cache @types/phoenix@https://registry.npm.taobao.org/@types/phoenix/-/phoenix-1.6.6.tgz 0ms (cache hit)
+201 http cache @types/react@https://registry.npm.taobao.org/@types/react/-/react-19.2.6.tgz 0ms (cache hit)
+202 http cache @types/estree@https://registry.npm.taobao.org/@types/estree/-/estree-1.0.8.tgz 0ms (cache hit)
+203 http cache @types/babel__generator@https://registry.npm.taobao.org/@types/babel__generator/-/babel__generator-7.27.0.tgz 0ms (cache hit)
+204 http cache @types/json-schema@https://registry.npm.taobao.org/@types/json-schema/-/json-schema-7.0.15.tgz 0ms (cache hit)
+205 http cache @types/babel__template@https://registry.npm.taobao.org/@types/babel__template/-/babel__template-7.4.4.tgz 0ms (cache hit)
+206 http cache @types/babel__traverse@https://registry.npm.taobao.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz 0ms (cache hit)
+207 http cache @supabase/supabase-js@https://registry.npm.taobao.org/@supabase/supabase-js/-/supabase-js-2.84.0.tgz 0ms (cache hit)
+208 http cache @supabase/storage-js@https://registry.npm.taobao.org/@supabase/storage-js/-/storage-js-2.84.0.tgz 0ms (cache hit)
+209 http cache @types/babel__core@https://registry.npm.taobao.org/@types/babel__core/-/babel__core-7.20.5.tgz 0ms (cache hit)
+210 http cache @supabase/functions-js@https://registry.npm.taobao.org/@supabase/functions-js/-/functions-js-2.84.0.tgz 0ms (cache hit)
+211 http cache @supabase/auth-js@https://registry.npm.taobao.org/@supabase/auth-js/-/auth-js-2.84.0.tgz 0ms (cache hit)
+212 http cache @supabase/postgrest-js@https://registry.npm.taobao.org/@supabase/postgrest-js/-/postgrest-js-2.84.0.tgz 0ms (cache hit)
+213 http cache @rolldown/pluginutils@https://registry.npm.taobao.org/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.47.tgz 0ms (cache hit)
+214 http cache @jridgewell/trace-mapping@https://registry.npm.taobao.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz 0ms (cache hit)
+215 http cache @jridgewell/resolve-uri@https://registry.npm.taobao.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz 0ms (cache hit)
+216 http cache @types/node@https://registry.npm.taobao.org/@types/node/-/node-24.10.1.tgz 0ms (cache hit)
+217 http cache @jridgewell/remapping@https://registry.npm.taobao.org/@jridgewell/remapping/-/remapping-2.3.5.tgz 0ms (cache hit)
+218 http cache @jridgewell/sourcemap-codec@https://registry.npm.taobao.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz 0ms (cache hit)
+219 http cache @humanfs/node@https://registry.npm.taobao.org/@humanfs/node/-/node-0.16.7.tgz 0ms (cache hit)
+220 http cache @supabase/realtime-js@https://registry.npm.taobao.org/@supabase/realtime-js/-/realtime-js-2.84.0.tgz 0ms (cache hit)
+221 http cache @jridgewell/gen-mapping@https://registry.npm.taobao.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz 0ms (cache hit)
+222 http cache @eslint/plugin-kit@https://registry.npm.taobao.org/@eslint/plugin-kit/-/plugin-kit-0.4.1.tgz 0ms (cache hit)
+223 http cache @eslint-community/eslint-utils@https://registry.npm.taobao.org/@eslint-community/eslint-utils/-/eslint-utils-4.9.0.tgz 0ms (cache hit)
+224 http cache @humanwhocodes/module-importer@https://registry.npm.taobao.org/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz 0ms (cache hit)
+225 http cache @humanwhocodes/retry@https://registry.npm.taobao.org/@humanwhocodes/retry/-/retry-0.4.3.tgz 0ms (cache hit)
+226 http cache @eslint-community/regexpp@https://registry.npm.taobao.org/@eslint-community/regexpp/-/regexpp-4.12.2.tgz 0ms (cache hit)
+227 http cache @eslint/object-schema@https://registry.npm.taobao.org/@eslint/object-schema/-/object-schema-2.1.7.tgz 0ms (cache hit)
+228 http cache @eslint/js@https://registry.npm.taobao.org/@eslint/js/-/js-9.39.1.tgz 0ms (cache hit)
+229 http cache @eslint/config-helpers@https://registry.npm.taobao.org/@eslint/config-helpers/-/config-helpers-0.4.2.tgz 0ms (cache hit)
+230 http cache @eslint/core@https://registry.npm.taobao.org/@eslint/core/-/core-0.17.0.tgz 0ms (cache hit)
+231 http cache @eslint/config-array@https://registry.npm.taobao.org/@eslint/config-array/-/config-array-0.21.1.tgz 0ms (cache hit)
+232 http cache @babel/template@https://registry.npm.taobao.org/@babel/template/-/template-7.27.2.tgz 0ms (cache hit)
+233 http cache @esbuild/darwin-arm64@https://registry.npm.taobao.org/@esbuild/darwin-arm64/-/darwin-arm64-0.25.12.tgz 0ms (cache hit)
+234 http cache @babel/traverse@https://registry.npm.taobao.org/@babel/traverse/-/traverse-7.28.5.tgz 0ms (cache hit)
+235 http cache @eslint/eslintrc@https://registry.npm.taobao.org/@eslint/eslintrc/-/eslintrc-3.3.1.tgz 0ms (cache hit)
+236 http cache @babel/types@https://registry.npm.taobao.org/@babel/types/-/types-7.28.5.tgz 0ms (cache hit)
+237 http cache @babel/plugin-transform-react-jsx-source@https://registry.npm.taobao.org/@babel/plugin-transform-react-jsx-source/-/plugin-transform-react-jsx-source-7.27.1.tgz 0ms (cache hit)
+238 http cache @babel/plugin-transform-react-jsx-self@https://registry.npm.taobao.org/@babel/plugin-transform-react-jsx-self/-/plugin-transform-react-jsx-self-7.27.1.tgz 0ms (cache hit)
+239 http cache @rollup/rollup-darwin-arm64@https://registry.npm.taobao.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.53.3.tgz 0ms (cache hit)
+240 http cache @babel/helpers@https://registry.npm.taobao.org/@babel/helpers/-/helpers-7.28.4.tgz 0ms (cache hit)
+241 http cache @babel/parser@https://registry.npm.taobao.org/@babel/parser/-/parser-7.28.5.tgz 0ms (cache hit)
+242 http cache @humanfs/core@https://registry.npm.taobao.org/@humanfs/core/-/core-0.19.1.tgz 0ms (cache hit)
+243 http cache @babel/helper-validator-option@https://registry.npm.taobao.org/@babel/helper-validator-option/-/helper-validator-option-7.27.1.tgz 0ms (cache hit)
+244 http cache @babel/helper-validator-identifier@https://registry.npm.taobao.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz 0ms (cache hit)
+245 http cache @babel/helper-string-parser@https://registry.npm.taobao.org/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz 0ms (cache hit)
+246 http cache @babel/helper-module-transforms@https://registry.npm.taobao.org/@babel/helper-module-transforms/-/helper-module-transforms-7.28.3.tgz 0ms (cache hit)
+247 http cache @babel/helper-plugin-utils@https://registry.npm.taobao.org/@babel/helper-plugin-utils/-/helper-plugin-utils-7.27.1.tgz 0ms (cache hit)
+248 http cache @babel/helper-module-imports@https://registry.npm.taobao.org/@babel/helper-module-imports/-/helper-module-imports-7.27.1.tgz 0ms (cache hit)
+249 http cache @babel/generator@https://registry.npm.taobao.org/@babel/generator/-/generator-7.28.5.tgz 0ms (cache hit)
+250 http cache @babel/helper-compilation-targets@https://registry.npm.taobao.org/@babel/helper-compilation-targets/-/helper-compilation-targets-7.27.2.tgz 0ms (cache hit)
+251 http cache @babel/helper-globals@https://registry.npm.taobao.org/@babel/helper-globals/-/helper-globals-7.28.0.tgz 0ms (cache hit)
+252 http cache @babel/core@https://registry.npm.taobao.org/@babel/core/-/core-7.28.5.tgz 0ms (cache hit)
+253 http cache @babel/code-frame@https://registry.npm.taobao.org/@babel/code-frame/-/code-frame-7.27.1.tgz 0ms (cache hit)
+254 http cache @babel/compat-data@https://registry.npm.taobao.org/@babel/compat-data/-/compat-data-7.28.5.tgz 0ms (cache hit)
+255 http cache zod@https://registry.npm.taobao.org/zod/-/zod-4.1.12.tgz 0ms (cache hit)
+256 http cache zod-validation-error@https://registry.npm.taobao.org/zod-validation-error/-/zod-validation-error-4.0.2.tgz 0ms (cache hit)
+257 http cache yocto-queue@https://registry.npm.taobao.org/yocto-queue/-/yocto-queue-0.1.0.tgz 0ms (cache hit)
+258 http cache yallist@https://registry.npm.taobao.org/yallist/-/yallist-3.1.1.tgz 0ms (cache hit)
+259 http cache ws@https://registry.npm.taobao.org/ws/-/ws-8.18.3.tgz 0ms (cache hit)
+260 http cache vite@https://registry.npm.taobao.org/vite/-/vite-7.2.4.tgz 0ms (cache hit)
+261 http cache word-wrap@https://registry.npm.taobao.org/word-wrap/-/word-wrap-1.2.5.tgz 0ms (cache hit)
+262 http cache which@https://registry.npm.taobao.org/which/-/which-2.0.2.tgz 0ms (cache hit)
+263 http cache uri-js@https://registry.npm.taobao.org/uri-js/-/uri-js-4.4.1.tgz 0ms (cache hit)
+264 http cache util-deprecate@https://registry.npm.taobao.org/util-deprecate/-/util-deprecate-1.0.2.tgz 0ms (cache hit)
+265 http cache update-browserslist-db@https://registry.npm.taobao.org/update-browserslist-db/-/update-browserslist-db-1.1.4.tgz 0ms (cache hit)
+266 http cache undici-types@https://registry.npm.taobao.org/undici-types/-/undici-types-7.16.0.tgz 0ms (cache hit)
+267 http cache type-check@https://registry.npm.taobao.org/type-check/-/type-check-0.4.0.tgz 0ms (cache hit)
+268 http cache tinyglobby@https://registry.npm.taobao.org/tinyglobby/-/tinyglobby-0.2.15.tgz 0ms (cache hit)
+269 http cache tslib@https://registry.npm.taobao.org/tslib/-/tslib-2.8.1.tgz 0ms (cache hit)
+270 http cache source-map-js@https://registry.npm.taobao.org/source-map-js/-/source-map-js-1.2.1.tgz 0ms (cache hit)
+271 http cache supports-color@https://registry.npm.taobao.org/supports-color/-/supports-color-7.2.0.tgz 0ms (cache hit)
+272 http cache strip-json-comments@https://registry.npm.taobao.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz 0ms (cache hit)
+273 http cache shebang-command@https://registry.npm.taobao.org/shebang-command/-/shebang-command-2.0.0.tgz 0ms (cache hit)
+274 http cache set-cookie-parser@https://registry.npm.taobao.org/set-cookie-parser/-/set-cookie-parser-2.7.2.tgz 0ms (cache hit)
+275 http cache scheduler@https://registry.npm.taobao.org/scheduler/-/scheduler-0.27.0.tgz 0ms (cache hit)
+276 http cache semver@https://registry.npm.taobao.org/semver/-/semver-6.3.1.tgz 0ms (cache hit)
+277 http cache resolve-from@https://registry.npm.taobao.org/resolve-from/-/resolve-from-4.0.0.tgz 0ms (cache hit)
+278 http cache rollup@https://registry.npm.taobao.org/rollup/-/rollup-4.53.3.tgz 0ms (cache hit)
+279 http cache react-router-dom@https://registry.npm.taobao.org/react-router-dom/-/react-router-dom-7.9.6.tgz 0ms (cache hit)
+280 http cache react-router@https://registry.npm.taobao.org/react-router/-/react-router-7.9.6.tgz 0ms (cache hit)
+281 http cache react@https://registry.npm.taobao.org/react/-/react-19.2.0.tgz 0ms (cache hit)
+282 http cache shebang-regex@https://registry.npm.taobao.org/shebang-regex/-/shebang-regex-3.0.0.tgz 0ms (cache hit)
+283 http cache react-refresh@https://registry.npm.taobao.org/react-refresh/-/react-refresh-0.18.0.tgz 0ms (cache hit)
+284 http cache react-dom@https://registry.npm.taobao.org/react-dom/-/react-dom-19.2.0.tgz 0ms (cache hit)
+285 http cache punycode@https://registry.npm.taobao.org/punycode/-/punycode-2.3.1.tgz 0ms (cache hit)
+286 http cache prelude-ls@https://registry.npm.taobao.org/prelude-ls/-/prelude-ls-1.2.1.tgz 0ms (cache hit)
+287 http cache postcss-value-parser@https://registry.npm.taobao.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz 0ms (cache hit)
+288 http cache postcss-selector-parser@https://registry.npm.taobao.org/postcss-selector-parser/-/postcss-selector-parser-7.1.0.tgz 0ms (cache hit)
+289 http cache postcss-nested@https://registry.npm.taobao.org/postcss-nested/-/postcss-nested-7.0.2.tgz 0ms (cache hit)
+290 http cache postcss@https://registry.npm.taobao.org/postcss/-/postcss-8.5.6.tgz 0ms (cache hit)
+291 http cache path-exists@https://registry.npm.taobao.org/path-exists/-/path-exists-4.0.0.tgz 0ms (cache hit)
+292 http cache picocolors@https://registry.npm.taobao.org/picocolors/-/picocolors-1.1.1.tgz 0ms (cache hit)
+293 http cache path-key@https://registry.npm.taobao.org/path-key/-/path-key-3.1.1.tgz 0ms (cache hit)
+294 http cache parent-module@https://registry.npm.taobao.org/parent-module/-/parent-module-1.0.1.tgz 0ms (cache hit)
+295 http cache p-locate@https://registry.npm.taobao.org/p-locate/-/p-locate-5.0.0.tgz 0ms (cache hit)
+296 http cache optionator@https://registry.npm.taobao.org/optionator/-/optionator-0.9.4.tgz 0ms (cache hit)
+297 http cache picomatch@https://registry.npm.taobao.org/picomatch/-/picomatch-4.0.3.tgz 0ms (cache hit)
+298 http cache node-releases@https://registry.npm.taobao.org/node-releases/-/node-releases-2.0.27.tgz 0ms (cache hit)
+299 http cache ms@https://registry.npm.taobao.org/ms/-/ms-2.1.3.tgz 0ms (cache hit)
+300 http cache natural-compare@https://registry.npm.taobao.org/natural-compare/-/natural-compare-1.4.0.tgz 0ms (cache hit)
+301 http cache normalize-range@https://registry.npm.taobao.org/normalize-range/-/normalize-range-0.1.2.tgz 0ms (cache hit)
+302 http cache minimatch@https://registry.npm.taobao.org/minimatch/-/minimatch-3.1.2.tgz 0ms (cache hit)
+303 http cache lru-cache@https://registry.npm.taobao.org/lru-cache/-/lru-cache-5.1.1.tgz 0ms (cache hit)
+304 http cache lucide-react@https://registry.npm.taobao.org/lucide-react/-/lucide-react-0.554.0.tgz 0ms (cache hit)
+305 http cache lodash.merge@https://registry.npm.taobao.org/lodash.merge/-/lodash.merge-4.6.2.tgz 0ms (cache hit)
+306 http cache locate-path@https://registry.npm.taobao.org/locate-path/-/locate-path-6.0.0.tgz 0ms (cache hit)
+307 http cache levn@https://registry.npm.taobao.org/levn/-/levn-0.4.1.tgz 0ms (cache hit)
+308 http cache json5@https://registry.npm.taobao.org/json5/-/json5-2.2.3.tgz 0ms (cache hit)
+309 http cache keyv@https://registry.npm.taobao.org/keyv/-/keyv-4.5.4.tgz 0ms (cache hit)
+310 http cache json-stable-stringify-without-jsonify@https://registry.npm.taobao.org/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz 0ms (cache hit)
+311 http cache json-buffer@https://registry.npm.taobao.org/json-buffer/-/json-buffer-3.0.1.tgz 0ms (cache hit)
+312 http cache json-schema-traverse@https://registry.npm.taobao.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz 0ms (cache hit)
+313 http cache jsesc@https://registry.npm.taobao.org/jsesc/-/jsesc-3.1.0.tgz 0ms (cache hit)
+314 http cache isexe@https://registry.npm.taobao.org/isexe/-/isexe-2.0.0.tgz 0ms (cache hit)
+315 http cache js-yaml@https://registry.npm.taobao.org/js-yaml/-/js-yaml-4.1.1.tgz 0ms (cache hit)
+316 http cache js-tokens@https://registry.npm.taobao.org/js-tokens/-/js-tokens-4.0.0.tgz 0ms (cache hit)
+317 http cache nanoid@https://registry.npm.taobao.org/nanoid/-/nanoid-3.3.11.tgz 0ms (cache hit)
+318 http cache is-extglob@https://registry.npm.taobao.org/is-extglob/-/is-extglob-2.1.1.tgz 0ms (cache hit)
+319 http cache p-limit@https://registry.npm.taobao.org/p-limit/-/p-limit-3.1.0.tgz 0ms (cache hit)
+320 http cache is-glob@https://registry.npm.taobao.org/is-glob/-/is-glob-4.0.3.tgz 0ms (cache hit)
+321 http cache imurmurhash@https://registry.npm.taobao.org/imurmurhash/-/imurmurhash-0.1.4.tgz 0ms (cache hit)
+322 http cache hermes-estree@https://registry.npm.taobao.org/hermes-estree/-/hermes-estree-0.25.1.tgz 0ms (cache hit)
+323 http cache ignore@https://registry.npm.taobao.org/ignore/-/ignore-5.3.2.tgz 0ms (cache hit)
+324 http cache has-flag@https://registry.npm.taobao.org/has-flag/-/has-flag-4.0.0.tgz 0ms (cache hit)
+325 http cache globals@https://registry.npm.taobao.org/globals/-/globals-16.5.0.tgz 0ms (cache hit)
+326 http cache glob-parent@https://registry.npm.taobao.org/glob-parent/-/glob-parent-6.0.2.tgz 0ms (cache hit)
+327 http cache import-fresh@https://registry.npm.taobao.org/import-fresh/-/import-fresh-3.3.1.tgz 0ms (cache hit)
+328 http cache gensync@https://registry.npm.taobao.org/gensync/-/gensync-1.0.0-beta.2.tgz 0ms (cache hit)
+329 http cache fsevents@https://registry.npm.taobao.org/fsevents/-/fsevents-2.3.3.tgz 0ms (cache hit)
+330 http cache flat-cache@https://registry.npm.taobao.org/flat-cache/-/flat-cache-4.0.1.tgz 0ms (cache hit)
+331 http cache fraction.js@https://registry.npm.taobao.org/fraction.js/-/fraction.js-5.3.4.tgz 0ms (cache hit)
+332 http cache flatted@https://registry.npm.taobao.org/flatted/-/flatted-3.3.3.tgz 0ms (cache hit)
+333 http cache find-up@https://registry.npm.taobao.org/find-up/-/find-up-5.0.0.tgz 0ms (cache hit)
+334 http cache file-entry-cache@https://registry.npm.taobao.org/file-entry-cache/-/file-entry-cache-8.0.0.tgz 0ms (cache hit)
+335 http cache fdir@https://registry.npm.taobao.org/fdir/-/fdir-6.5.0.tgz 0ms (cache hit)
+336 http cache fast-levenshtein@https://registry.npm.taobao.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz 0ms (cache hit)
+337 http cache fast-deep-equal@https://registry.npm.taobao.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz 0ms (cache hit)
+338 http cache fast-json-stable-stringify@https://registry.npm.taobao.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz 0ms (cache hit)
+339 http cache esutils@https://registry.npm.taobao.org/esutils/-/esutils-2.0.3.tgz 0ms (cache hit)
+340 http cache esrecurse@https://registry.npm.taobao.org/esrecurse/-/esrecurse-4.3.0.tgz 0ms (cache hit)
+341 http cache estraverse@https://registry.npm.taobao.org/estraverse/-/estraverse-5.3.0.tgz 0ms (cache hit)
+342 http cache espree@https://registry.npm.taobao.org/espree/-/espree-10.4.0.tgz 0ms (cache hit)
+343 http cache esquery@https://registry.npm.taobao.org/esquery/-/esquery-1.6.0.tgz 0ms (cache hit)
+344 http cache eslint-scope@https://registry.npm.taobao.org/eslint-scope/-/eslint-scope-8.4.0.tgz 0ms (cache hit)
+345 http cache eslint-visitor-keys@https://registry.npm.taobao.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.1.tgz 0ms (cache hit)
+346 http cache eslint-plugin-react-refresh@https://registry.npm.taobao.org/eslint-plugin-react-refresh/-/eslint-plugin-react-refresh-0.4.24.tgz 0ms (cache hit)
+347 http cache eslint-plugin-react-hooks@https://registry.npm.taobao.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-7.0.1.tgz 0ms (cache hit)
+348 http cache eslint@https://registry.npm.taobao.org/eslint/-/eslint-9.39.1.tgz 0ms (cache hit)
+349 http cache esbuild@https://registry.npm.taobao.org/esbuild/-/esbuild-0.25.12.tgz 0ms (cache hit)
+350 http cache escape-string-regexp@https://registry.npm.taobao.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz 0ms (cache hit)
+351 http cache escalade@https://registry.npm.taobao.org/escalade/-/escalade-3.2.0.tgz 0ms (cache hit)
+352 http cache electron-to-chromium@https://registry.npm.taobao.org/electron-to-chromium/-/electron-to-chromium-1.5.259.tgz 0ms (cache hit)
+353 http cache debug@https://registry.npm.taobao.org/debug/-/debug-4.4.3.tgz 0ms (cache hit)
+354 http cache date-fns@https://registry.npm.taobao.org/date-fns/-/date-fns-4.1.0.tgz 0ms (cache hit)
+355 http cache deep-is@https://registry.npm.taobao.org/deep-is/-/deep-is-0.1.4.tgz 0ms (cache hit)
+356 http cache cross-spawn@https://registry.npm.taobao.org/cross-spawn/-/cross-spawn-7.0.6.tgz 0ms (cache hit)
+357 http cache csstype@https://registry.npm.taobao.org/csstype/-/csstype-3.2.3.tgz 0ms (cache hit)
+358 http cache cssesc@https://registry.npm.taobao.org/cssesc/-/cssesc-3.0.0.tgz 0ms (cache hit)
+359 http cache cookie@https://registry.npm.taobao.org/cookie/-/cookie-1.0.2.tgz 0ms (cache hit)
+360 http cache color-name@https://registry.npm.taobao.org/color-name/-/color-name-1.1.4.tgz 0ms (cache hit)
+361 http cache convert-source-map@https://registry.npm.taobao.org/convert-source-map/-/convert-source-map-2.0.0.tgz 0ms (cache hit)
+362 http cache concat-map@https://registry.npm.taobao.org/concat-map/-/concat-map-0.0.1.tgz 0ms (cache hit)
+363 http cache color-convert@https://registry.npm.taobao.org/color-convert/-/color-convert-2.0.1.tgz 0ms (cache hit)
+364 http cache chalk@https://registry.npm.taobao.org/chalk/-/chalk-4.1.2.tgz 0ms (cache hit)
+365 http cache callsites@https://registry.npm.taobao.org/callsites/-/callsites-3.1.0.tgz 0ms (cache hit)
+366 http cache caniuse-lite@https://registry.npm.taobao.org/caniuse-lite/-/caniuse-lite-1.0.30001756.tgz 0ms (cache hit)
+367 http cache browserslist@https://registry.npm.taobao.org/browserslist/-/browserslist-4.28.0.tgz 0ms (cache hit)
+368 http cache brace-expansion@https://registry.npm.taobao.org/brace-expansion/-/brace-expansion-1.1.12.tgz 0ms (cache hit)
+369 http cache baseline-browser-mapping@https://registry.npm.taobao.org/baseline-browser-mapping/-/baseline-browser-mapping-2.8.30.tgz 0ms (cache hit)
+370 http cache autoprefixer@https://registry.npm.taobao.org/autoprefixer/-/autoprefixer-10.4.22.tgz 0ms (cache hit)
+371 http cache balanced-match@https://registry.npm.taobao.org/balanced-match/-/balanced-match-1.0.2.tgz 0ms (cache hit)
+372 http cache argparse@https://registry.npm.taobao.org/argparse/-/argparse-2.0.1.tgz 0ms (cache hit)
+373 http cache ansi-styles@https://registry.npm.taobao.org/ansi-styles/-/ansi-styles-4.3.0.tgz 0ms (cache hit)
+374 http cache acorn-jsx@https://registry.npm.taobao.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz 0ms (cache hit)
+375 http cache acorn@https://registry.npm.taobao.org/acorn/-/acorn-8.15.0.tgz 0ms (cache hit)
+376 http cache ajv@https://registry.npm.taobao.org/ajv/-/ajv-6.12.6.tgz 0ms (cache hit)
+377 http cache hermes-parser@https://registry.npm.taobao.org/hermes-parser/-/hermes-parser-0.25.1.tgz 0ms (cache hit)
+378 silly tarball no local data for @vitejs/plugin-react@https://registry.npm.taobao.org/@vitejs/plugin-react/-/plugin-react-5.1.1.tgz. Extracting by manifest.
+379 silly tarball no local data for @types/ws@https://registry.npm.taobao.org/@types/ws/-/ws-8.18.1.tgz. Extracting by manifest.
+380 silly tarball no local data for @types/react-dom@https://registry.npm.taobao.org/@types/react-dom/-/react-dom-19.2.3.tgz. Extracting by manifest.
+381 silly tarball no local data for @types/phoenix@https://registry.npm.taobao.org/@types/phoenix/-/phoenix-1.6.6.tgz. Extracting by manifest.
+382 silly tarball no local data for @types/react@https://registry.npm.taobao.org/@types/react/-/react-19.2.6.tgz. Extracting by manifest.
+383 http cache globals@https://registry.npm.taobao.org/globals/-/globals-14.0.0.tgz 0ms (cache hit)
+384 silly tarball no local data for @types/estree@https://registry.npm.taobao.org/@types/estree/-/estree-1.0.8.tgz. Extracting by manifest.
+385 silly tarball no local data for @types/babel__generator@https://registry.npm.taobao.org/@types/babel__generator/-/babel__generator-7.27.0.tgz. Extracting by manifest.
+386 silly tarball no local data for @types/json-schema@https://registry.npm.taobao.org/@types/json-schema/-/json-schema-7.0.15.tgz. Extracting by manifest.
+387 silly tarball no local data for @types/babel__template@https://registry.npm.taobao.org/@types/babel__template/-/babel__template-7.4.4.tgz. Extracting by manifest.
+388 silly tarball no local data for @types/babel__traverse@https://registry.npm.taobao.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz. Extracting by manifest.
+389 silly tarball no local data for @supabase/supabase-js@https://registry.npm.taobao.org/@supabase/supabase-js/-/supabase-js-2.84.0.tgz. Extracting by manifest.
+390 silly tarball no local data for @supabase/storage-js@https://registry.npm.taobao.org/@supabase/storage-js/-/storage-js-2.84.0.tgz. Extracting by manifest.
+391 silly tarball no local data for @types/babel__core@https://registry.npm.taobao.org/@types/babel__core/-/babel__core-7.20.5.tgz. Extracting by manifest.
+392 silly tarball no local data for @supabase/functions-js@https://registry.npm.taobao.org/@supabase/functions-js/-/functions-js-2.84.0.tgz. Extracting by manifest.
+393 silly tarball no local data for @supabase/auth-js@https://registry.npm.taobao.org/@supabase/auth-js/-/auth-js-2.84.0.tgz. Extracting by manifest.
+394 silly tarball no local data for @supabase/postgrest-js@https://registry.npm.taobao.org/@supabase/postgrest-js/-/postgrest-js-2.84.0.tgz. Extracting by manifest.
+395 silly tarball no local data for @rolldown/pluginutils@https://registry.npm.taobao.org/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.47.tgz. Extracting by manifest.
+396 silly tarball no local data for @jridgewell/trace-mapping@https://registry.npm.taobao.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz. Extracting by manifest.
+397 silly tarball no local data for @jridgewell/resolve-uri@https://registry.npm.taobao.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz. Extracting by manifest.
+398 silly tarball no local data for @types/node@https://registry.npm.taobao.org/@types/node/-/node-24.10.1.tgz. Extracting by manifest.
+399 silly tarball no local data for @jridgewell/remapping@https://registry.npm.taobao.org/@jridgewell/remapping/-/remapping-2.3.5.tgz. Extracting by manifest.
+400 silly tarball no local data for @jridgewell/sourcemap-codec@https://registry.npm.taobao.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz. Extracting by manifest.
+401 silly tarball no local data for @humanfs/node@https://registry.npm.taobao.org/@humanfs/node/-/node-0.16.7.tgz. Extracting by manifest.
+402 silly tarball no local data for @supabase/realtime-js@https://registry.npm.taobao.org/@supabase/realtime-js/-/realtime-js-2.84.0.tgz. Extracting by manifest.
+403 http cache eslint-visitor-keys@https://registry.npm.taobao.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz 0ms (cache hit)
+404 silly tarball no local data for @jridgewell/gen-mapping@https://registry.npm.taobao.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz. Extracting by manifest.
+405 silly tarball no local data for @eslint/plugin-kit@https://registry.npm.taobao.org/@eslint/plugin-kit/-/plugin-kit-0.4.1.tgz. Extracting by manifest.
+406 silly tarball no local data for @eslint-community/eslint-utils@https://registry.npm.taobao.org/@eslint-community/eslint-utils/-/eslint-utils-4.9.0.tgz. Extracting by manifest.
+407 silly tarball no local data for @humanwhocodes/module-importer@https://registry.npm.taobao.org/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz. Extracting by manifest.
+408 silly tarball no local data for @humanwhocodes/retry@https://registry.npm.taobao.org/@humanwhocodes/retry/-/retry-0.4.3.tgz. Extracting by manifest.
+409 silly tarball no local data for @eslint-community/regexpp@https://registry.npm.taobao.org/@eslint-community/regexpp/-/regexpp-4.12.2.tgz. Extracting by manifest.
+410 silly tarball no local data for @eslint/object-schema@https://registry.npm.taobao.org/@eslint/object-schema/-/object-schema-2.1.7.tgz. Extracting by manifest.
+411 silly tarball no local data for @eslint/js@https://registry.npm.taobao.org/@eslint/js/-/js-9.39.1.tgz. Extracting by manifest.
+412 silly tarball no local data for @eslint/config-helpers@https://registry.npm.taobao.org/@eslint/config-helpers/-/config-helpers-0.4.2.tgz. Extracting by manifest.
+413 silly tarball no local data for @eslint/core@https://registry.npm.taobao.org/@eslint/core/-/core-0.17.0.tgz. Extracting by manifest.
+414 silly tarball no local data for @eslint/config-array@https://registry.npm.taobao.org/@eslint/config-array/-/config-array-0.21.1.tgz. Extracting by manifest.
+415 silly tarball no local data for @babel/template@https://registry.npm.taobao.org/@babel/template/-/template-7.27.2.tgz. Extracting by manifest.
+416 silly tarball no local data for @esbuild/darwin-arm64@https://registry.npm.taobao.org/@esbuild/darwin-arm64/-/darwin-arm64-0.25.12.tgz. Extracting by manifest.
+417 silly tarball no local data for @babel/traverse@https://registry.npm.taobao.org/@babel/traverse/-/traverse-7.28.5.tgz. Extracting by manifest.
+418 silly tarball no local data for @eslint/eslintrc@https://registry.npm.taobao.org/@eslint/eslintrc/-/eslintrc-3.3.1.tgz. Extracting by manifest.
+419 silly tarball no local data for @babel/types@https://registry.npm.taobao.org/@babel/types/-/types-7.28.5.tgz. Extracting by manifest.
+420 silly tarball no local data for @babel/plugin-transform-react-jsx-source@https://registry.npm.taobao.org/@babel/plugin-transform-react-jsx-source/-/plugin-transform-react-jsx-source-7.27.1.tgz. Extracting by manifest.
+421 silly tarball no local data for @babel/plugin-transform-react-jsx-self@https://registry.npm.taobao.org/@babel/plugin-transform-react-jsx-self/-/plugin-transform-react-jsx-self-7.27.1.tgz. Extracting by manifest.
+422 silly tarball no local data for @rollup/rollup-darwin-arm64@https://registry.npm.taobao.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.53.3.tgz. Extracting by manifest.
+423 silly tarball no local data for @babel/helpers@https://registry.npm.taobao.org/@babel/helpers/-/helpers-7.28.4.tgz. Extracting by manifest.
+424 silly tarball no local data for @babel/parser@https://registry.npm.taobao.org/@babel/parser/-/parser-7.28.5.tgz. Extracting by manifest.
+425 silly tarball no local data for @humanfs/core@https://registry.npm.taobao.org/@humanfs/core/-/core-0.19.1.tgz. Extracting by manifest.
+426 silly tarball no local data for @babel/helper-validator-option@https://registry.npm.taobao.org/@babel/helper-validator-option/-/helper-validator-option-7.27.1.tgz. Extracting by manifest.
+427 silly tarball no local data for @babel/helper-validator-identifier@https://registry.npm.taobao.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz. Extracting by manifest.
+428 silly tarball no local data for @babel/helper-string-parser@https://registry.npm.taobao.org/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz. Extracting by manifest.
+429 silly tarball no local data for @babel/helper-module-transforms@https://registry.npm.taobao.org/@babel/helper-module-transforms/-/helper-module-transforms-7.28.3.tgz. Extracting by manifest.
+430 silly tarball no local data for @babel/helper-plugin-utils@https://registry.npm.taobao.org/@babel/helper-plugin-utils/-/helper-plugin-utils-7.27.1.tgz. Extracting by manifest.
+431 silly tarball no local data for @babel/helper-module-imports@https://registry.npm.taobao.org/@babel/helper-module-imports/-/helper-module-imports-7.27.1.tgz. Extracting by manifest.
+432 silly tarball no local data for @babel/generator@https://registry.npm.taobao.org/@babel/generator/-/generator-7.28.5.tgz. Extracting by manifest.
+433 silly tarball no local data for @babel/helper-compilation-targets@https://registry.npm.taobao.org/@babel/helper-compilation-targets/-/helper-compilation-targets-7.27.2.tgz. Extracting by manifest.
+434 silly tarball no local data for @babel/helper-globals@https://registry.npm.taobao.org/@babel/helper-globals/-/helper-globals-7.28.0.tgz. Extracting by manifest.
+435 silly tarball no local data for @babel/core@https://registry.npm.taobao.org/@babel/core/-/core-7.28.5.tgz. Extracting by manifest.
+436 silly tarball no local data for @babel/code-frame@https://registry.npm.taobao.org/@babel/code-frame/-/code-frame-7.27.1.tgz. Extracting by manifest.
+437 silly tarball no local data for @babel/compat-data@https://registry.npm.taobao.org/@babel/compat-data/-/compat-data-7.28.5.tgz. Extracting by manifest.
+438 silly tarball no local data for zod@https://registry.npm.taobao.org/zod/-/zod-4.1.12.tgz. Extracting by manifest.
+439 silly tarball no local data for zod-validation-error@https://registry.npm.taobao.org/zod-validation-error/-/zod-validation-error-4.0.2.tgz. Extracting by manifest.
+440 silly tarball no local data for yocto-queue@https://registry.npm.taobao.org/yocto-queue/-/yocto-queue-0.1.0.tgz. Extracting by manifest.
+441 silly tarball no local data for yallist@https://registry.npm.taobao.org/yallist/-/yallist-3.1.1.tgz. Extracting by manifest.
+442 silly tarball no local data for ws@https://registry.npm.taobao.org/ws/-/ws-8.18.3.tgz. Extracting by manifest.
+443 silly tarball no local data for vite@https://registry.npm.taobao.org/vite/-/vite-7.2.4.tgz. Extracting by manifest.
+444 silly tarball no local data for word-wrap@https://registry.npm.taobao.org/word-wrap/-/word-wrap-1.2.5.tgz. Extracting by manifest.
+445 silly tarball no local data for which@https://registry.npm.taobao.org/which/-/which-2.0.2.tgz. Extracting by manifest.
+446 silly tarball no local data for uri-js@https://registry.npm.taobao.org/uri-js/-/uri-js-4.4.1.tgz. Extracting by manifest.
+447 silly tarball no local data for util-deprecate@https://registry.npm.taobao.org/util-deprecate/-/util-deprecate-1.0.2.tgz. Extracting by manifest.
+448 silly tarball no local data for update-browserslist-db@https://registry.npm.taobao.org/update-browserslist-db/-/update-browserslist-db-1.1.4.tgz. Extracting by manifest.
+449 silly tarball no local data for undici-types@https://registry.npm.taobao.org/undici-types/-/undici-types-7.16.0.tgz. Extracting by manifest.
+450 silly tarball no local data for type-check@https://registry.npm.taobao.org/type-check/-/type-check-0.4.0.tgz. Extracting by manifest.
+451 silly tarball no local data for tinyglobby@https://registry.npm.taobao.org/tinyglobby/-/tinyglobby-0.2.15.tgz. Extracting by manifest.
+452 silly tarball no local data for tslib@https://registry.npm.taobao.org/tslib/-/tslib-2.8.1.tgz. Extracting by manifest.
+453 silly tarball no local data for source-map-js@https://registry.npm.taobao.org/source-map-js/-/source-map-js-1.2.1.tgz. Extracting by manifest.
+454 silly tarball no local data for supports-color@https://registry.npm.taobao.org/supports-color/-/supports-color-7.2.0.tgz. Extracting by manifest.
+455 silly tarball no local data for strip-json-comments@https://registry.npm.taobao.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz. Extracting by manifest.
+456 silly tarball no local data for shebang-command@https://registry.npm.taobao.org/shebang-command/-/shebang-command-2.0.0.tgz. Extracting by manifest.
+457 silly tarball no local data for set-cookie-parser@https://registry.npm.taobao.org/set-cookie-parser/-/set-cookie-parser-2.7.2.tgz. Extracting by manifest.
+458 silly tarball no local data for scheduler@https://registry.npm.taobao.org/scheduler/-/scheduler-0.27.0.tgz. Extracting by manifest.
+459 silly tarball no local data for semver@https://registry.npm.taobao.org/semver/-/semver-6.3.1.tgz. Extracting by manifest.
+460 silly tarball no local data for resolve-from@https://registry.npm.taobao.org/resolve-from/-/resolve-from-4.0.0.tgz. Extracting by manifest.
+461 silly tarball no local data for rollup@https://registry.npm.taobao.org/rollup/-/rollup-4.53.3.tgz. Extracting by manifest.
+462 silly tarball no local data for react-router-dom@https://registry.npm.taobao.org/react-router-dom/-/react-router-dom-7.9.6.tgz. Extracting by manifest.
+463 silly tarball no local data for react-router@https://registry.npm.taobao.org/react-router/-/react-router-7.9.6.tgz. Extracting by manifest.
+464 silly tarball no local data for react@https://registry.npm.taobao.org/react/-/react-19.2.0.tgz. Extracting by manifest.
+465 silly tarball no local data for shebang-regex@https://registry.npm.taobao.org/shebang-regex/-/shebang-regex-3.0.0.tgz. Extracting by manifest.
+466 silly tarball no local data for react-refresh@https://registry.npm.taobao.org/react-refresh/-/react-refresh-0.18.0.tgz. Extracting by manifest.
+467 silly tarball no local data for react-dom@https://registry.npm.taobao.org/react-dom/-/react-dom-19.2.0.tgz. Extracting by manifest.
+468 silly tarball no local data for punycode@https://registry.npm.taobao.org/punycode/-/punycode-2.3.1.tgz. Extracting by manifest.
+469 silly tarball no local data for prelude-ls@https://registry.npm.taobao.org/prelude-ls/-/prelude-ls-1.2.1.tgz. Extracting by manifest.
+470 silly tarball no local data for postcss-value-parser@https://registry.npm.taobao.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz. Extracting by manifest.
+471 silly tarball no local data for postcss-selector-parser@https://registry.npm.taobao.org/postcss-selector-parser/-/postcss-selector-parser-7.1.0.tgz. Extracting by manifest.
+472 silly tarball no local data for postcss-nested@https://registry.npm.taobao.org/postcss-nested/-/postcss-nested-7.0.2.tgz. Extracting by manifest.
+473 silly tarball no local data for postcss@https://registry.npm.taobao.org/postcss/-/postcss-8.5.6.tgz. Extracting by manifest.
+474 silly tarball no local data for path-exists@https://registry.npm.taobao.org/path-exists/-/path-exists-4.0.0.tgz. Extracting by manifest.
+475 silly tarball no local data for picocolors@https://registry.npm.taobao.org/picocolors/-/picocolors-1.1.1.tgz. Extracting by manifest.
+476 silly tarball no local data for path-key@https://registry.npm.taobao.org/path-key/-/path-key-3.1.1.tgz. Extracting by manifest.
+477 silly tarball no local data for parent-module@https://registry.npm.taobao.org/parent-module/-/parent-module-1.0.1.tgz. Extracting by manifest.
+478 silly tarball no local data for p-locate@https://registry.npm.taobao.org/p-locate/-/p-locate-5.0.0.tgz. Extracting by manifest.
+479 silly tarball no local data for optionator@https://registry.npm.taobao.org/optionator/-/optionator-0.9.4.tgz. Extracting by manifest.
+480 silly tarball no local data for picomatch@https://registry.npm.taobao.org/picomatch/-/picomatch-4.0.3.tgz. Extracting by manifest.
+481 silly tarball no local data for node-releases@https://registry.npm.taobao.org/node-releases/-/node-releases-2.0.27.tgz. Extracting by manifest.
+482 silly tarball no local data for ms@https://registry.npm.taobao.org/ms/-/ms-2.1.3.tgz. Extracting by manifest.
+483 silly tarball no local data for natural-compare@https://registry.npm.taobao.org/natural-compare/-/natural-compare-1.4.0.tgz. Extracting by manifest.
+484 silly tarball no local data for normalize-range@https://registry.npm.taobao.org/normalize-range/-/normalize-range-0.1.2.tgz. Extracting by manifest.
+485 silly tarball no local data for minimatch@https://registry.npm.taobao.org/minimatch/-/minimatch-3.1.2.tgz. Extracting by manifest.
+486 silly tarball no local data for lru-cache@https://registry.npm.taobao.org/lru-cache/-/lru-cache-5.1.1.tgz. Extracting by manifest.
+487 silly tarball no local data for lucide-react@https://registry.npm.taobao.org/lucide-react/-/lucide-react-0.554.0.tgz. Extracting by manifest.
+488 silly tarball no local data for lodash.merge@https://registry.npm.taobao.org/lodash.merge/-/lodash.merge-4.6.2.tgz. Extracting by manifest.
+489 silly tarball no local data for locate-path@https://registry.npm.taobao.org/locate-path/-/locate-path-6.0.0.tgz. Extracting by manifest.
+490 silly tarball no local data for levn@https://registry.npm.taobao.org/levn/-/levn-0.4.1.tgz. Extracting by manifest.
+491 silly tarball no local data for json5@https://registry.npm.taobao.org/json5/-/json5-2.2.3.tgz. Extracting by manifest.
+492 silly tarball no local data for keyv@https://registry.npm.taobao.org/keyv/-/keyv-4.5.4.tgz. Extracting by manifest.
+493 silly tarball no local data for json-stable-stringify-without-jsonify@https://registry.npm.taobao.org/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz. Extracting by manifest.
+494 silly tarball no local data for json-buffer@https://registry.npm.taobao.org/json-buffer/-/json-buffer-3.0.1.tgz. Extracting by manifest.
+495 silly tarball no local data for json-schema-traverse@https://registry.npm.taobao.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz. Extracting by manifest.
+496 silly tarball no local data for jsesc@https://registry.npm.taobao.org/jsesc/-/jsesc-3.1.0.tgz. Extracting by manifest.
+497 silly tarball no local data for isexe@https://registry.npm.taobao.org/isexe/-/isexe-2.0.0.tgz. Extracting by manifest.
+498 silly tarball no local data for js-yaml@https://registry.npm.taobao.org/js-yaml/-/js-yaml-4.1.1.tgz. Extracting by manifest.
+499 silly tarball no local data for js-tokens@https://registry.npm.taobao.org/js-tokens/-/js-tokens-4.0.0.tgz. Extracting by manifest.
+500 silly tarball no local data for nanoid@https://registry.npm.taobao.org/nanoid/-/nanoid-3.3.11.tgz. Extracting by manifest.
+501 silly tarball no local data for is-extglob@https://registry.npm.taobao.org/is-extglob/-/is-extglob-2.1.1.tgz. Extracting by manifest.
+502 silly tarball no local data for p-limit@https://registry.npm.taobao.org/p-limit/-/p-limit-3.1.0.tgz. Extracting by manifest.
+503 silly tarball no local data for is-glob@https://registry.npm.taobao.org/is-glob/-/is-glob-4.0.3.tgz. Extracting by manifest.
+504 silly tarball no local data for imurmurhash@https://registry.npm.taobao.org/imurmurhash/-/imurmurhash-0.1.4.tgz. Extracting by manifest.
+505 silly tarball no local data for hermes-estree@https://registry.npm.taobao.org/hermes-estree/-/hermes-estree-0.25.1.tgz. Extracting by manifest.
+506 silly tarball no local data for ignore@https://registry.npm.taobao.org/ignore/-/ignore-5.3.2.tgz. Extracting by manifest.
+507 silly tarball no local data for has-flag@https://registry.npm.taobao.org/has-flag/-/has-flag-4.0.0.tgz. Extracting by manifest.
+508 silly tarball no local data for globals@https://registry.npm.taobao.org/globals/-/globals-16.5.0.tgz. Extracting by manifest.
+509 silly tarball no local data for glob-parent@https://registry.npm.taobao.org/glob-parent/-/glob-parent-6.0.2.tgz. Extracting by manifest.
+510 silly tarball no local data for import-fresh@https://registry.npm.taobao.org/import-fresh/-/import-fresh-3.3.1.tgz. Extracting by manifest.
+511 silly tarball no local data for gensync@https://registry.npm.taobao.org/gensync/-/gensync-1.0.0-beta.2.tgz. Extracting by manifest.
+512 silly tarball no local data for fsevents@https://registry.npm.taobao.org/fsevents/-/fsevents-2.3.3.tgz. Extracting by manifest.
+513 silly tarball no local data for flat-cache@https://registry.npm.taobao.org/flat-cache/-/flat-cache-4.0.1.tgz. Extracting by manifest.
+514 silly tarball no local data for fraction.js@https://registry.npm.taobao.org/fraction.js/-/fraction.js-5.3.4.tgz. Extracting by manifest.
+515 silly tarball no local data for flatted@https://registry.npm.taobao.org/flatted/-/flatted-3.3.3.tgz. Extracting by manifest.
+516 silly tarball no local data for find-up@https://registry.npm.taobao.org/find-up/-/find-up-5.0.0.tgz. Extracting by manifest.
+517 silly tarball no local data for file-entry-cache@https://registry.npm.taobao.org/file-entry-cache/-/file-entry-cache-8.0.0.tgz. Extracting by manifest.
+518 silly tarball no local data for fdir@https://registry.npm.taobao.org/fdir/-/fdir-6.5.0.tgz. Extracting by manifest.
+519 silly tarball no local data for fast-levenshtein@https://registry.npm.taobao.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz. Extracting by manifest.
+520 silly tarball no local data for fast-deep-equal@https://registry.npm.taobao.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz. Extracting by manifest.
+521 silly tarball no local data for fast-json-stable-stringify@https://registry.npm.taobao.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz. Extracting by manifest.
+522 silly tarball no local data for esutils@https://registry.npm.taobao.org/esutils/-/esutils-2.0.3.tgz. Extracting by manifest.
+523 silly tarball no local data for esrecurse@https://registry.npm.taobao.org/esrecurse/-/esrecurse-4.3.0.tgz. Extracting by manifest.
+524 silly tarball no local data for estraverse@https://registry.npm.taobao.org/estraverse/-/estraverse-5.3.0.tgz. Extracting by manifest.
+525 silly tarball no local data for espree@https://registry.npm.taobao.org/espree/-/espree-10.4.0.tgz. Extracting by manifest.
+526 silly tarball no local data for esquery@https://registry.npm.taobao.org/esquery/-/esquery-1.6.0.tgz. Extracting by manifest.
+527 silly tarball no local data for eslint-scope@https://registry.npm.taobao.org/eslint-scope/-/eslint-scope-8.4.0.tgz. Extracting by manifest.
+528 silly tarball no local data for eslint-visitor-keys@https://registry.npm.taobao.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.1.tgz. Extracting by manifest.
+529 silly tarball no local data for eslint-plugin-react-refresh@https://registry.npm.taobao.org/eslint-plugin-react-refresh/-/eslint-plugin-react-refresh-0.4.24.tgz. Extracting by manifest.
+530 silly tarball no local data for eslint-plugin-react-hooks@https://registry.npm.taobao.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-7.0.1.tgz. Extracting by manifest.
+531 silly tarball no local data for eslint@https://registry.npm.taobao.org/eslint/-/eslint-9.39.1.tgz. Extracting by manifest.
+532 silly tarball no local data for esbuild@https://registry.npm.taobao.org/esbuild/-/esbuild-0.25.12.tgz. Extracting by manifest.
+533 silly tarball no local data for escape-string-regexp@https://registry.npm.taobao.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz. Extracting by manifest.
+534 silly tarball no local data for escalade@https://registry.npm.taobao.org/escalade/-/escalade-3.2.0.tgz. Extracting by manifest.
+535 silly tarball no local data for electron-to-chromium@https://registry.npm.taobao.org/electron-to-chromium/-/electron-to-chromium-1.5.259.tgz. Extracting by manifest.
+536 silly tarball no local data for debug@https://registry.npm.taobao.org/debug/-/debug-4.4.3.tgz. Extracting by manifest.
+537 silly tarball no local data for date-fns@https://registry.npm.taobao.org/date-fns/-/date-fns-4.1.0.tgz. Extracting by manifest.
+538 silly tarball no local data for deep-is@https://registry.npm.taobao.org/deep-is/-/deep-is-0.1.4.tgz. Extracting by manifest.
+539 silly tarball no local data for cross-spawn@https://registry.npm.taobao.org/cross-spawn/-/cross-spawn-7.0.6.tgz. Extracting by manifest.
+540 silly tarball no local data for csstype@https://registry.npm.taobao.org/csstype/-/csstype-3.2.3.tgz. Extracting by manifest.
+541 silly tarball no local data for cssesc@https://registry.npm.taobao.org/cssesc/-/cssesc-3.0.0.tgz. Extracting by manifest.
+542 silly tarball no local data for cookie@https://registry.npm.taobao.org/cookie/-/cookie-1.0.2.tgz. Extracting by manifest.
+543 silly tarball no local data for color-name@https://registry.npm.taobao.org/color-name/-/color-name-1.1.4.tgz. Extracting by manifest.
+544 silly tarball no local data for convert-source-map@https://registry.npm.taobao.org/convert-source-map/-/convert-source-map-2.0.0.tgz. Extracting by manifest.
+545 silly tarball no local data for concat-map@https://registry.npm.taobao.org/concat-map/-/concat-map-0.0.1.tgz. Extracting by manifest.
+546 silly tarball no local data for color-convert@https://registry.npm.taobao.org/color-convert/-/color-convert-2.0.1.tgz. Extracting by manifest.
+547 silly tarball no local data for chalk@https://registry.npm.taobao.org/chalk/-/chalk-4.1.2.tgz. Extracting by manifest.
+548 silly tarball no local data for callsites@https://registry.npm.taobao.org/callsites/-/callsites-3.1.0.tgz. Extracting by manifest.
+549 silly tarball no local data for caniuse-lite@https://registry.npm.taobao.org/caniuse-lite/-/caniuse-lite-1.0.30001756.tgz. Extracting by manifest.
+550 silly tarball no local data for browserslist@https://registry.npm.taobao.org/browserslist/-/browserslist-4.28.0.tgz. Extracting by manifest.
+551 silly tarball no local data for brace-expansion@https://registry.npm.taobao.org/brace-expansion/-/brace-expansion-1.1.12.tgz. Extracting by manifest.
+552 silly tarball no local data for baseline-browser-mapping@https://registry.npm.taobao.org/baseline-browser-mapping/-/baseline-browser-mapping-2.8.30.tgz. Extracting by manifest.
+553 silly tarball no local data for autoprefixer@https://registry.npm.taobao.org/autoprefixer/-/autoprefixer-10.4.22.tgz. Extracting by manifest.
+554 silly tarball no local data for balanced-match@https://registry.npm.taobao.org/balanced-match/-/balanced-match-1.0.2.tgz. Extracting by manifest.
+555 silly tarball no local data for argparse@https://registry.npm.taobao.org/argparse/-/argparse-2.0.1.tgz. Extracting by manifest.
+556 silly tarball no local data for ansi-styles@https://registry.npm.taobao.org/ansi-styles/-/ansi-styles-4.3.0.tgz. Extracting by manifest.
+557 silly tarball no local data for acorn-jsx@https://registry.npm.taobao.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz. Extracting by manifest.
+558 silly tarball no local data for acorn@https://registry.npm.taobao.org/acorn/-/acorn-8.15.0.tgz. Extracting by manifest.
+559 silly tarball no local data for ajv@https://registry.npm.taobao.org/ajv/-/ajv-6.12.6.tgz. Extracting by manifest.
+560 silly tarball no local data for hermes-parser@https://registry.npm.taobao.org/hermes-parser/-/hermes-parser-0.25.1.tgz. Extracting by manifest.
+561 silly tarball no local data for globals@https://registry.npm.taobao.org/globals/-/globals-14.0.0.tgz. Extracting by manifest.
+562 silly tarball no local data for eslint-visitor-keys@https://registry.npm.taobao.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz. Extracting by manifest.
+563 verbose audit error FetchError: request to https://registry.npm.taobao.org/-/npm/v1/security/advisories/bulk failed, reason: certificate has expired
+563 verbose audit error     at ClientRequest.<anonymous> (/opt/homebrew/lib/node_modules/npm/node_modules/minipass-fetch/lib/index.js:130:14)
+563 verbose audit error     at ClientRequest.emit (node:events:508:28)
+563 verbose audit error     at emitErrorEvent (node:_http_client:108:11)
+563 verbose audit error     at _destroy (node:_http_client:962:9)
+563 verbose audit error     at onSocketNT (node:_http_client:982:5)
+563 verbose audit error     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+563 verbose audit error   code: 'CERT_HAS_EXPIRED',
+563 verbose audit error   errno: 'CERT_HAS_EXPIRED',
+563 verbose audit error   type: 'system'
+563 verbose audit error }
+564 silly audit error undefined
+565 silly audit report null
+566 http fetch GET https://registry.npm.taobao.org/@types/react/-/react-19.2.6.tgz attempt 1 failed with CERT_HAS_EXPIRED
+567 http fetch GET https://registry.npm.taobao.org/@types/react-dom/-/react-dom-19.2.3.tgz attempt 1 failed with CERT_HAS_EXPIRED
+568 http fetch GET https://registry.npm.taobao.org/@supabase/supabase-js/-/supabase-js-2.84.0.tgz attempt 1 failed with CERT_HAS_EXPIRED
+569 http fetch GET https://registry.npm.taobao.org/@types/phoenix/-/phoenix-1.6.6.tgz attempt 1 failed with CERT_HAS_EXPIRED
+570 http fetch GET https://registry.npm.taobao.org/@supabase/storage-js/-/storage-js-2.84.0.tgz attempt 1 failed with CERT_HAS_EXPIRED
+571 http fetch GET https://registry.npm.taobao.org/@supabase/functions-js/-/functions-js-2.84.0.tgz attempt 1 failed with CERT_HAS_EXPIRED
+572 http fetch GET https://registry.npm.taobao.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz attempt 1 failed with CERT_HAS_EXPIRED
+573 http fetch GET https://registry.npm.taobao.org/@types/babel__template/-/babel__template-7.4.4.tgz attempt 1 failed with CERT_HAS_EXPIRED
+574 http fetch GET https://registry.npm.taobao.org/@types/estree/-/estree-1.0.8.tgz attempt 1 failed with CERT_HAS_EXPIRED
+575 http fetch GET https://registry.npm.taobao.org/@types/ws/-/ws-8.18.1.tgz attempt 1 failed with CERT_HAS_EXPIRED
+576 http fetch GET https://registry.npm.taobao.org/@types/babel__generator/-/babel__generator-7.27.0.tgz attempt 1 failed with CERT_HAS_EXPIRED
+577 http fetch GET https://registry.npm.taobao.org/@vitejs/plugin-react/-/plugin-react-5.1.1.tgz attempt 1 failed with CERT_HAS_EXPIRED
+578 http fetch GET https://registry.npm.taobao.org/@types/babel__core/-/babel__core-7.20.5.tgz attempt 1 failed with CERT_HAS_EXPIRED
+579 http fetch GET https://registry.npm.taobao.org/@types/json-schema/-/json-schema-7.0.15.tgz attempt 1 failed with CERT_HAS_EXPIRED
+580 http fetch GET https://registry.npm.taobao.org/@types/phoenix/-/phoenix-1.6.6.tgz attempt 2 failed with CERT_HAS_EXPIRED
+581 http fetch GET https://registry.npm.taobao.org/@supabase/supabase-js/-/supabase-js-2.84.0.tgz attempt 2 failed with CERT_HAS_EXPIRED
+582 http fetch GET https://registry.npm.taobao.org/@supabase/storage-js/-/storage-js-2.84.0.tgz attempt 2 failed with CERT_HAS_EXPIRED
+583 http fetch GET https://registry.npm.taobao.org/@types/react/-/react-19.2.6.tgz attempt 2 failed with CERT_HAS_EXPIRED
+584 http fetch GET https://registry.npm.taobao.org/@types/react-dom/-/react-dom-19.2.3.tgz attempt 2 failed with CERT_HAS_EXPIRED
+585 http fetch GET https://registry.npm.taobao.org/@supabase/functions-js/-/functions-js-2.84.0.tgz attempt 2 failed with CERT_HAS_EXPIRED
+586 http fetch GET https://registry.npm.taobao.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz attempt 2 failed with CERT_HAS_EXPIRED
+587 http fetch GET https://registry.npm.taobao.org/@types/babel__template/-/babel__template-7.4.4.tgz attempt 2 failed with CERT_HAS_EXPIRED
+588 http fetch GET https://registry.npm.taobao.org/@types/estree/-/estree-1.0.8.tgz attempt 2 failed with CERT_HAS_EXPIRED
+589 http fetch GET https://registry.npm.taobao.org/@types/ws/-/ws-8.18.1.tgz attempt 2 failed with CERT_HAS_EXPIRED
+590 http fetch GET https://registry.npm.taobao.org/@vitejs/plugin-react/-/plugin-react-5.1.1.tgz attempt 2 failed with CERT_HAS_EXPIRED
+591 http fetch GET https://registry.npm.taobao.org/@types/babel__generator/-/babel__generator-7.27.0.tgz attempt 2 failed with CERT_HAS_EXPIRED
+592 http fetch GET https://registry.npm.taobao.org/@types/babel__core/-/babel__core-7.20.5.tgz attempt 2 failed with CERT_HAS_EXPIRED
+593 http fetch GET https://registry.npm.taobao.org/@types/json-schema/-/json-schema-7.0.15.tgz attempt 2 failed with CERT_HAS_EXPIRED
+594 http fetch GET https://registry.npm.taobao.org/@types/react/-/react-19.2.6.tgz attempt 3 failed with CERT_HAS_EXPIRED
+595 http fetch GET https://registry.npm.taobao.org/@types/phoenix/-/phoenix-1.6.6.tgz attempt 3 failed with CERT_HAS_EXPIRED
+596 http fetch GET https://registry.npm.taobao.org/@types/react-dom/-/react-dom-19.2.3.tgz attempt 3 failed with CERT_HAS_EXPIRED
+597 http fetch GET https://registry.npm.taobao.org/@supabase/functions-js/-/functions-js-2.84.0.tgz attempt 3 failed with CERT_HAS_EXPIRED
+598 http fetch GET https://registry.npm.taobao.org/@supabase/storage-js/-/storage-js-2.84.0.tgz attempt 3 failed with CERT_HAS_EXPIRED
+599 http fetch GET https://registry.npm.taobao.org/@supabase/supabase-js/-/supabase-js-2.84.0.tgz attempt 3 failed with CERT_HAS_EXPIRED
+600 http fetch GET https://registry.npm.taobao.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz attempt 3 failed with CERT_HAS_EXPIRED
+601 http fetch GET https://registry.npm.taobao.org/@types/estree/-/estree-1.0.8.tgz attempt 3 failed with CERT_HAS_EXPIRED
+602 http fetch GET https://registry.npm.taobao.org/@types/babel__template/-/babel__template-7.4.4.tgz attempt 3 failed with CERT_HAS_EXPIRED
+603 http fetch GET https://registry.npm.taobao.org/@types/ws/-/ws-8.18.1.tgz attempt 3 failed with CERT_HAS_EXPIRED
+604 http fetch GET https://registry.npm.taobao.org/@vitejs/plugin-react/-/plugin-react-5.1.1.tgz attempt 3 failed with CERT_HAS_EXPIRED
+605 http fetch GET https://registry.npm.taobao.org/@types/babel__generator/-/babel__generator-7.27.0.tgz attempt 3 failed with CERT_HAS_EXPIRED
+606 http fetch GET https://registry.npm.taobao.org/@types/babel__core/-/babel__core-7.20.5.tgz attempt 3 failed with CERT_HAS_EXPIRED
+607 http fetch GET https://registry.npm.taobao.org/@types/json-schema/-/json-schema-7.0.15.tgz attempt 3 failed with CERT_HAS_EXPIRED
+608 verbose cwd /Users/zzhil/Projects/TeamBridge
+609 verbose os Darwin 25.1.0
+610 verbose node v25.2.1
+611 verbose npm  v11.6.2
+612 error Exit handler never called!
+613 error This is an error with npm itself. Please report this error at:
+614 error   <https://github.com/npm/cli/issues>
+615 verbose exit 1
+616 verbose code 1
+617 error A complete log of this run can be found in: /Users/zzhil/.npm/_logs/2026-01-02T09_46_27_620Z-debug-0.log

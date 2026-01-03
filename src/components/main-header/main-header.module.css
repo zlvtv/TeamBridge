@@ -5,7 +5,7 @@
   align-items: center;
   padding: 16px 24px;
   background: var(--color-surface);
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
   color: var(--color-text);
@@ -36,16 +36,6 @@
 }
 
 .main-header__info-btn:hover {
-  background: var(--color-text-light);
-  background-color: rgba(100, 116, 139, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .main-header {
-    background: #2c2c2e;
-    border-bottom-color: #333;
-  }
-  .main-header__info-btn:hover {
-    background: #3a3a3c;
-  }
+  background-color: var(--color-text-light);
+  opacity: 0.2;
 }

@@ -1,7 +1,7 @@
 .org-icon-panel {
   width: 64px;
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: var(--border-radius-lg);
   border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -18,7 +18,7 @@
   width: 40px;
   height: 40px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,28 +26,27 @@
   cursor: pointer;
   transition: background 0.2s;
   font-size: 18px;
-  flex-shrink: 0; 
+  flex-shrink: 0;
 }
 
 .org-icon-panel__search-btn {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .org-icon-panel__search-btn:hover {
-  background: #e2e8f0;
+  background: var(--color-background);
 }
 
 .org-icon-panel__create-org-btn {
-  background: #4f46e5;
+  background: var(--color-primary);
   color: white;
 }
 
 .org-icon-panel__create-org-btn:hover {
-  background: #4338ca;
+  background: var(--color-primary-hover);
 }
 
-/* ✅ Фиксированная высота контейнера иконок */
 .org-icon-panel__orgs {
   display: flex;
   flex-direction: column;
@@ -56,9 +55,9 @@
   gap: 8px;
   padding: 4px 0;
   margin-top: 4px;
-  overflow-y: auto; /* резерв */
+  overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #4f46e5 #f1f5f9;
+  scrollbar-color: var(--color-primary) var(--color-surface);
   flex-shrink: 0;
 }
 
@@ -67,29 +66,28 @@
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--color-surface);
   border-radius: 3px;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-thumb {
-  background: #4f46e5;
+  background: var(--color-primary);
   border-radius: 3px;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar-thumb:hover {
-  background: #4338ca;
+  background: var(--color-primary-hover);
 }
 
-/* ✅ Фиксированные иконки — НИКОГДА не сжимаются */
 .org-icon-panel__org-btn {
   width: 40px;
   height: 40px;
   border: none;
-  border-radius: 12px;
-  background: #f1f5f9;
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
   font-size: 16px;
   font-weight: 500;
-  color: #1e293b;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -99,37 +97,10 @@
 }
 
 .org-icon-panel__org-btn:hover {
-  background: #e2e8f0;
+  background: var(--color-background);
 }
 
 .org-icon-panel__org-btn--active {
-  background: #4f46e5;
+  background: var(--color-primary);
   color: white;
-}
-
-/* Тема */
-@media (prefers-color-scheme: dark) {
-  .org-icon-panel {
-    background: #1e1e1e;
-    border-color: #333;
-  }
-
-  .org-icon-panel__search-btn,
-  .org-icon-panel__org-btn {
-    background: #333;
-    color: white;
-  }
-
-  .org-icon-panel__search-btn:hover,
-  .org-icon-panel__org-btn:hover {
-    background: #444;
-  }
-
-  .org-icon-panel__orgs::-webkit-scrollbar-track {
-    background: #333;
-  }
-
-  .org-icon-panel__orgs::-webkit-scrollbar-thumb {
-    background: #4f46e5;
-  }
 }

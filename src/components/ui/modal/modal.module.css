@@ -5,24 +5,28 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   animation: fade-in 0.2s ease-out;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-medium);
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
   padding: 24px;
   margin: 20px;
+  min-width: 300px;
   animation: scale-in 0.2s ease-out;
+  color: var(--color-text);
 }
 
 .close {
@@ -32,7 +36,7 @@
   background: none;
   border: none;
   font-size: 24px;
-  color: #666;
+  color: var(--color-text-light);
   cursor: pointer;
   width: 32px;
   height: 32px;
@@ -44,23 +48,22 @@
 }
 
 .close:hover {
-  background: #f1f5f9;
-  color: #333;
+  background: var(--color-background);
 }
 
 .title {
   margin: 0 0 16px;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text);
   text-align: center;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .content {
   font-size: 14px;
-  color: #475569;
+  color: var(--color-text);
   line-height: 1.5;
 }
 
@@ -70,6 +73,6 @@
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.9); opacity: 0; }
+  from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }

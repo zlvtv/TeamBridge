@@ -1,12 +1,15 @@
 /* src/components/resizable-splitter/resizable-splitter.module.css */
 .resizable-splitter {
   width: 6px;
-  background: #e2e8f0;
+  background: var(--color-background);
   cursor: col-resize;
-  transition: background 0.2s;
   position: relative;
+  transition: background 0.2s ease;
+  user-select: none;
+  touch-action: none;
 }
 
+/* Тонкая линия по центру */
 .resizable-splitter::before {
   content: '';
   position: absolute;
@@ -14,57 +17,43 @@
   top: 0;
   width: 1px;
   height: 100%;
-  background: #cbd5e1;
+  background: var(--border-color);
   transform: translateX(-50%);
+  opacity: 0.4;
 }
 
-.resizable-splitter:hover {
-  background: #a0aec0;
+/* При наведении — фон светлее/темнее, но не прозрачный */
+.resizable-splitter:hover::before {
+  opacity: 0.6;
+  background: var(--color-primary);
 }
 
+/* При активном перетаскивании */
 .resizable-splitter:active {
-  background: #6b7280;
+  background: var(--color-primary);
+  opacity: 0.15;
 }
 
-.splitter {
-  width: 6px;
-  background: #e2e8f0;
-  cursor: col-resize;
-  position: relative;
-  transition: background 0.2s;
+.resizable-splitter:active::before {
+  background: var(--color-primary);
+  opacity: 0.8;
 }
 
-.splitter::after {
+/* Псевдо-иконка "полоски" — только в активном состоянии */
+.resizable-splitter::after {
   content: '⋮';
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: #94a3b8;
-  font-size: 16px;
+  color: var(--color-text-light);
+  font-size: 14px;
   opacity: 0;
   transition: opacity 0.2s;
+  pointer-events: none;
 }
 
-.splitter:hover::after,
-.splitter:active::after {
-  opacity: 1;
-}
-
-.splitter:hover {
-  background: #cbd5e1;
-}
-
-/* Активный режим — курсор уже col-resize */
-
-@media (prefers-color-scheme: dark) {
-  .resizable-splitter {
-    background: #3a3a3c;
-  }
-  .resizable-splitter::before {
-    background: #4a4a4c;
-  }
-  .resizable-splitter:hover {
-    background: #5a5a5c;
-  }
+.resizable-splitter:hover::after,
+.resizable-splitter:active::after {
+  opacity: 0.5;
 }

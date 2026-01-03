@@ -74,15 +74,3 @@
   background: var(--color-surface);
   margin: 16px;
 } 
-
-body {
-  margin: 0;
-  background: #f1f5f9;
-  color: #1e293b;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-body.dark {
-  background: #111;
-  color: #f3f4f6;
-}

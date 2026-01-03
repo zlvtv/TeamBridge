@@ -1,56 +1,53 @@
 /* src/pages/SignUp/SignUp.module.css */
-/* Копия стилей из Login.module.css */
 .container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  background: var(--color-background);
   padding: 20px;
 }
 
 .formWrapper {
   width: 100%;
   max-width: 400px;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 16px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
   padding: 40px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-color);
 }
 
 .title {
   font-size: 1.75rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text);
   margin: 0 0 8px 0;
   text-align: center;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--color-text-light);
   font-size: 1rem;
   margin: 0 0 24px 0;
   text-align: center;
 }
 
 .error {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--color-error);
+  color: white;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   font-size: 0.875rem;
   margin-bottom: 16px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger);
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
 }
 
 .field {
@@ -62,31 +59,33 @@
 .label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--color-text);
 }
 
 .input {
   padding: 12px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   font-size: 1rem;
   transition: border 0.2s, box-shadow 0.2s;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .input::placeholder {
-  color: #94a3b8;
+  color: var(--color-text-light);
 }
 
 .link {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--color-primary);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 4px 0;
@@ -96,20 +95,19 @@
 
 .link:hover {
   text-decoration: underline;
-  color: #2563eb;
+  color: var(--color-primary-hover);
 }
 
 .link:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  text-decoration: none;
 }
 
 .submit {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
-  border: none; 
-  border-radius: 8px;
+  border: none;
+  border-radius: var(--border-radius);
   padding: 14px 24px;
   font-size: 1rem;
   font-weight: 500;
@@ -119,7 +117,7 @@
 }
 
 .submit:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--color-primary-hover);
 }
 
 .submit:disabled {
@@ -129,43 +127,12 @@
 
 .footer {
   text-align: center;
-  color: #64748b;
+  color: var(--color-text-light);
   font-size: 0.875rem;
   margin-top: 24px;
 }
 
 .footer .link {
-  color: #3b82f6;
+  color: var(--color-primary);
   display: inline;
-}
-
-@media (prefers-color-scheme: dark) {
-  .formWrapper {
-    background: #1e1e1e;
-    border-color: #333;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  }
-
-  .title,
-  .subtitle,
-  .label,
-  .input {
-    color: #e2e8f0;
-  }
-
-  .input {
-    background: #2d2d2d;
-    border-color: #444;
-  }
-
-  .input:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-  }
-
-  .error {
-    background: #3b0707;
-    border-color: #7f1d1d;
-    color: #fca5a5;
-  }
 }
