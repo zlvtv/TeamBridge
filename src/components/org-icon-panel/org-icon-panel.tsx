@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';
 import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
-import { createPortal } from 'react-dom';
 import styles from './org-icon-panel.module.css';
 
 const OrgIconPanel: React.FC = () => {
@@ -17,23 +16,21 @@ const OrgIconPanel: React.FC = () => {
 
   const [searchAnchor, setSearchAnchor] = useState<HTMLElement | null>(null);
   const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const orgsRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null); // для контроля высоты
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const [maxHeight, setMaxHeight] = useState<number>(400);
+  const [maxHeight, setMaxHeight] = useState(400);
 
   useEffect(() => {
     const updateHeight = () => {
       const totalHeight = window.innerHeight;
-      const topOffset = 20;           // отступ сверху
-      const bottomOffset = 20;        // снизу
-      const settingsHeight = 120;      // высота SettingsPanel
-      const gap = 16;                 // gap между панелями
+      const topOffset = 20;
+      const bottomOffset = 20;
+      const settingsHeight = 120;
+      const gap = 16;
 
-      // Максимальная высота org-icon-panel
       const availableHeight = totalHeight - topOffset - settingsHeight - gap - bottomOffset;
-
-      // Ограничиваем сверху
       const clampedHeight = Math.max(120, availableHeight);
 
       setMaxHeight(clampedHeight);
@@ -46,6 +43,12 @@ const OrgIconPanel: React.FC = () => {
 
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setSearchAnchor(e.currentTarget);
+    setIsSearchModalOpen(true);
+  };
+
+  const handleSearchClose = () => {
+    setIsSearchModalOpen(false);
+    setSearchAnchor(null);
   };
 
   const handleOrgClick = (org: (typeof organizations)[0]) => {
@@ -72,77 +75,76 @@ const OrgIconPanel: React.FC = () => {
       const newOrg = organizations.find((org) => org.name === lastCreatedOrgName);
       if (newOrg && newOrg.id !== currentOrganization?.id) {
         setCurrentOrganization(newOrg);
-        setTimeout(() => {
-          const buttons = orgsRef.current?.querySelectorAll('button');
-          const lastButton = buttons?.[buttons.length - 1];
-          lastButton?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
         setLastCreatedOrgName(null);
       }
     }
   }, [organizations, lastCreatedOrgName, currentOrganization, setCurrentOrganization, setLastCreatedOrgName]);
 
   return (
-    <div
-      ref={containerRef}
-      className={styles['org-icon-panel']}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        height: `${maxHeight}px`,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <button
-        className={styles['org-icon-panel__search-btn']}
-        onClick={handleSearchClick}
-        aria-label="Поиск по чатам"
-      >
-        🔍
-      </button>
+    <>
+      <CreateOrganizationModal
+        isOpen={isCreateOrgModalOpen}
+        onClose={() => setIsCreateOrgModalOpen(false)}
+      />
 
-      <button
-        className={styles['org-icon-panel__create-org-btn']}
-        onClick={() => setIsCreateOrgModalOpen(true)}
-        aria-label="Создать организацию"
-      >
-        +
-      </button>
+      {isSearchModalOpen && searchAnchor && (
+        <SearchModal
+          isOpen={isSearchModalOpen}
+          onClose={handleSearchClose}
+          anchorEl={searchAnchor}
+          organizations={organizations}
+        />
+      )}
 
-      {/* 🔥 Прокручиваемый контейнер с фиксированной высотой */}
       <div
-        ref={orgsRef}
-        className={styles['org-icon-panel__orgs']}
-        role="region"
-        aria-label="Список организаций"
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          maxHeight: '100%',
-        }}
+        ref={containerRef}
+        className={styles['org-icon-panel']}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{ height: `${maxHeight}px`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
-        {organizations.map((org) => {
-          const firstLetter = org.name?.charAt(0).toUpperCase() || 'O';
-          return (
-            <button
-              key={org.id}
-              className={`${styles['org-icon-panel__org-btn']} ${
-                currentOrganization?.id === org.id
-                  ? styles['org-icon-panel__org-btn--active']
-                  : ''
-              }`}
-              onClick={() => handleOrgClick(org)}
-              aria-label={org.name}
-              title={org.name}
-            >
-              {firstLetter}
-            </button>
-          );
-        })}
+        <button
+          className={styles['org-icon-panel__search-btn']}
+          onClick={handleSearchClick}
+          aria-label="Поиск по чатам"
+        >
+          🔍
+        </button>
+
+        <button
+          className={styles['org-icon-panel__create-org-btn']}
+          onClick={() => setIsCreateOrgModalOpen(true)}
+          aria-label="Создать организацию"
+        >
+          +
+        </button>
+
+        <div
+          ref={orgsRef}
+          className={styles['org-icon-panel__orgs']}
+          role="region"
+          aria-label="Список организаций"
+          style={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}
+        >
+          {organizations.map((org) => {
+            const firstLetter = org.name?.charAt(0).toUpperCase() || 'O';
+            return (
+              <button
+                key={org.id}
+                className={`${styles['org-icon-panel__org-btn']} ${
+                  currentOrganization?.id === org.id ? styles['org-icon-panel__org-btn--active'] : ''
+                }`}
+                onClick={() => handleOrgClick(org)}
+                aria-label={org.name}
+                title={org.name}
+              >
+                {firstLetter}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

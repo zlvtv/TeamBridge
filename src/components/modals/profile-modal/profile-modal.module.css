@@ -1,9 +1,8 @@
-/* src/components/modals/profile-modal/profile-modal.module.css */
 .profile-modal {
   background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-medium);
   overflow: hidden;
   font-size: 14px;
   color: var(--color-text);
@@ -62,12 +61,8 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s;
   border: none;
-}
-
-.profile-modal__btn:hover:not(:disabled) {
-  opacity: 0.9;
 }
 
 .profile-modal__btn_logout {
@@ -75,11 +70,6 @@
   color: #dc2626;
 }
 
-.profile-modal__btn_logout:hover:not(:disabled) {
+.profile-modal__btn_logout:hover {
   background: #fecaca;
-}
-
-.profile-modal__btn_logout:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }

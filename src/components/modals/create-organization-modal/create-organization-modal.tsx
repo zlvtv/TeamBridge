@@ -17,10 +17,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Очищаем поля при открытии/закрытии
   useEffect(() => {
     if (isOpen) {
-      // При открытии — сбрасываем форму
       setName('');
       setDescription('');
       setError(null);
@@ -38,19 +36,15 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
     setError(null);
 
     try {
-      // Создаём организацию
       await createOrganization({ name: name.trim(), description: description.trim() });
 
-      // ✅ Находим новую организацию и переключаемся на неё
-      // Предположим, что `createOrganization` уже обновил `organizations` через `loadOrganizations`
       setTimeout(() => {
         const newOrg = organizations.find((org) => org.name === name.trim());
         if (newOrg) {
           setCurrentOrganization(newOrg);
         }
-      }, 100); // Небольшая задержка, чтобы обновился список
+      }, 100);
 
-      // Закрываем модалку
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать организацию');

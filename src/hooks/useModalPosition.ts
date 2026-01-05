@@ -15,24 +15,19 @@ export const useModalPosition = ({ referenceRef, modalWidth = 320 }: UseModalPos
       const button = referenceRef.current;
       if (!button) return;
 
-      // Проверяем, кликнули ли по кнопке
       if (!button.contains(e.target as Node)) {
         setIsVisible(false);
         return;
       }
 
       const rect = button.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollTop = window.pageYOffset;
+      const scrollLeft = window.pageXOffset;
 
       let left = rect.left + scrollLeft;
-
-      // Если справа нет места — показываем слева
       if (left + modalWidth > window.innerWidth) {
         left = window.innerWidth - modalWidth - 20;
       }
-
-      // Не уходим за левый край
       if (left < 20) {
         left = 20;
       }

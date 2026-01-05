@@ -9,16 +9,12 @@ import { createPortal } from 'react-dom';
 const MainHeader: React.FC = () => {
   const { currentOrganization } = useOrganization();
   const { isOrgInfoOpen, openOrgInfo, closeOrgInfo } = useUI();
-
-  // Элемент, к которому будет привязана модалка
   const [infoBtnEl, setInfoBtnEl] = React.useState<HTMLButtonElement | null>(null);
 
   const handleInfoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setInfoBtnEl(e.currentTarget);
-    console.log('ℹ️ [MainHeader] Кнопка информации нажата');
-    openOrgInfo(); // Это должно сработать
+    openOrgInfo();
   };
-
 
   return (
     <>
@@ -26,7 +22,6 @@ const MainHeader: React.FC = () => {
         <h1 className={styles['main-header__title']}>
           {currentOrganization?.name || 'Организация'}
         </h1>
-
         <button
           ref={setInfoBtnEl}
           className={styles['main-header__info-btn']}
@@ -37,7 +32,6 @@ const MainHeader: React.FC = () => {
         </button>
       </header>
 
-      {/* Модалка информации — привязана к кнопке */}
       {isOrgInfoOpen && infoBtnEl &&
         createPortal(
           <OrgInfoModal anchorEl={infoBtnEl} onClose={closeOrgInfo} />,

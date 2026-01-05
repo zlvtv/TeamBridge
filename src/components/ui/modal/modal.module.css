@@ -27,6 +27,7 @@
   min-width: 300px;
   animation: scale-in 0.2s ease-out;
   color: var(--color-text);
+  outline: none;
 }
 
 .close {

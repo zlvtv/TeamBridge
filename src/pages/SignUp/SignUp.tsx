@@ -14,78 +14,60 @@ const SignUp: React.FC = () => {
   const [showConfirmScreen, setShowConfirmScreen] = useState(false);
   const navigate = useNavigate();
   const { signUp } = useAuth();
+
   const checkIfEmailExists = async (email: string): Promise<boolean> => {
-    console.log('🔍 Проверяем email:', email);
     const { data, error } = await supabase.rpc('is_email_registered', { user_email: email });
-
-    if (error) {
-        console.error('❌ Ошибка RPC:', error);
-        return false;
-    }
-
-    console.log('✅ Результат проверки:', data); // ← Должно быть true
+    if (error) return false;
     return data;
-    };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setIsLoading(true);
-  setShowConfirmScreen(false);
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+    setShowConfirmScreen(false);
 
-  const emailTrimmed = email.trim();
+    const emailTrimmed = email.trim();
 
-  try {
-    // ✅ 1. Проверяем, существует ли ПОДТВЕРЖДЁННЫЙ пользователь
-    const emailExists = await checkIfEmailExists(emailTrimmed);
-
-    if (emailExists) {
-      setError('Пользователь с таким email уже зарегистрирован. Войдите в аккаунт.');
-      setIsLoading(false);
-      return;
-    }
-
-    // ✅ 2. Пробуем зарегистрировать
-    const { data, error } = await signUp(emailTrimmed, password, username);
-
-    if (error) {
-      if (error.message.includes('Password should be at least 6 characters')) {
-        setError('Пароль должен быть не менее 6 символов.');
-      } else if (error.message.includes('Password is too weak')) {
-        setError('Пароль слишком простой. Попробуйте другой.');
-      } else if (error.message.includes('User already registered')) {
-        // 🔁 На случай, если RPC не сработал
-        setError('Пользователь с таким email уже зарегистрирован.');
-      } else {
-        setError('Ошибка регистрации: ' + error.message);
+    try {
+      const emailExists = await checkIfEmailExists(emailTrimmed);
+      if (emailExists) {
+        setError('Пользователь с таким email уже зарегистрирован. Войдите в аккаунт.');
+        setIsLoading(false);
+        return;
       }
+
+      const { data, error } = await signUp(emailTrimmed, password, username);
+
+      if (error) {
+        if (error.message.includes('Password should be at least 6 characters')) {
+          setError('Пароль должен быть не менее 6 символов.');
+        } else if (error.message.includes('Password is too weak')) {
+          setError('Пароль слишком простой. Попробуйте другой.');
+        } else if (error.message.includes('User already registered')) {
+          setError('Пользователь с таким email уже зарегистрирован.');
+        } else {
+          setError('Ошибка регистрации: ' + error.message);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        setShowConfirmScreen(true);
+      }
+    } catch (err: any) {
+      const networkError = !err.message.includes('password') && !err.message.includes('email');
+      if (networkError) {
+        setError('Не удалось подключиться к серверу. Проверьте интернет.');
+      } else {
+        setError('Пароль должен быть не менее 6 символов.');
+      }
+    } finally {
       setIsLoading(false);
-      return;
     }
+  };
 
-    // ✅ Успешная регистрация
-    if (data.user) {
-      setShowConfirmScreen(true);
-    }
-  } catch (err: any) {
-    console.error('Критическая ошибка:', err);
-
-    // 🚨 Только настоящие сетевые ошибки
-    const networkError = !err.message.includes('password') && !err.message.includes('email');
-
-    if (networkError) {
-      setError('Не удалось подключиться к серверу. Проверьте интернет.');
-    } else {
-      // 🔁 Если ошибка всё же связана с паролем
-      setError('Пароль должен быть не менее 6 символов.');
-    }
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
-  // ✅ Экран подтверждения
   if (showConfirmScreen) {
     return (
       <div className={styles.container}>
@@ -94,13 +76,8 @@ const SignUp: React.FC = () => {
           <p className={styles.subtitle}>
             Мы отправили письмо на <strong>{email}</strong>. Перейдите по ссылке подтверждения, чтобы завершить регистрацию.
           </p>
-          <p className={styles.footer}>
-            Не пришло письмо? Проверьте папку "Спам"
-          </p>
-          <button
-            className={styles.submit}
-            onClick={() => navigate('/login')}
-          >
+          <p className={styles.footer}>Не пришло письмо? Проверьте папку "Спам"</p>
+          <button className={styles.submit} onClick={() => navigate('/login')}>
             Хорошо
           </button>
         </div>
@@ -165,11 +142,7 @@ const SignUp: React.FC = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            className={styles.submit}
-            disabled={isLoading}
-          >
+          <button type="submit" className={styles.submit} disabled={isLoading}>
             {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
         </form>

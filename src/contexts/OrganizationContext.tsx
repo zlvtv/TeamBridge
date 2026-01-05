@@ -6,11 +6,11 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { organizationService } from '../services/organizationService';
 import {
-  OrganizationWithMembers,
-  CreateOrganizationData,
-} from '../types/organization.types';
+  organizationService,
+  type OrganizationWithMembers,
+  type CreateOrganizationData,
+} from '../services/organizationService';
 
 interface OrganizationContextType {
   organizations: OrganizationWithMembers[];
@@ -22,25 +22,18 @@ interface OrganizationContextType {
   setCurrentOrganization: (org: OrganizationWithMembers | null) => void;
   refreshOrganizations: () => Promise<void>;
   refreshCurrentOrganization: () => Promise<void>;
-  regenerateInviteCode: (organizationId: string) => Promise<string>;
+  regenerateInviteCode: (organizationId: string) => Promise<void>;
   deactivateInviteCode: (organizationId: string) => Promise<void>;
   deleteOrganization: (organizationId: string) => Promise<void>;
 }
 
-const OrganizationContext = createContext<OrganizationContextType | undefined>(
-  undefined
-);
+const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
-export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [organizations, setOrganizations] = useState<OrganizationWithMembers[]>([]);
-  const [currentOrganization, setCurrentOrganization] =
-    useState<OrganizationWithMembers | null>(null);
+  const [currentOrganization, setCurrentOrganization] = useState<OrganizationWithMembers | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastCreatedOrgName, setLastCreatedOrgName] = useState<string | null>(null);
-
 
   const loadOrganizations = useCallback(async () => {
     setIsLoading(true);
@@ -51,7 +44,6 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const savedOrgId = localStorage.getItem('currentOrgId');
       const matchedOrg = orgs.find((o) => o.id === savedOrgId) || orgs[0] || null;
-
       setCurrentOrganization(matchedOrg);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка загрузки организаций');
@@ -59,6 +51,8 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   }, []);
+
+  const refreshOrganizations = useCallback(() => loadOrganizations(), [loadOrganizations]);
 
   const refreshCurrentOrganization = useCallback(async () => {
     if (!currentOrganization) return;
@@ -72,17 +66,15 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [currentOrganization?.id]);
 
   const createOrganization = async (data: CreateOrganizationData) => {
-  setError(null);
-  try {
-    await organizationService.createOrganization(data);
-    setLastCreatedOrgName(data.name); // ✅ Запоминаем имя
-    await loadOrganizations();
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Ошибка создания');
-    throw err;
-  }
-};
-
+    setError(null);
+    try {
+      await organizationService.createOrganization(data);
+      await loadOrganizations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка создания');
+      throw err;
+    }
+  };
 
   const joinOrganization = async (inviteCode: string) => {
     setError(null);
@@ -112,27 +104,26 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const regenerateInviteCode = async (organizationId: string) => {
+    setError(null);
     try {
-      const newCode = await organizationService.regenerateInviteCode(organizationId);
+      await organizationService.regenerateInviteCode(organizationId);
       await refreshCurrentOrganization();
-      return newCode;
-    } catch (error) {
-      setError((error as Error).message);
-      throw error;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка обновления кода');
+      throw err;
     }
   };
 
   const deactivateInviteCode = async (organizationId: string) => {
+    setError(null);
     try {
       await organizationService.deactivateInviteCode(organizationId);
       await refreshCurrentOrganization();
-    } catch (error) {
-      setError((error as Error).message);
-      throw error;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка отключения кода');
+      throw err;
     }
   };
-
-  const refreshOrganizations = useCallback(() => loadOrganizations(), []);
 
   useEffect(() => {
     loadOrganizations();
@@ -156,8 +147,6 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
     refreshCurrentOrganization,
     regenerateInviteCode,
     deactivateInviteCode,
-    lastCreatedOrgName,
-    setLastCreatedOrgName,
     deleteOrganization,
   };
 
@@ -170,8 +159,6 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useOrganization = () => {
   const context = useContext(OrganizationContext);
-  if (!context) {
-    throw new Error('useOrganization должен использоваться внутри OrganizationProvider');
-  }
+  if (!context) throw new Error('useOrganization must be used within OrganizationProvider');
   return context;
 };

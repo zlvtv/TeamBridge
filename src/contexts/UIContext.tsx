@@ -39,29 +39,21 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  // 🔹 1. Инициализация темы при монтировании
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
     setTheme(initialTheme);
 
     const html = document.documentElement;
-    if (savedTheme) {
-      html.classList.add('manual-theme');
-    } else {
-      html.classList.remove('manual-theme');
-    }
-
     if (initialTheme === 'dark') {
       html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
+    }
+    if (savedTheme) {
+      html.classList.add('manual-theme');
     }
   }, []);
 
-  // 🔹 2. Применение темы при каждом изменении `theme`
   useEffect(() => {
     const html = document.documentElement;
     if (theme === 'dark') {
@@ -69,17 +61,12 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     } else {
       html.classList.remove('dark');
     }
-
-    // Обновляем признак ручного выбора
     html.classList.add('manual-theme');
-
     localStorage.setItem('theme', theme);
-
-    console.log('🎨 [UI] Тема обновлена:', theme, '| classList:', html.classList);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
   const setChatWidth = useCallback((width: number) => {
@@ -88,18 +75,14 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const openSearch = useCallback(() => setIsSearchOpen(true), []);
   const closeSearch = useCallback(() => setIsSearchOpen(false), []);
-
   const openProfile = useCallback(() => setIsProfileOpen(true), []);
   const closeProfile = useCallback(() => setIsProfileOpen(false), []);
-
   const openOrgInfo = useCallback(() => setIsOrgInfoOpen(true), []);
   const closeOrgInfo = useCallback(() => setIsOrgInfoOpen(false), []);
-
   const openCreateProject = useCallback(() => setIsCreateProjectOpen(true), []);
   const closeCreateProject = useCallback(() => setIsCreateProjectOpen(false), []);
-
   const toggleFullscreen = useCallback(() => {
-    setIsBoardFullscreen(prev => !prev);
+    setIsBoardFullscreen((prev) => !prev);
   }, []);
 
   const selectOrg = useCallback((id: string) => {
@@ -110,59 +93,58 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setSelectedProjectId(id);
   }, []);
 
-  const value = useMemo<UIContextType>(() => ({
-    theme,
-    isSearchOpen,
-    isProfileOpen,
-    isOrgInfoOpen,
-    isCreateProjectOpen,
-    chatWidth,
-    isBoardFullscreen,
-    selectedOrgId,
-    selectedProjectId,
-    toggleTheme,
-    openSearch,
-    closeSearch,
-    openProfile,
-    closeProfile,
-    openOrgInfo,
-    closeOrgInfo,
-    openCreateProject,
-    closeCreateProject,
-    setChatWidth,
-    toggleFullscreen,
-    selectOrg,
-    selectProject,
-  }), [
-    theme,
-    isSearchOpen,
-    isProfileOpen,
-    isOrgInfoOpen,
-    isCreateProjectOpen,
-    chatWidth,
-    isBoardFullscreen,
-    selectedOrgId,
-    selectedProjectId,
-    toggleTheme,
-    openSearch,
-    closeSearch,
-    openProfile,
-    closeProfile,
-    openOrgInfo,
-    closeOrgInfo,
-    openCreateProject,
-    closeCreateProject,
-    setChatWidth,
-    toggleFullscreen,
-    selectOrg,
-    selectProject,
-  ]);
-
-  return (
-    <UIContext.Provider value={value}>
-      {children}
-    </UIContext.Provider>
+  const value = useMemo<UIContextType>(
+    () => ({
+      theme,
+      isSearchOpen,
+      isProfileOpen,
+      isOrgInfoOpen,
+      isCreateProjectOpen,
+      chatWidth,
+      isBoardFullscreen,
+      selectedOrgId,
+      selectedProjectId,
+      toggleTheme,
+      openSearch,
+      closeSearch,
+      openProfile,
+      closeProfile,
+      openOrgInfo,
+      closeOrgInfo,
+      openCreateProject,
+      closeCreateProject,
+      setChatWidth,
+      toggleFullscreen,
+      selectOrg,
+      selectProject,
+    }),
+    [
+      theme,
+      isSearchOpen,
+      isProfileOpen,
+      isOrgInfoOpen,
+      isCreateProjectOpen,
+      chatWidth,
+      isBoardFullscreen,
+      selectedOrgId,
+      selectedProjectId,
+      toggleTheme,
+      openSearch,
+      closeSearch,
+      openProfile,
+      closeProfile,
+      openOrgInfo,
+      closeOrgInfo,
+      openCreateProject,
+      closeCreateProject,
+      setChatWidth,
+      toggleFullscreen,
+      selectOrg,
+      selectProject,
+    ]
   );
+
+  return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 };
 
 export const useUI = () => {

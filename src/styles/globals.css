@@ -17,7 +17,6 @@ body {
   transition: background-color 0.3s ease;
 }
 
-/* Принудительно применяем переменные, если .dark на html */
 html.dark {
   --color-primary: #3b82f6;
   --color-primary-hover: #2563eb;
@@ -29,7 +28,6 @@ html.dark {
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
-/* Поддержка prefers-color-scheme, если пользователь НЕ выбрал тему вручную */
 @media (prefers-color-scheme: dark) {
   html:not(.manual-theme) {
     --color-primary: #3b82f6;
@@ -39,3 +37,12 @@ html.dark {
     --border-color: #334155;
   }
 }
+
+input:focus, button:focus, select:focus, textarea:focus {
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+

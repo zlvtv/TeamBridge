@@ -1,18 +1,21 @@
 import React from 'react';
 import styles from './button.module.css';
 
+type ButtonVariant = 'primary' | 'secondary';
+type ButtonType = 'button' | 'submit' | 'reset';
+
 interface ButtonProps {
   children: React.ReactNode;
-  type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary';
+  type?: ButtonType;
+  variant?: ButtonVariant;
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  'aria-label'?: string;
+  'aria-disabled'?: boolean;
+  role?: string;
 }
 
-/**
- * Универсальный компонент кнопки с поддержкой различных вариантов стилей
- */
 const Button: React.FC<ButtonProps> = ({
   children,
   type = 'button',
@@ -20,15 +23,18 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   disabled = false,
   className = '',
+  ...props
 }) => {
   const buttonClass = `${styles.button} ${styles[`button--${variant}`]} ${className}`.trim();
 
   return (
-    <button 
-      type={type} 
-      className={buttonClass} 
+    <button
+      type={type}
+      className={buttonClass}
       onClick={onClick}
       disabled={disabled}
+      aria-disabled={disabled || props['aria-disabled']}
+      {...props}
     >
       {children}
     </button>

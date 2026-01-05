@@ -3,17 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Login.module.css';
-
-const translateError = (message: string): string => {
-  if (message.includes('Invalid login credentials')) {
-    return 'Неверный email или пароль';
-  }
-  if (message.includes('Email not confirmed')) {
-    return 'Email не подтверждён. Проверьте почту';
-  }
-  return 'Ошибка входа. Попробуйте снова';
-};
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -89,11 +78,7 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          <button
-            type="submit"
-            className={styles.submit}
-            disabled={isLoading}
-          >
+          <button type="submit" className={styles.submit} disabled={isLoading}>
             {isLoading ? 'Вход...' : 'Войти'}
           </button>
         </form>
@@ -112,6 +97,12 @@ const Login: React.FC = () => {
       </div>
     </div>
   );
+};
+
+const translateError = (message: string): string => {
+  if (message.includes('Invalid login credentials')) return 'Неверный email или пароль';
+  if (message.includes('Email not confirmed')) return 'Email не подтверждён. Проверьте почту';
+  return 'Ошибка входа. Попробуйте снова';
 };
 
 export default Login;

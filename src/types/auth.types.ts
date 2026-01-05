@@ -10,8 +10,8 @@ export interface UserProfile {
 export interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  isInitialized: boolean; // ✅ Добавляем
-  signUp: (email: string, password: string, username: string) => Promise<any>;
+  isInitialized: boolean;
+  signUp: (email: string, password: string, username: string) => Promise<{ data: any; error: any }>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }

@@ -10,7 +10,7 @@ const ResizableSplitter: React.FC = () => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
-      const newWidth = e.clientX - 100; // 100 = отступ слева (org-icon-panel + отступ)
+      const newWidth = e.clientX - 100;
       if (newWidth >= 300 && newWidth <= 800) {
         setChatWidth(newWidth);
       }
@@ -45,7 +45,13 @@ const ResizableSplitter: React.FC = () => {
       ref={splitterRef}
       className={styles['resizable-splitter']}
       onMouseDown={handleMouseDown}
-      title="Перетащите, чтобы изменить ширину"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Разделитель панелей"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handleMouseDown(e as any);
+      }}
     />
   );
 };

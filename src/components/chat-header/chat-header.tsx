@@ -9,7 +9,6 @@ import { createPortal } from 'react-dom';
 const ChatHeader: React.FC = () => {
   const { projects } = useProject();
   const { isCreateProjectOpen, openCreateProject, closeCreateProject } = useUI();
-
   const [addBtnEl, setAddBtnEl] = React.useState<HTMLButtonElement | null>(null);
 
   const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -19,13 +18,20 @@ const ChatHeader: React.FC = () => {
 
   return (
     <>
-      <div className={styles['chat-header']}>
-        <div className={styles['chat-header__tabs']}>
-          <div className={styles['chat-header__tab']}>Общий</div>
+      <header className={styles['chat-header']}>
+        <div className={styles['chat-header__tabs']} role="tablist">
+          <button role="tab" className={styles['chat-header__tab']} aria-selected="true">
+            Общий
+          </button>
           {projects.map((project) => (
-            <div key={project.id} className={styles['chat-header__tab']}>
+            <button
+              key={project.id}
+              role="tab"
+              className={styles['chat-header__tab']}
+              aria-selected="false"
+            >
               {project.name}
-            </div>
+            </button>
           ))}
         </div>
 
@@ -34,15 +40,15 @@ const ChatHeader: React.FC = () => {
           className={styles['chat-header__add-btn']}
           onClick={handleAddClick}
           aria-label="Создать проект"
+          title="Создать новый проект"
         >
           +
         </button>
-      </div>
+      </header>
 
-      {/* Модалка создания проекта — рядом с кнопкой */}
       {isCreateProjectOpen && addBtnEl &&
         createPortal(
-          <CreateProjectModal anchorEl={addBtnEl} onClose={closeCreateProject} />,
+          <CreateProjectModal isOpen={isCreateProjectOpen} onClose={closeCreateProject} />,
           document.body
         )}
     </>

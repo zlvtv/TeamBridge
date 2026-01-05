@@ -9,6 +9,9 @@ interface ModalProps {
   maxWidth?: number;
   title?: string;
   disableEscape?: boolean;
+  disableOutsideClick?: boolean;
+  className?: string;
+  role?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -18,31 +21,48 @@ const Modal: React.FC<ModalProps> = ({
   maxWidth = 500,
   title,
   disableEscape = false,
+  disableOutsideClick = false,
+  className = '',
+  role = 'dialog',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Закрытие по клику вне
-  const handleOutsideClick = (e: React.MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  };
-
-  // Закрытие по Escape
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !disableEscape) {
-        onClose();
-      }
-    };
-
     if (isOpen) {
-      document.addEventListener('keydown', handleEsc);
-    }
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && !disableEscape) {
+          onClose();
+        }
+      };
 
-    return () => {
-      document.removeEventListener('keydown', handleEsc);
-    };
+      const handleFocus = (e: FocusEvent) => {
+        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+          const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable.length > 0) {
+            focusable[0].focus();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleEsc);
+      document.addEventListener('focus', handleFocus, true);
+
+      // Фокус на модалку при открытии
+      if (modalRef.current) {
+        modalRef.current.focus();
+      }
+
+      // Блокируем прокрутку
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.removeEventListener('keydown', handleEsc);
+        document.removeEventListener('focus', handleFocus, true);
+        document.body.style.overflow = '';
+      };
+    }
   }, [isOpen, onClose, disableEscape]);
 
   if (!isOpen) return null;
@@ -50,19 +70,20 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <div
       className={styles.overlay}
-      onClick={handleOutsideClick}
+      onClick={disableOutsideClick ? undefined : onClose}
       role="button"
       tabIndex={-1}
       aria-hidden={!isOpen}
     >
       <div
         ref={modalRef}
-        className={styles.modal}
+        className={`${styles.modal} ${className}`.trim()}
         style={{ maxWidth }}
         onClick={(e) => e.stopPropagation()}
-        role="dialog"
+        role={role}
         aria-modal="true"
         aria-label={title || 'Модальное окно'}
+        tabIndex={-1}
       >
         <button
           className={styles.close}

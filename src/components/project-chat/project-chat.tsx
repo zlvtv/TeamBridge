@@ -6,34 +6,43 @@ import styles from './project-chat.module.css';
 const ProjectChat: React.FC = () => {
   const { currentProject } = useProject();
 
-  if (!currentProject) return null;
+  if (!currentProject) {
+    return (
+      <div className={styles.chat} aria-label="Чат">
+        <div className={styles.chat__empty}>
+          <h4>Нет активного проекта</h4>
+          <p>Выберите проект или создайте новый, чтобы начать обсуждение.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.chat}>
-      <div className={styles.chat__header}>
-        <h3>Project Chat</h3>
-        <p className={styles.chat__subtitle}>
-          Discuss {currentProject.name} with your team. 
-          Messages can be linked to specific tasks.
-        </p>
-      </div>
-      
+    <div className={styles.chat} role="region" aria-label={`Чат проекта ${currentProject.name}`}>
+      <header className={styles.chat__header}>
+        <h3>Проект: {currentProject.name}</h3>
+        {currentProject.description && (
+          <p className={styles.chat__subtitle}>{currentProject.description}</p>
+        )}
+      </header>
+
       <div className={styles.chat__empty}>
         <div className={styles.chat__emptyIcon}>💬</div>
-        <h4>Start a conversation</h4>
-        <p>Messages sent here will appear in real-time for all project members.</p>
+        <h4>Начать беседу</h4>
+        <p>Сообщения видны всем участникам проекта. Можно ссылаться на задачи — #123.</p>
+
         <div className={styles.chat__features}>
           <div className={styles.feature}>
             <span className={styles.feature__icon}>🔗</span>
-            <span>Link messages to tasks</span>
+            <span>Ссылки на задачи</span>
           </div>
           <div className={styles.feature}>
             <span className={styles.feature__icon}>🤖</span>
-            <span>Automatic status notifications</span>
+            <span>Уведомления об изменениях</span>
           </div>
           <div className={styles.feature}>
             <span className={styles.feature__icon}>📁</span>
-            <span>Share files</span>
+            <span>Обмен файлами</span>
           </div>
         </div>
       </div>

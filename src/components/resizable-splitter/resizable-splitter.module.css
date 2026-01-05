@@ -1,4 +1,3 @@
-/* src/components/resizable-splitter/resizable-splitter.module.css */
 .resizable-splitter {
   width: 6px;
   background: var(--color-background);
@@ -7,9 +6,12 @@
   transition: background 0.2s ease;
   user-select: none;
   touch-action: none;
+  outline: none;
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-right: none;
 }
 
-/* Тонкая линия по центру */
 .resizable-splitter::before {
   content: '';
   position: absolute;
@@ -22,16 +24,15 @@
   opacity: 0.4;
 }
 
-/* При наведении — фон светлее/темнее, но не прозрачный */
-.resizable-splitter:hover::before {
+.resizable-splitter:hover::before,
+.resizable-splitter:focus::before {
   opacity: 0.6;
   background: var(--color-primary);
 }
 
-/* При активном перетаскивании */
 .resizable-splitter:active {
   background: var(--color-primary);
-  opacity: 0.15;
+  opacity: 0.1;
 }
 
 .resizable-splitter:active::before {
@@ -39,7 +40,6 @@
   opacity: 0.8;
 }
 
-/* Псевдо-иконка "полоски" — только в активном состоянии */
 .resizable-splitter::after {
   content: '⋮';
   position: absolute;
@@ -54,6 +54,12 @@
 }
 
 .resizable-splitter:hover::after,
-.resizable-splitter:active::after {
+.resizable-splitter:active::after,
+.resizable-splitter:focus::after {
   opacity: 0.5;
+}
+
+.resizable-splitter:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

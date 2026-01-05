@@ -6,10 +6,11 @@ import styles from './settings-panel.module.css';
 
 const SettingsPanel: React.FC = () => {
   const { theme, toggleTheme, isProfileOpen, openProfile, closeProfile } = useUI();
+
   const handleThemeClick = () => {
-    console.log('🌙 [SettingsPanel] Кнопка темы нажата');
     toggleTheme();
   };
+
   const handleProfileClick = () => {
     if (isProfileOpen) {
       closeProfile();
@@ -17,7 +18,7 @@ const SettingsPanel: React.FC = () => {
       openProfile();
     }
   };
-  
+
   return (
     <div className={styles['settings-panel']}>
       <button
@@ -31,7 +32,7 @@ const SettingsPanel: React.FC = () => {
       <button
         data-profile-button
         className={styles['settings-panel__avatar-btn']}
-        onClick={handleProfileClick} // ✅ Меняем с openProfile → на переключение
+        onClick={handleProfileClick}
         aria-label="Профиль"
       >
         👤

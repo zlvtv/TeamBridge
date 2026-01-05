@@ -1,5 +1,5 @@
 // src/components/modals/profile-modal/profile-modal.tsx
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUI } from '../../../contexts/UIContext';
 import styles from './profile-modal.module.css';
@@ -8,16 +8,14 @@ const ProfileModal: React.FC = () => {
   const { closeProfile } = useUI();
   const { user, signOut } = useAuth();
   const modalRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
 
-  // Обновляем позицию при монтировании
   useEffect(() => {
     const updatePosition = () => {
       const button = document.querySelector('[data-profile-button]') as HTMLButtonElement;
       if (button) {
         const rect = button.getBoundingClientRect();
-        const top = rect.bottom - 200; // Пример высоты модалки
+        const top = rect.bottom - 200;
         const left = rect.right + 8;
         setPosition({ top, left });
       }
@@ -28,7 +26,6 @@ const ProfileModal: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 🔥 Закрытие: по клику вне И по Esc
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const button = document.querySelector('[data-profile-button]');
@@ -42,9 +39,7 @@ const ProfileModal: React.FC = () => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeProfile();
-      }
+      if (e.key === 'Escape') closeProfile();
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -56,21 +51,12 @@ const ProfileModal: React.FC = () => {
     };
   }, [closeProfile]);
 
-  // Обработчик выхода
   const handleSignOut = async () => {
-    setIsLoading(true);
-    try {
-      await signOut();
-      closeProfile();
-    } catch (err) {
-      console.error('Ошибка при выходе:', err);
-      setIsLoading(false);
-    }
+    await signOut();
+    closeProfile();
   };
 
-  if (!position) {
-    return null;
-  }
+  if (!position) return null;
 
   return (
     <div
@@ -94,25 +80,20 @@ const ProfileModal: React.FC = () => {
         <div className={styles['profile-modal__body']}>
           <p>
             <strong>Имя:</strong>{' '}
-            {user?.full_name
-              ? user.full_name
-              : user?.username
-              ? user.username
-              : user?.email?.split('@')[0] || 'Без имени'}
+            {user?.full_name || user?.username || user?.email?.split('@')[0] || 'Аноним'}
           </p>
           <p>
-            <strong>Email:</strong> {user?.email || 'Не указан'}
+            <strong>Email:</strong> {user?.email || '—'}
           </p>
         </div>
 
         <div className={styles['profile-modal__footer']}>
-          {/* ✅ Кнопка "Закрыть" удалена */}
           <button
             className={`${styles['profile-modal__btn']} ${styles['profile-modal__btn_logout']}`}
             onClick={handleSignOut}
-            disabled={isLoading}
+            aria-label="Выйти из аккаунта"
           >
-            {isLoading ? 'Выход...' : 'Выйти'}
+            Выйти
           </button>
         </div>
       </div>

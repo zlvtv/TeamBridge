@@ -1,6 +1,6 @@
 // src/contexts/ProjectContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase'; // ✅ Добавлен импорт
+import { supabase } from '../lib/supabase';
 import { projectService } from '../services/projectService';
 import { Project, TaskStatus, CreateProjectData } from '../types/project.types';
 
@@ -27,30 +27,23 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [lastLoadedOrgId, setLastLoadedOrgId] = useState<string | null>(null);
 
   const loadProjects = useCallback(async (organizationId: string) => {
-    if (lastLoadedOrgId === organizationId) {
-      console.log('Проекты уже загружены для организации:', organizationId);
-      return;
-    }
+    if (lastLoadedOrgId === organizationId) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('Начинаем загрузку проектов для организации:', organizationId);
-      const organizationProjects = await projectService.getOrganizationProjects(organizationId);
-      console.log('Загружены проекты:', organizationProjects);
-
-      setProjects(organizationProjects);
+      const loadedProjects = await projectService.getOrganizationProjects(organizationId);
+      setProjects(loadedProjects);
       setLastLoadedOrgId(organizationId);
 
-      if (organizationProjects.length > 0 && !currentProject) {
-        setCurrentProject(organizationProjects[0]);
-      } else if (organizationProjects.length === 0) {
+      if (loadedProjects.length > 0 && !currentProject) {
+        setCurrentProject(loadedProjects[0]);
+      } else if (loadedProjects.length === 0) {
         setCurrentProject(null);
       }
     } catch (err) {
-      console.error('Ошибка загрузки проектов:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load projects');
+      setError(err instanceof Error ? err.message : 'Не удалось загрузить проекты');
       setProjects([]);
     } finally {
       setIsLoading(false);
@@ -61,10 +54,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!projectId) return;
 
     try {
-      console.log('Загружаем статусы для проекта:', projectId);
       const statuses = await projectService.getProjectStatuses(projectId);
-      console.log('Загружены статусы:', statuses);
-
       setProjectStatuses(statuses);
     } catch (err) {
       console.error('Ошибка загрузки статусов:', err);
@@ -75,59 +65,32 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const createProject = async (data: CreateProjectData) => {
     try {
       setError(null);
-      console.log('Создаем проект:', data);
       await projectService.createProject(data);
-
       await loadProjects(data.organization_id);
     } catch (err) {
-      console.error('Ошибка создания проекта:', err);
+      setError(err instanceof Error ? err.message : 'Ошибка создания проекта');
       throw err;
     }
   };
 
-  // ✅ Подписка на изменения задач в текущем проекте
+  // Подписка на изменения проекта
   useEffect(() => {
     const projectId = currentProject?.id;
     if (!projectId) return;
 
     const channel = supabase
-      .channel(`tasks-changes-${projectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'tasks',
-          filter: `project_id=eq.${projectId}`,
-        },
-        (payload) => {
-          console.log('Новая задача:', payload.new);
-          // Здесь можно обновить состояние при необходимости
-        }
-      )
+      .channel(`project-changes-${projectId}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'tasks',
-          filter: `project_id=eq.${projectId}`,
+          table: 'projects',
+          filter: `id=eq.${projectId}`,
         },
-        (payload) => {
-          console.log('Задача обновлена:', payload.new);
-          // Обнови кэш или UI, если нужно
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'tasks',
-          filter: `project_id=eq.${projectId}`,
-        },
-        (payload) => {
-          console.log('Задача удалена:', payload.old);
+        async (payload) => {
+          console.log('Проект обновлён:', payload.new);
+          // При необходимости — обновить кэш
         }
       )
       .subscribe();
@@ -135,22 +98,66 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentProject?.id]); // ✅ Зависимость — только id текущего проекта
+  }, [currentProject?.id]);
 
-  const value = {
-    projects,
-    currentProject,
-    projectStatuses,
-    isLoading,
-    error,
-    createProject,
-    setCurrentProject,
-    loadProjects,
-    loadProjectStatuses,
-  };
+  // Подписка на изменения статусов
+  useEffect(() => {
+    const projectId = currentProject?.id;
+    if (!projectId) return;
+
+    const channel = supabase
+      .channel(`status-changes-${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'task_statuses',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => loadProjectStatuses(projectId)
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'task_statuses',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => loadProjectStatuses(projectId)
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'task_statuses',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => loadProjectStatuses(projectId)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentProject?.id, loadProjectStatuses]);
 
   return (
-    <ProjectContext.Provider value={value}>
+    <ProjectContext.Provider
+      value={{
+        projects,
+        currentProject,
+        projectStatuses,
+        isLoading,
+        error,
+        createProject,
+        setCurrentProject,
+        loadProjects,
+        loadProjectStatuses,
+      }}
+    >
       {children}
     </ProjectContext.Provider>
   );
@@ -158,8 +165,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
 export const useProject = () => {
   const context = useContext(ProjectContext);
-  if (context === undefined) {
-    throw new Error('useProject must be used within a ProjectProvider');
-  }
+  if (!context) throw new Error('useProject must be used within ProjectProvider');
   return context;
 };

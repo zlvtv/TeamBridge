@@ -1,4 +1,3 @@
-// src/pages/Dashboard/Dashboard.tsx
 import React from 'react';
 import OrgIconPanel from '../../components/org-icon-panel/org-icon-panel';
 import SettingsPanel from '../../components/settings-panel/settings-panel';
@@ -7,7 +6,7 @@ import ChatHeader from '../../components/chat-header/chat-header';
 import ProjectChat from '../../components/project-chat/project-chat';
 import TaskBoard from '../../components/task-board/task-board';
 import ResizableSplitter from '../../components/resizable-splitter/resizable-splitter';
-import EmptyDashboard from '../../components/empty-dashboard/EmptyDashboard'; // ✅ Новый компонент
+import EmptyDashboard from '../../components/empty-dashboard/EmptyDashboard';
 import styles from './Dashboard.module.css';
 import { useUI } from '../../contexts/UIContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -30,7 +29,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={`${styles.dashboard} ${theme}`}>
-      {/* ✅ Панели: снизу, но выровнены по вертикали */}
       <div className={styles['dashboard__panels-container']}>
         <OrgIconPanel />
         <SettingsPanel />
@@ -43,11 +41,7 @@ const Dashboard: React.FC = () => {
         {!isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentProject ? (
-                <ProjectChat />
-              ) : (
-                <div className={styles['chat-placeholder']}>Выберите проект</div>
-              )}
+              {currentProject ? <ProjectChat /> : <div className={styles['chat-placeholder']}>Выберите проект</div>}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>
