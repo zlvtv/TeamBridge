@@ -1,4 +1,3 @@
-// src/types/project.types.ts
 export interface Project {
   id: string;
   name: string;
@@ -37,7 +36,6 @@ export interface Task {
   created_at: string;
   updated_at: string;
   
-  // Joined fields
   status?: TaskStatus;
   project?: Project;
   author_profile?: {
@@ -62,7 +60,6 @@ export interface Message {
   created_at: string;
   updated_at: string;
   
-  // Joined fields
   author_profile?: {
     username: string;
     full_name?: string;

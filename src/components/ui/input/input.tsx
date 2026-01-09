@@ -7,6 +7,7 @@ type InputSize = 'small' | 'medium';
 interface InputProps {
   type?: InputType;
   placeholder?: string;
+  fullWidth?: boolean;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
@@ -27,6 +28,7 @@ const Input: React.FC<InputProps> = ({
   value,
   onChange,
   required = false,
+  fullWidth = false,
   disabled = false,
   className = '',
   name,

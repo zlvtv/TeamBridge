@@ -1,4 +1,3 @@
-// src/components/main-header/main-header.tsx
 import React from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useUI } from '../../contexts/UIContext';
@@ -20,8 +19,10 @@ const MainHeader: React.FC = () => {
     <>
       <header className={styles['main-header']}>
         <h1 className={styles['main-header__title']}>
-          {currentOrganization?.name || 'Организация'}
+          {currentOrganization ? currentOrganization.name : 'Выберите организацию'}
         </h1>
+
+        {currentOrganization && (
         <button
           ref={setInfoBtnEl}
           className={styles['main-header__info-btn']}
@@ -29,7 +30,7 @@ const MainHeader: React.FC = () => {
           aria-label="Информация об организации"
         >
           ℹ️
-        </button>
+        </button>)}
       </header>
 
       {isOrgInfoOpen && infoBtnEl &&

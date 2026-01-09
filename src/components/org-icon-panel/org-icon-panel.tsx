@@ -1,4 +1,3 @@
-// src/components/org-icon-panel/org-icon-panel.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';

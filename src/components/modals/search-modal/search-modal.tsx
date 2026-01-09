@@ -1,4 +1,3 @@
-// src/components/modals/search-modal/search-modal.tsx
 import React, { useState, useEffect } from 'react';
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { useUI } from '../../../contexts/UIContext';

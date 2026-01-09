@@ -1,4 +1,3 @@
-// src/components/task/TaskBoard/TaskBoard.tsx
 import React from 'react';
 import { useProject } from '../../contexts/ProjectContext';
 import TaskColumn from '../task-column/task-column';

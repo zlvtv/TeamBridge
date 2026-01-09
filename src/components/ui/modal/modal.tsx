@@ -1,4 +1,3 @@
-// src/components/ui/modal/modal.tsx
 import React, { useEffect, useRef } from 'react';
 import styles from './modal.module.css';
 
@@ -49,12 +48,10 @@ const Modal: React.FC<ModalProps> = ({
       document.addEventListener('keydown', handleEsc);
       document.addEventListener('focus', handleFocus, true);
 
-      // Фокус на модалку при открытии
       if (modalRef.current) {
         modalRef.current.focus();
       }
 
-      // Блокируем прокрутку
       document.body.style.overflow = 'hidden';
 
       return () => {

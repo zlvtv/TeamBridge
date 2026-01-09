@@ -90,6 +90,18 @@
   margin-top: 16px;
 }
 
+.inviteLink {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.error {
+  color: #e3342f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -100,3 +112,4 @@
     transform: translateY(0);
   }
 }
+

@@ -1,4 +1,3 @@
-// src/pages/InvitePage.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -21,7 +20,6 @@ const InvitePage = () => {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Перенаправить на login с сохранением токена
         navigate(`/login?invite=${token}`);
         return;
       }
@@ -50,7 +48,7 @@ const InvitePage = () => {
     <div className={styles.container}>
       {status === 'success' && (
         <>
-          <h1>✅ Успешно!</h1>
+          <h1>Успешно!</h1>
           <p>Вы вступили в организацию.</p>
           <Button onClick={() => navigate('/dashboard')}>Перейти в организацию</Button>
         </>
@@ -58,7 +56,7 @@ const InvitePage = () => {
 
       {status === 'expired' && (
         <>
-          <h1>❌ Приглашение истекло</h1>
+          <h1>Приглашение истекло</h1>
           <p>Срок действия пригласительной ссылки истёк.</p>
           <Button onClick={() => navigate('/')}>На главную</Button>
         </>
@@ -66,7 +64,7 @@ const InvitePage = () => {
 
       {status === 'error' && (
         <>
-          <h1>❌ Ошибка</h1>
+          <h1>Ошибка</h1>
           <p>Приглашение недействительно.</p>
           <Button onClick={() => navigate('/')}>На главную</Button>
         </>

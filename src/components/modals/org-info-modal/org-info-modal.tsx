@@ -1,8 +1,8 @@
-// src/components/modals/org-info-modal/org-info-modal.tsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../ui/button/button';
+import Input from '../../ui/input/input';
 import styles from './org-info-modal.module.css';
 
 interface OrgInfoModalProps {
@@ -12,9 +12,15 @@ interface OrgInfoModalProps {
 
 const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const { currentOrganization, deleteOrganization, regenerateInviteCode } = useOrganization();
+  const { currentOrganization, leaveOrganization, deleteOrganization, createOrganizationInvite } = useOrganization();
   const { user } = useAuth();
-  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isOwner = currentOrganization?.created_by === user?.id;
 
@@ -44,23 +50,60 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   if (!currentOrganization) return null;
 
-  const handleDeleteOrg = async () => {
-    if (window.confirm('Вы уверены, что хотите удалить организацию? Все данные будут потеряны.')) {
-      await deleteOrganization(currentOrganization.id);
+  const handleLeaveOrg = async () => {
+    if (!window.confirm('Вы уверены, что хотите выйти из организации?')) return;
+
+    setIsLeaving(true);
+    try {
+      await leaveOrganization(currentOrganization.id);
       onClose();
+    } catch (err: any) {
+      alert('Ошибка выхода: ' + err.message);
+    } finally {
+      setIsLeaving(false);
     }
   };
 
-  const handleRegenerateCode = async () => {
-    if (window.confirm('Сгенерировать новый код? Старый станет недействительным.')) {
-      setIsRegenerating(true);
-      try {
-        await regenerateInviteCode(currentOrganization.id);
-      } catch (err) {
-        alert('Ошибка обновления кода: ' + (err as Error).message);
-      } finally {
-        setIsRegenerating(false);
-      }
+  const handleDeleteOrg = async () => {
+    if (!window.confirm('Вы уверены, что хотите удалить организацию? Все данные будут потеряны.')) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteOrganization(currentOrganization.id);
+      onClose();
+    } catch (err: any) {
+      alert('Ошибка удаления: ' + err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleGenerateInvite = async () => {
+  if (!currentOrganization) return;
+
+  setIsGenerating(true);
+  setError(null);
+
+  try {
+    const data = await createOrganizationInvite(currentOrganization.id);
+
+    if (data && data.invite_link) {
+      setInviteLink(data.invite_link);
+      setExpiresAt(data.expires_at);
+    } else {
+      setError('Не удалось получить ссылку');
+    }
+  } catch (err: any) {
+    setError(err.message || 'Не удалось создать приглашение');
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
+  const handleCopyLink = () => {
+    if (inviteLink) {
+      navigator.clipboard.writeText(inviteLink);
+      alert('Ссылка скопирована в буфер обмена');
     }
   };
 
@@ -88,32 +131,20 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
         </div>
       )}
 
-      {isOwner && (
-        <div className={styles.section}>
-          <strong>Код приглашения:</strong>
-          <div className={styles.inviteCode}>
-            <code>{currentOrganization.invite_code || '—'}</code>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={handleRegenerateCode}
-              disabled={!currentOrganization.is_invite_code_active || isRegenerating}
-            >
-              {isRegenerating ? 'Обновление...' : 'Обновить'}
-            </Button>
-          </div>
-        </div>
-      )}
-
       <div className={styles.section}>
         <strong>Участники ({currentOrganization.organization_members?.length || 1}):</strong>
         <div className={styles.members}>
           {currentOrganization.organization_members?.map((member) => (
             <div key={member.id} className={styles.member}>
-              <div className={styles.avatar} title={member.user?.full_name || 'Участник'}>
-                {member.user?.full_name?.charAt(0).toUpperCase() || 'U'}
+              <div
+                className={styles.avatar}
+                title={member.user?.full_name || `@${member.user?.username}`}
+              >
+                {member.user?.full_name?.charAt(0).toUpperCase() ||
+                 member.user?.username?.charAt(0).toUpperCase() ||
+                 'U'}
               </div>
-              <span>{member.user?.full_name || 'Участник'}</span>
+              <span>{member.user?.full_name || `@${member.user?.username}`}</span>
               <span className={styles.role}>
                 {member.role === 'owner' ? 'Владелец' : 'Участник'}
               </span>
@@ -121,20 +152,61 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
           ))}
         </div>
       </div>
-      <Button
-        variant="primary"
-        size="small"
-        onClick={() => setIsInviteModalOpen(true)}
-      >
-        Пригласить
-      </Button>
+
+      {isOwner && (
+        <div className={styles.section}>
+          <strong>Пригласить участников:</strong>
+          {inviteLink ? (
+            <div className={styles.inviteLink}>
+              <Input
+                value={inviteLink}
+                readOnly
+                fullWidth
+                size="small"
+                style={{ marginBottom: '8px' }}
+              />
+              <Button variant="secondary" size="small" onClick={handleCopyLink}>
+                Скопировать ссылку
+              </Button>
+              {inviteLink && expiresAt && (
+  <div className={styles.inviteInfo}>
+    <small>
+      Ссылка действительна 1 час.
+  </small>
+</div>
+)}
+            </div>
+          ) : (
+            <Button
+              variant="primary"
+              size="small"
+              onClick={handleGenerateInvite}
+              disabled={isGenerating}
+            >
+              {isGenerating ? 'Создание...' : 'Создать ссылку-приглашение'}
+            </Button>
+          )}
+          {error && <div className={styles.error}>{error}</div>}
+        </div>
+      )}
+
       <div className={styles.actions}>
-        <Button variant="secondary" onClick={() => alert('Функция "Выйти" пока не реализована')}>
-          Выйти из организации
+        <Button
+          variant="secondary"
+          onClick={handleLeaveOrg}
+          disabled={isLeaving || isOwner}
+          title={isOwner ? 'Владелец не может выйти. Удалите организацию вместо этого.' : undefined}
+        >
+          {isLeaving ? 'Выход...' : 'Выйти из организации'}
         </Button>
+
         {isOwner && (
-          <Button variant="danger" onClick={handleDeleteOrg}>
-            Удалить организацию
+          <Button
+            variant="danger"
+            onClick={handleDeleteOrg}
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Удаление...' : 'Удалить организацию'}
           </Button>
         )}
       </div>

@@ -1,6 +1,5 @@
 /* src/styles/variables.css */
 :root {
-  /* Цвета */
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-secondary: #64748b;
@@ -14,7 +13,6 @@
   --color-danger: #ef4444;
   --border-color: #e2e8f0;
 
-  /* Отступы */
   --space-xs: 4px;
   --space-s: 8px;
   --space-m: 16px;
@@ -22,24 +20,19 @@
   --space-xl: 32px;
   --space-2xl: 48px;
 
-  /* Скругления */
   --border-radius: 8px;
   --border-radius-md: 12px;
   --border-radius-lg: 16px;
 
-  /* Тени */
   --shadow-small: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-large: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 
-  /* Переходы */
   --transition: 0.2s ease-in-out;
 
-  /* Размеры */
   --max-content-width: 1200px;
 }
 
-/* Темная тема */
 .dark {
   --color-primary: #3b82f6;
   --color-primary-hover: #2563eb;

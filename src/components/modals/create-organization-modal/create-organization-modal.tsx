@@ -11,16 +11,23 @@ interface CreateOrganizationModalProps {
 }
 
 const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpen, onClose }) => {
-  const { createOrganization, setCurrentOrganization, organizations } = useOrganization();
+  const { createOrganization } = useOrganization();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Сброс при открытии и закрытии
   useEffect(() => {
     if (isOpen) {
+      // При открытии — сбрасываем всё
       setName('');
       setDescription('');
+      setError(null);
+      setIsCreating(false); // ✅ Важно: сбрасываем состояние загрузки
+    } else {
+      // При закрытии — тоже можно сбросить (на случай, если было принудительное закрытие)
+      setIsCreating(false);
       setError(null);
     }
   }, [isOpen]);
@@ -32,29 +39,25 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       return;
     }
 
-    setIsLoading(true);
+    setIsCreating(true);
     setError(null);
 
     try {
-      await createOrganization({ name: name.trim(), description: description.trim() });
+      await createOrganization({
+        name: name.trim(),
+        description: description.trim(),
+      });
 
-      setTimeout(() => {
-        const newOrg = organizations.find((org) => org.name === name.trim());
-        if (newOrg) {
-          setCurrentOrganization(newOrg);
-        }
-      }, 100);
-
+      // ✅ Успешно создана — закрываем
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать организацию');
-    } finally {
-      setIsLoading(false);
+      setIsCreating(false); // ✅ Сбрасываем, если ошибка
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Создать организацию">
+    <Modal isOpen={isOpen} onClose={onClose} title={isCreating ? "Создание организации..." : "Создать организацию"}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.field}>
           <label htmlFor="org-name" className={styles.label}>Название организации</label>
@@ -66,6 +69,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             required
             autoFocus
             error={error}
+            disabled={isCreating}
           />
           {error && <div className={styles.errorMessage}>{error}</div>}
         </div>
@@ -78,17 +82,25 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             textarea
+            disabled={isCreating}
           />
         </div>
 
         <div className={styles.actions}>
-          <Button variant="secondary" onClick={onClose} type="button">
+          <Button variant="secondary" onClick={onClose} type="button" disabled={isCreating}>
             Закрыть
           </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
-            {isLoading ? 'Создание...' : 'Создать'}
+          <Button type="submit" variant="primary" disabled={isCreating}>
+            {isCreating ? 'Создание...' : 'Создать'}
           </Button>
         </div>
+
+        {/* Фидбэк во время создания */}
+        {isCreating && (
+          <div className={styles.creatingFeedback}>
+            <small>Создаём организацию…</small>
+          </div>
+        )}
       </form>
     </Modal>
   );

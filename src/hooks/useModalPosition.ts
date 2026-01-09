@@ -1,4 +1,3 @@
-// src/hooks/useModalPosition.ts
 import { useState, useEffect, useRef } from 'react';
 
 interface UseModalPositionProps {

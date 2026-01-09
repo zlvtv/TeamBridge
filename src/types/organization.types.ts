@@ -1,13 +1,18 @@
+export interface UserProfile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  username: string | null;
+  avatar_url: string | null;
+}
+
 export interface OrganizationMember {
   id: string;
   organization_id: string;
   user_id: string;
   role: 'owner' | 'admin' | 'member';
   joined_at: string;
-  user: {
-    full_name: string;
-    username: string;
-  };
+  user: UserProfile;
 }
 
 export interface Organization {

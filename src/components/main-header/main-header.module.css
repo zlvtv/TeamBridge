@@ -13,10 +13,12 @@
   box-sizing: border-box;
 }
 
+
 .main-header__title {
   font-size: 1.5rem;
   margin: 0;
-  color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .main-header {
@@ -36,7 +38,8 @@
 .main-header__title {
   font-size: 1.5rem;
   margin: 0;
-  color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .main-header__info-btn {
@@ -58,4 +61,8 @@
 .main-header__info-btn:hover {
   background-color: var(--color-text-light);
   opacity: 0.2;
+}
+
+.main-header__title[title] {
+  cursor: help;
 }

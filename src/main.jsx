@@ -1,5 +1,3 @@
-// src/main.jsx
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './styles/globals.css';
@@ -15,7 +13,6 @@ const handleAuthCallback = () => {
 
     if (accessToken) {
       if (type === 'recovery') {
-        // ✅ Сохраняем токен в localStorage и редиректим
         localStorage.setItem('auth_recovery_token', accessToken);
         window.location.href = '/reset-password';
         return true;

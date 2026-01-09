@@ -1,4 +1,3 @@
-// src/pages/Confirm/Confirm.tsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -25,7 +24,7 @@ const Confirm: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        <h1 className={styles.title}>✅ Подтверждение завершено</h1>
+        <h1 className={styles.title}>Подтверждение завершено</h1>
         <p className={styles.subtitle}>Email успешно подтверждён.</p>
         <button className={styles.submit} onClick={handleContinue}>
           Продолжить

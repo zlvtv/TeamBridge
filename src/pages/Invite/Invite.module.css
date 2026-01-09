@@ -1,0 +1,51 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: var(--color-background);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.container h1 {
+  font-size: 1.75rem;
+  margin: 0 0 12px 0;
+  color: var(--color-primary);
+}
+
+.container p {
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+  max-width: 400px;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:first-of-type {
+  background: var(--color-primary);
+  color: white;
+}
+
+button:not(:first-of-type) {
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+}

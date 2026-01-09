@@ -1,4 +1,3 @@
-// src/utils/formatCount.ts
 export function formatCount(count: number, singular: string, few: string, many: string): string {
   const lastDigit = count % 10;
   const lastTwoDigits = count % 100;

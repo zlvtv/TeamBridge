@@ -1,4 +1,3 @@
-// src/components/settings-panel/settings-panel.tsx
 import React, { useRef } from 'react';
 import { useUI } from '../../contexts/UIContext';
 import ProfileModal from '../../components/modals/profile-modal/profile-modal';

@@ -1,4 +1,3 @@
-// src/components/chat-header/chat-header.tsx
 import React from 'react';
 import { useProject } from '../../contexts/ProjectContext';
 import { useUI } from '../../contexts/UIContext';

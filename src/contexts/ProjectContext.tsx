@@ -1,4 +1,3 @@
-// src/contexts/ProjectContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { projectService } from '../services/projectService';
@@ -73,7 +72,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Подписка на изменения проекта
   useEffect(() => {
     const projectId = currentProject?.id;
     if (!projectId) return;
@@ -90,7 +88,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
         async (payload) => {
           console.log('Проект обновлён:', payload.new);
-          // При необходимости — обновить кэш
         }
       )
       .subscribe();
@@ -100,7 +97,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [currentProject?.id]);
 
-  // Подписка на изменения статусов
   useEffect(() => {
     const projectId = currentProject?.id;
     if (!projectId) return;

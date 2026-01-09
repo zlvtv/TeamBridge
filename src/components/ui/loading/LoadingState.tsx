@@ -1,4 +1,3 @@
-// src/components/ui/loading/LoadingState.tsx
 import React from 'react';
 import styles from './LoadingState.module.css';
 

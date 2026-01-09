@@ -1,4 +1,3 @@
-// src/components/modals/profile-modal/profile-modal.tsx
 import React, { useRef, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUI } from '../../../contexts/UIContext';

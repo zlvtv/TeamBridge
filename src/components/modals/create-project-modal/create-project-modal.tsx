@@ -1,4 +1,3 @@
-// src/components/modals/create-project-modal/create-project-modal.tsx
 import React, { useState } from 'react';
 import { useProject } from '../../../contexts/ProjectContext';
 import { useOrganization } from '../../../contexts/OrganizationContext';

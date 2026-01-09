@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { UserProfile, AuthContextType } from '../types/auth.types';
@@ -75,6 +74,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isSettingStateRef.current = true;
       setState({ user, isLoading: false, isInitialized: true });
       isSettingStateRef.current = false;
+
+      if (user) {
+        const savedToken = localStorage.getItem('invite_token');
+        if (savedToken) {
+          localStorage.removeItem('invite_token');
+          window.dispatchEvent(new CustomEvent('invite_after_login', { detail: savedToken }));
+        }
+      }
     };
 
     const processSession = async (session: any, source: string) => {

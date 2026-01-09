@@ -7,6 +7,28 @@ import {
 } from '../types/organization.types';
 
 export const organizationService = {
+  async getOrganizationsLite(): Promise<Organization[]> {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error('Не авторизован');
+
+    const { data, error } = await supabase
+      .from('organization_members')
+      .select(`
+        organization:organizations!inner(
+          id, 
+          name, 
+          description, 
+          created_by, 
+          created_at, 
+          updated_at
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+
+    return data.map((dm) => dm.organization);
+  },
   async getUserOrganizations(): Promise<OrganizationWithMembers[]> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -16,15 +38,53 @@ export const organizationService = {
     const { data, error } = await supabase.rpc('get_user_organizations_with_members');
     if (error) throw new Error(`Ошибка загрузки организаций: ${error.message}`);
 
-    return (data as OrganizationWithMembers[]) || [];
+    const orgMap = new Map<string, OrganizationWithMembers>();
+
+    (data as any[]).forEach((row) => {
+      const memberData = row.member_data;
+
+      if (!orgMap.has(row.id)) {
+        orgMap.set(row.id, {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          created_by: row.created_by,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          organization_members: [],
+        });
+      }
+
+      const org = orgMap.get(row.id)!;
+      org.organization_members.push({
+        id: memberData.id,
+        organization_id: row.id,
+        user_id: memberData.user_id,
+        role: memberData.role,
+        joined_at: row.created_at, 
+        user: {
+          id: memberData.user_id,
+          full_name: memberData.full_name,
+          email: null, 
+          username: memberData.username,
+          avatar_url: memberData.avatar_url,
+        },
+      });
+    });
+
+    return Array.from(orgMap.values());
   },
 
-  async joinOrganization(inviteCode: string): Promise<string> {
-    console.warn('joinOrganization устарел — используйте accept_organization_invite');
-    return '';
-  },
+  async joinOrganization(inviteToken: string): Promise<string> {
+  const { data, error } = await supabase.rpc('join_organization_by_invite', {
+    invite_token: inviteToken,
+  });
 
-  async createOrganization(data: CreateOrganizationData): Promise<Organization> {
+  if (error) throw error;
+  return data;
+},
+
+  async createOrganization(data: CreateOrganizationData): Promise<OrganizationWithMembers> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Пользователь не аутентифицирован');
 
@@ -37,7 +97,19 @@ export const organizationService = {
 
     const { data: org, error: fetchError } = await supabase
       .from('organizations')
-      .select('*')
+      .select(`
+        *,
+        organization_members (
+          id,
+          role,
+          user_id,
+          users (
+            id,
+            full_name,
+            email
+          )
+        )
+      `)
       .eq('id', orgId)
       .single();
 
@@ -49,10 +121,17 @@ export const organizationService = {
         created_by: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        organization_members: [],
       };
     }
 
-    return { ...org, organization_members: [] } as Organization;
+    return {
+      ...org,
+      organization_members: (org.organization_members || []).map((m: any) => ({
+        ...m,
+        user: m.users,
+      })),
+    } as OrganizationWithMembers;
   },
 
   async createOrganizationInvite(organizationId: string): Promise<OrganizationInvite> {
@@ -77,4 +156,15 @@ export const organizationService = {
 
     if (error) throw new Error(`Ошибка удаления: ${error.message}`);
   },
+
+  async leaveOrganization(organizationId: string): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Не авторизован');
+
+  const { error } = await supabase.rpc('leave_organization', {
+    org_id: organizationId,
+  });
+
+  if (error) throw new Error(`Ошибка выхода: ${error.message}`);
+},
 };

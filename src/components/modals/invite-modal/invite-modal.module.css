@@ -1,0 +1,78 @@
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-medium);
+  width: 420px;
+  padding: 24px;
+  font-size: 14px;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInUp 0.2s ease;
+}
+
+.modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.link input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: monospace;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.link input::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+.error {
+  color: var(--color-error);
+  font-size: 13px;
+  padding: 8px 12px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--color-error);
+}
+
+p {
+  margin: 8px 0;
+  color: var(--color-text-light);
+  font-size: 13px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
