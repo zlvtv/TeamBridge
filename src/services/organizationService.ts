@@ -158,13 +158,11 @@ export const organizationService = {
   },
 
   async leaveOrganization(organizationId: string): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Не авторизован');
+  const { error } = await supabase
+    .from('organization_members')
+    .delete()
+    .match({ user_id: (await supabase.auth.getUser()).data.user?.id, organization_id: organizationId });
 
-  const { error } = await supabase.rpc('leave_organization', {
-    org_id: organizationId,
-  });
-
-  if (error) throw new Error(`Ошибка выхода: ${error.message}`);
+  if (error) throw error;
 },
 };

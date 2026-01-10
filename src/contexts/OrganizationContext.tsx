@@ -92,7 +92,6 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     await organizationService.createOrganization(data);
     const orgs = await refreshOrganizations();
 
-    // Получаем user_id до вызова find
     const { data: { user } } = await supabase.auth.getUser();
     const newOrg = orgs.find(org => org.created_by === user?.id) ?? orgs[0];
 

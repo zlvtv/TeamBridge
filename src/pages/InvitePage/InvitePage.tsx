@@ -1,6 +1,4 @@
-// src/pages/InvitePage/InvitePage.tsx
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,106 +6,77 @@ import { useAuth } from '../../contexts/AuthContext';
 const InvitePage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const { joinOrganization, refreshOrganizations, setCurrentOrganization } = useOrganization();
-  const { user, isInitialized, isLoading: isAuthLoading } = useAuth();
+  const { user, isInitialized } = useAuth();
   const navigate = useNavigate();
 
-  // Обработка после входа
-  useEffect(() => {
-    const handleInviteAfterLogin = (e: CustomEvent) => {
-      navigate(`/invite/${e.detail}`, { replace: true });
-    };
-
-    window.addEventListener('invite_after_login', handleInviteAfterLogin as any);
-    return () => {
-      window.removeEventListener('invite_after_login', handleInviteAfterLogin as any);
-    };
-  }, [navigate]);
+  const hasBeenCalled = useRef(false);
 
   useEffect(() => {
-    let hasBeenCalled = false;
+    if (hasBeenCalled.current || !token) return;
+    if (!isInitialized) return; 
 
-    const acceptInvite = async () => {
-      if (hasBeenCalled) return;
-      hasBeenCalled = true;
-
-      if (!isInitialized || isAuthLoading) return;
-
-      if (!user) {
-        if (token) localStorage.setItem('invite_token', token);
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      if (!token) {
-        navigate('/');
-        return;
-      }
-
+    if (!user) {
+      console.log('[InvitePage] Пользователь не авторизован — сохраняем токен и на /login');
       try {
-        // 1. Вступаем
+        localStorage.setItem('invite_token', token);
+      } catch (e) {
+        console.error('[InvitePage] Не удалось сохранить токен', e);
+      }
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    hasBeenCalled.current = true;
+    const acceptInvite = async () => {
+      try {
+        console.log('🔧 [InvitePage] Вызов joinOrganization с токеном:', token);
         const orgId = await joinOrganization(token);
 
-        // 2. Обновляем список (полностью)
-        const fullOrgs = await refreshOrganizations();
+        const orgs = await refreshOrganizations();
+        const org = orgs.find(o => o.id === orgId);
 
-        // 3. Ищем организацию
-        const newOrg = fullOrgs.find(org => org.id === orgId);
-
-        if (newOrg) {
-          // 4. Устанавливаем как текущую
-          setCurrentOrganization(newOrg);
-          // 5. Переходим на дашборд
+        if (org) {
+          setCurrentOrganization(org);
           navigate(`/organization/${orgId}`, { replace: true });
         } else {
-          // Если не нашли — возможно, задержка, но мы уже в ней
-          navigate('/');
+          console.warn('Организация не найдена после вступления');
+          navigate('/dashboard', { replace: true });
         }
       } catch (err: any) {
         const message = err.message || String(err);
 
-        // Уже состоит — просто обновим и переключим
-        if (message.includes('duplicate key') || message.includes('уже состоит')) {
-          const fullOrgs = await refreshOrganizations();
-          const existingOrg = fullOrgs.find(org => org.id === err.orgId) || fullOrgs[0];
-          if (existingOrg) {
-            setCurrentOrganization(existingOrg);
-            navigate(`/organization/${existingOrg.id}`, { replace: true });
+        if (
+          message.includes('duplicate key') ||
+          message.includes('уже состоит')
+        ) {
+          const orgs = await refreshOrganizations();
+          const org = orgs[0] || null;
+          if (org) {
+            setCurrentOrganization(org);
+            navigate(`/organization/${org.id}`, { replace: true });
           } else {
             navigate('/');
           }
-        } else if (message.includes('Приглашение недействительно')) {
-          // Может быть уже принято
-          const fullOrgs = await refreshOrganizations();
-          const existingOrg = fullOrgs[0] || null;
-          if (existingOrg) {
-            setCurrentOrganization(existingOrg);
-            navigate(`/organization/${existingOrg.id}`, { replace: true });
-          } else {
-            navigate('/');
-          }
+        } else if (
+          message.includes('invalid') ||
+          message.includes('not found')
+        ) {
+          alert('Приглашение недействительно');
+          navigate('/', { replace: true });
         } else {
-          console.error('❌ Ошибка вступления:', err);
-          navigate('/');
+          alert('Ошибка вступления: ' + message);
+          navigate('/dashboard', { replace: true });
         }
       }
     };
 
     acceptInvite();
-  }, [
-    token,
-    joinOrganization,
-    refreshOrganizations,
-    setCurrentOrganization,
-    navigate,
-    user,
-    isInitialized,
-    isAuthLoading,
-  ]);
+  }, [token, user, isInitialized, navigate, joinOrganization, refreshOrganizations, setCurrentOrganization]);
 
   return (
     <div style={{ textAlign: 'center', padding: '40px' }}>
       <h2>Присоединяемся к организации...</h2>
-      <p>Не закрывайте страницу</p>
+      <p>Ожидание авторизации...</p>
     </div>
   );
 };

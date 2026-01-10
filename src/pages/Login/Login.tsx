@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 import styles from './Login.module.css';
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -9,16 +11,46 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if (state?.invite_token) {
+      console.log('📬 [Login] Получен invite_token из state:', state.invite_token);
+      try {
+        localStorage.setItem('invite_token', state.invite_token);
+      } catch (e) {
+        console.error('[Login] Не удалось сохранить в localStorage', e);
+      }
+    }
+  }, [state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🔐 [Login] handleSubmit вызван');
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
       await signIn(email.trim(), password);
-      navigate('/dashboard');
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('Не удалось получить пользователя');
+      }
+
+      const savedToken = localStorage.getItem('invite_token');
+      console.log('[Login] Проверка invite_token после входа:', savedToken);
+
+      if (savedToken) {
+        localStorage.removeItem('invite_token');
+        console.log('[Login] Отправляю invite_after_login:', savedToken);
+        window.dispatchEvent(new CustomEvent('invite_after_login', { detail: savedToken }));
+      } else {
+        console.log('[Login] Нет invite_token — переходим на /dashboard');
+        navigate('/dashboard');
+      }
     } catch (err: any) {
+      console.error('[Login] Ошибка входа:', err);
       setError(translateError(err.message));
     } finally {
       setIsLoading(false);
