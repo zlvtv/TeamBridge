@@ -42,7 +42,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     try {
       await onConfirm();
     } catch (err) {
-      console.error('Ошибка при подтверждении:', err);
       alert('Ошибка: ' + (err as Error).message);
     } finally {
       setIsConfirming(false);

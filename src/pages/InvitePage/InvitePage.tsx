@@ -16,11 +16,11 @@ const InvitePage: React.FC = () => {
     if (!isInitialized) return; 
 
     if (!user) {
-      console.log('[InvitePage] Пользователь не авторизован — сохраняем токен и на /login');
+      console.log('Пользователь не авторизован — сохраняем токен и на /login');
       try {
         localStorage.setItem('invite_token', token);
       } catch (e) {
-        console.error('[InvitePage] Не удалось сохранить токен', e);
+        console.error('Не удалось сохранить токен', e);
       }
       navigate('/login', { replace: true });
       return;
@@ -29,7 +29,6 @@ const InvitePage: React.FC = () => {
     hasBeenCalled.current = true;
     const acceptInvite = async () => {
       try {
-        console.log('🔧 [InvitePage] Вызов joinOrganization с токеном:', token);
         const orgId = await joinOrganization(token);
 
         const orgs = await refreshOrganizations();

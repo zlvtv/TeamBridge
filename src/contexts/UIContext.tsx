@@ -85,12 +85,11 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const openCreateProject = useCallback(() => setIsCreateProjectOpen(true), []);
   const closeCreateProject = useCallback(() => setIsCreateProjectOpen(false), []);
   const openCreateOrgModal = useCallback(() => {
-  console.log('✅ openCreateOrgModal вызван');
   setIsCreateOrgModalOpen(true);
 }, []);
 
 useEffect(() => {
-  console.log('🎯 isCreateOrgModalOpen изменился:', isCreateOrgModalOpen);
+  console.log('isCreateOrgModalOpen изменился:', isCreateOrgModalOpen);
 }, [isCreateOrgModalOpen]);
   const closeCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(false), []);
   const toggleFullscreen = useCallback(() => {

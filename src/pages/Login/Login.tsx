@@ -15,17 +15,15 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (state?.invite_token) {
-      console.log('📬 [Login] Получен invite_token из state:', state.invite_token);
       try {
         localStorage.setItem('invite_token', state.invite_token);
       } catch (e) {
-        console.error('[Login] Не удалось сохранить в localStorage', e);
+        console.error('Не удалось сохранить в localStorage', e);
       }
     }
   }, [state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('🔐 [Login] handleSubmit вызван');
     e.preventDefault();
     setError(null);
     setIsLoading(true);
@@ -39,14 +37,11 @@ const Login: React.FC = () => {
       }
 
       const savedToken = localStorage.getItem('invite_token');
-      console.log('[Login] Проверка invite_token после входа:', savedToken);
 
       if (savedToken) {
         localStorage.removeItem('invite_token');
-        console.log('[Login] Отправляю invite_after_login:', savedToken);
         window.dispatchEvent(new CustomEvent('invite_after_login', { detail: savedToken }));
       } else {
-        console.log('[Login] Нет invite_token — переходим на /dashboard');
         navigate('/dashboard');
       }
     } catch (err: any) {

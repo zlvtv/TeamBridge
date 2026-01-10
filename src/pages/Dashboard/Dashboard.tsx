@@ -31,7 +31,7 @@ const Dashboard: React.FC = () => {
   }, [openCreateOrgModal, location.state]);
 
   useEffect(() => {
-    console.log('🔄 isCreateOrgModalOpen изменился:', isCreateOrgModalOpen);
+    console.log('isCreateOrgModalOpen изменился:', isCreateOrgModalOpen);
   }, [isCreateOrgModalOpen]);
 
   if (orgLoading) {

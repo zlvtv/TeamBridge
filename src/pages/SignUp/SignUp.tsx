@@ -14,6 +14,19 @@ const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
 
+  const validateUsername = (username: string): string | null => {
+    const trimmed = username.trim();
+
+    if (trimmed.length === 0) return 'Имя пользователя обязательно';
+    if (trimmed.length < 3) return 'Имя пользователя должно быть не менее 3 символов';
+    if (trimmed.length > 15) return 'Имя пользователя не должно превышать 15 символов';
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+      return 'Имя пользователя может содержать только буквы, цифры, дефис и подчёркивание';
+    }
+
+    return null;
+  };
+
   const checkIfEmailExists = async (email: string): Promise<boolean> => {
     const { data, error } = await supabase.rpc('is_email_registered', { user_email: email });
     if (error) return false;
@@ -26,6 +39,13 @@ const SignUp: React.FC = () => {
     setIsLoading(true);
     setShowConfirmScreen(false);
 
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
+      setIsLoading(false);
+      return;
+    }
+
     const emailTrimmed = email.trim();
 
     try {
@@ -36,7 +56,7 @@ const SignUp: React.FC = () => {
         return;
       }
 
-      const { data, error } = await signUp(emailTrimmed, password, username);
+      const { data, error } = await signUp(emailTrimmed, password, username.trim());
 
       if (error) {
         if (error.message.includes('Password should be at least 6 characters')) {
@@ -45,6 +65,8 @@ const SignUp: React.FC = () => {
           setError('Пароль слишком простой. Попробуйте другой.');
         } else if (error.message.includes('User already registered')) {
           setError('Пользователь с таким email уже зарегистрирован.');
+        } else if (error.message.includes('duplicate key value violates unique constraint "profiles_username_key"')) {
+          setError('Это имя пользователя уже занято. Выберите другое.');
         } else {
           setError('Ошибка регистрации: ' + error.message);
         }
@@ -104,9 +126,12 @@ const SignUp: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="ваше_имя"
               required
+              minLength={3}
+              maxLength={30}
               disabled={isLoading}
               className={styles.input}
             />
+            <small>От 3 до 15 символов. Только буквы, цифры, _, -</small>
           </div>
 
           <div className={styles.field}>
