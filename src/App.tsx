@@ -14,13 +14,11 @@ import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import RecoveryCallback from './pages/RecoveryCallback/RecoveryCallback';
 
-// --- Компонент для слушания событий ---
 const EventListener = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleInvite = (e: CustomEvent) => {
-      console.log('📨 [App] Перехватил событие invite_after_login:', e.detail);
       navigate(`/invite/${e.detail}`, { replace: true });
     };
 
@@ -31,7 +29,6 @@ const EventListener = () => {
   return null;
 };
 
-// --- Роуты ---
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isInitialized, isLoading } = useAuth();
   if (!isInitialized || isLoading) return <LoadingState />;
@@ -53,7 +50,6 @@ const AuthCallbackRoute: React.FC<{ children: React.ReactNode }> = ({ children }
   return <>{children}</>;
 };
 
-// ✅ НОВЫЙ: UnprotectedRoute — для страниц, где нужна инициализация, но не нужна авторизация
 const UnprotectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isInitialized, isLoading } = useAuth();
   if (!isInitialized || isLoading) return <LoadingState />;
@@ -79,44 +75,19 @@ const AppRoutes: React.FC = () => {
         <Route path="/confirm" element={<AuthCallbackRoute><Confirm /></AuthCallbackRoute>} />
 
         <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <OrganizationProvider>
-                <ProjectProvider>
-                  <Dashboard />
-                </ProjectProvider>
-              </OrganizationProvider>
-            </PrivateRoute>
-          }
-        />
+        path="/"
+        element={<PrivateRoute><Dashboard /></PrivateRoute>}
+      />
+      
+      <Route
+        path="/dashboard"
+        element={<PrivateRoute><Dashboard /></PrivateRoute>}
+      />
 
         <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <OrganizationProvider>
-                <ProjectProvider>
-                  <Dashboard />
-                </ProjectProvider>
-              </OrganizationProvider>
-            </PrivateRoute>
-          }
-        />
-
-        {/* ✅ Исправлено: InvitePage теперь доступен без авторизации */}
-        <Route
-          path="/invite/:token"
-          element={
-            <UnprotectedRoute>
-              <OrganizationProvider>
-                <ProjectProvider>
-                  <InvitePage />
-                </ProjectProvider>
-              </OrganizationProvider>
-            </UnprotectedRoute>
-          }
-        />
+        path="/invite/:token"
+        element={<UnprotectedRoute><InvitePage /></UnprotectedRoute>}
+      />
 
         <Route path="*" element={<FallbackRoute />} />
       </Routes>
@@ -128,9 +99,13 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <UIProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <OrganizationProvider>
+          <ProjectProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+          </ProjectProvider>
+        </OrganizationProvider>
       </UIProvider>
     </AuthProvider>
   );

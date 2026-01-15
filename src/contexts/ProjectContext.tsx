@@ -1,18 +1,70 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+import { useOrganization } from './OrganizationContext';
 import { supabase } from '../lib/supabase';
-import { projectService } from '../services/projectService';
-import { Project, TaskStatus, CreateProjectData } from '../types/project.types';
+import { useAuth } from './AuthContext';
+
+// Типы
+interface ProjectMember {
+  id: string;
+  user_id: string;
+  role: 'member' | 'moderator' | 'owner';
+  joined_at: string;
+  profile: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
+}
+
+interface TaskAssignee {
+  task_id: string;
+  user_id: string;
+  assigned_by: string;
+  assigned_at: string;
+}
+
+interface Task {
+  id: string;
+  project_id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+  created_by: string;
+  due_date: string | null;
+  status: 'todo' | 'in_progress' | 'done';
+  priority: 'low' | 'medium' | 'high';
+  source_message_id: string | null;
+  assignees: TaskAssignee[];
+}
+
+interface Project {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  created_by: string;
+  members: ProjectMember[];
+  tasks: Task[];
+}
 
 interface ProjectContextType {
   projects: Project[];
   currentProject: Project | null;
-  projectStatuses: TaskStatus[];
   isLoading: boolean;
   error: string | null;
-  createProject: (data: CreateProjectData) => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
-  loadProjects: (organizationId: string) => Promise<void>;
-  loadProjectStatuses: (projectId: string) => Promise<void>;
+  createProject: (name: string, description?: string) => Promise<Project>;
+  refreshProjects: () => Promise<Project[]>;
+  isMember: (projectId: string) => boolean;
+  canManageTasks: (projectId: string) => boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -20,140 +72,139 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
-  const [projectStatuses, setProjectStatuses] = useState<TaskStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastLoadedOrgId, setLastLoadedOrgId] = useState<string | null>(null);
 
-  const loadProjects = useCallback(async (organizationId: string) => {
-    if (lastLoadedOrgId === organizationId) return;
+  const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const loadedProjects = await projectService.getOrganizationProjects(organizationId);
-      setProjects(loadedProjects);
-      setLastLoadedOrgId(organizationId);
-
-      if (loadedProjects.length > 0 && !currentProject) {
-        setCurrentProject(loadedProjects[0]);
-      } else if (loadedProjects.length === 0) {
-        setCurrentProject(null);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить проекты');
-      setProjects([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [lastLoadedOrgId, currentProject]);
-
-  const loadProjectStatuses = useCallback(async (projectId: string) => {
-    if (!projectId) return;
+  const fetchProjects = useCallback(async (): Promise<Project[]> => {
+    if (!currentOrganization) return [];
 
     try {
-      const statuses = await projectService.getProjectStatuses(projectId);
-      setProjectStatuses(statuses);
-    } catch (err) {
-      console.error('Ошибка загрузки статусов:', err);
-      setProjectStatuses([]);
-    }
-  }, []);
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          organization_id,
+          name,
+          description,
+          created_at,
+          created_by,
+          project_members (
+            user_id,
+            role,
+            joined_at,
+            profiles (
+              id,
+              username,
+              full_name,
+              avatar_url
+            )
+          )
+        `)
+        .eq('organization_id', currentOrganization.id)
+        .order('created_at', { ascending: false });
 
-  const createProject = async (data: CreateProjectData) => {
-    try {
-      setError(null);
-      await projectService.createProject(data);
-      await loadProjects(data.organization_id);
+      if (error) throw error;
+
+      const formatted = (data || []).map((p: any) => ({
+        ...p,
+        members: p.project_members.map((m: any) => ({
+          ...m,
+          profile: m.profiles,
+        })),
+        tasks: [],
+      }));
+
+      setProjects(formatted);
+
+      // Восстановить текущий проект
+      const savedId = localStorage.getItem('currentProjectId');
+      const savedProject = formatted.find(p => p.id === savedId) || formatted[0] || null;
+      setCurrentProject(savedProject);
+
+      return formatted;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания проекта');
-      throw err;
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки проектов');
+      return [];
     }
+  }, [currentOrganization?.id]);
+
+  const refreshProjects = useCallback(async () => {
+    const projects = await fetchProjects();
+    return projects;
+  }, [fetchProjects]);
+
+  const createProject = async (name: string, description?: string): Promise<Project> => {
+    if (!currentOrganization || !user) throw new Error('Нет доступа');
+
+    const { data, error } = await supabase
+      .from('projects')
+      .insert({
+        name,
+        description: description || null,
+        organization_id: currentOrganization.id,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    await supabase
+      .from('project_members')
+      .insert({
+        project_id: data.id,
+        user_id: user.id,
+        role: 'owner',
+      });
+
+    await refreshProjects();
+    return data;
+  };
+
+  const isMember = (projectId: string) => {
+    return projects.some(p => p.id === projectId);
+  };
+
+  const canManageTasks = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    const member = project?.members.find(m => m.user_id === user?.id);
+    return member?.role === 'owner' || member?.role === 'moderator';
   };
 
   useEffect(() => {
-    const projectId = currentProject?.id;
-    if (!projectId) return;
-
-    const channel = supabase
-      .channel(`project-changes-${projectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'projects',
-          filter: `id=eq.${projectId}`,
-        },
-        async (payload) => {
-          console.log('Проект обновлён:', payload.new);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentProject?.id]);
+    if (currentOrganization) {
+      setIsLoading(true);
+      fetchProjects().finally(() => setIsLoading(false));
+    } else {
+      setProjects([]);
+      setCurrentProject(null);
+      setIsLoading(false);
+    }
+  }, [currentOrganization?.id]);
 
   useEffect(() => {
-    const projectId = currentProject?.id;
-    if (!projectId) return;
+    if (currentProject) {
+      localStorage.setItem('currentProjectId', currentProject.id);
+    }
+  }, [currentProject]);
 
-    const channel = supabase
-      .channel(`status-changes-${projectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'task_statuses',
-          filter: `project_id=eq.${projectId}`,
-        },
-        () => loadProjectStatuses(projectId)
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'task_statuses',
-          filter: `project_id=eq.${projectId}`,
-        },
-        () => loadProjectStatuses(projectId)
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'task_statuses',
-          filter: `project_id=eq.${projectId}`,
-        },
-        () => loadProjectStatuses(projectId)
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentProject?.id, loadProjectStatuses]);
+  const value = {
+    projects,
+    currentProject,
+    isLoading,
+    error,
+    setCurrentProject,
+    createProject,
+    refreshProjects,
+    isMember,
+    canManageTasks,
+  };
 
   return (
-    <ProjectContext.Provider
-      value={{
-        projects,
-        currentProject,
-        projectStatuses,
-        isLoading,
-        error,
-        createProject,
-        setCurrentProject,
-        loadProjects,
-        loadProjectStatuses,
-      }}
-    >
+    <ProjectContext.Provider value={value}>
       {children}
     </ProjectContext.Provider>
   );

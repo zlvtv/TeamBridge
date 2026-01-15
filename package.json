@@ -10,11 +10,14 @@
     "preview": "vite preview",
     "test:unit": "jest",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.3.1",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -36,6 +39,7 @@
     "jest": "^30.2.0",
     "postcss": "^8.5.6",
     "postcss-nested": "^7.0.2",
+    "serve": "^14.2.5",
     "vite": "^7.2.4",
     "vite-plugin-react": "^4.0.1"
   }

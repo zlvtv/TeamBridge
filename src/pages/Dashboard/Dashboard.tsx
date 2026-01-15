@@ -5,7 +5,6 @@ import SettingsPanel from '../../components/settings-panel/settings-panel';
 import MainHeader from '../../components/main-header/main-header';
 import ChatHeader from '../../components/chat-header/chat-header';
 import ProjectChat from '../../components/project-chat/project-chat';
-import TaskBoard from '../../components/task-board/task-board';
 import ResizableSplitter from '../../components/resizable-splitter/resizable-splitter';
 import EmptyDashboard from '../../components/empty-dashboard/EmptyDashboard';
 import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
@@ -61,12 +60,10 @@ const Dashboard: React.FC = () => {
               </div>
               <ResizableSplitter />
               <div className={styles['dashboard__board']}>
-                <TaskBoard />
               </div>
             </div>
           ) : (
             <div className={styles['dashboard__fullscreen']}>
-              <TaskBoard />
             </div>
           )
         )}
