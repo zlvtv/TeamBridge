@@ -31,19 +31,24 @@ const MainHeader: React.FC = () => {
         </h1>
 
         {currentOrganization && (
-        <button
-          ref={setInfoBtnEl}
-          className={styles['main-header__info-btn']}
-          onClick={handleInfoClick}
-          aria-label="Информация об организации"
-        >
-          ℹ️
-        </button>)}
+          <button
+            ref={setInfoBtnEl}
+            className={styles['main-header__info-btn']}
+            onClick={handleInfoClick}
+            aria-label="Информация об организации"
+          >
+            ℹ️
+          </button>
+        )}
       </header>
 
       {isOrgInfoOpen && infoBtnEl &&
         createPortal(
-          <OrgInfoModal anchorEl={infoBtnEl} onClose={closeOrgInfo} />,
+         <OrgInfoModal
+  key={`org-info-modal-${currentOrganization?.id}`}
+  anchorEl={infoBtnEl}
+  onClose={closeOrgInfo}
+/>,
           document.body
         )}
     </>

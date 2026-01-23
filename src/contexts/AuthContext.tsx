@@ -9,12 +9,11 @@ import {
   sendPasswordResetEmail,
   updateProfile,
   User as FirebaseUser,
+  signInAnonymously as firebaseSignInAnonymously,
 } from 'firebase/auth';
 import { setDoc, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { UserProfile, AuthContextType } from '../types/auth.types';
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const translateAuthError = (message: string): string => {
   const map: Record<string, string> = {
@@ -33,6 +32,16 @@ const translateAuthError = (message: string): string => {
   return 'Произошла ошибка. Попробуйте снова';
 };
 
+const profileFromUser = (user: FirebaseUser, username: string): UserProfile => ({
+  id: user.uid,
+  email: user.email || '',
+  username,
+  full_name: username,
+  avatar_url: null,
+});
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<{
     user: UserProfile | null;
@@ -47,40 +56,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+      if (user) {
+        const isVerified = user.emailVerified;
 
-    if (user) {
-      const isVerified = user.emailVerified;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userData = userDoc.data();
 
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const userData = userDoc.data();
+        const profile: UserProfile = {
+          id: user.uid,
+          email: user.email || '',
+          username: userData?.username || user.email?.split('@')[0] || 'user',
+          full_name: userData?.full_name || user.displayName || userData?.username || 'User',
+          avatar_url: user.photoURL || userData?.avatar_url || null,
+        };
 
-      const profile: UserProfile = {
-        id: user.uid,
-        email: user.email || '',
-        username: userData?.username || user.email?.split('@')[0] || 'user',
-        full_name: userData?.full_name || user.displayName || userData?.username || 'User',
-        avatar_url: user.photoURL || userData?.avatar_url || null,
-      };
+        setState({
+          user: profile,
+          isLoading: false,
+          isInitialized: true,
+          isEmailVerified: isVerified,
+        });
+      } else {
+        setState({
+          user: null,
+          isLoading: false,
+          isInitialized: true,
+          isEmailVerified: false,
+        });
+      }
+    });
 
-      setState({
-        user: profile,
-        isLoading: false,
-        isInitialized: true,
-        isEmailVerified: isVerified,
-      });
-    } else {
-      setState({
-        user: null,
-        isLoading: false,
-        isInitialized: true,
-        isEmailVerified: false,
-      });
-    }
-  });
-
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -105,8 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
-        username,
-        full_name: username,
+        username, 
+        full_name: username, 
         avatar_url: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -138,13 +146,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const profileFromUser = (user: FirebaseUser, username: string): UserProfile => ({
-    id: user.uid,
-    email: user.email || '',
-    username,
-    full_name: username,
-    avatar_url: null,
-  });
+  const signInAnonymously = async () => {
+    try {
+      await firebaseSignInAnonymously(auth);
+    } catch (err: any) {
+      console.error('Anonymous sign-in failed:', err);
+      throw err;
+    }
+  };
 
   const value: AuthContextType = {
     user: state.user,
@@ -155,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     signUp,
     resetPassword,
+    signInAnonymously, 
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

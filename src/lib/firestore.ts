@@ -11,6 +11,8 @@ import {
   deleteDoc,
   serverTimestamp,
   onSnapshot,
+  getDocsFromServer,
+  getDocFromServer,
 } from 'firebase/firestore';
 
 export const getCollection = async (collectionName: string) => {
@@ -18,16 +20,27 @@ export const getCollection = async (collectionName: string) => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const getDocById = async (collectionName: string, id: string) => {
-  const docRef = doc(db, collectionName, id);
-  const docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) return null;
-  return { id: docSnap.id, ...docSnap.data() };
+export const getDocsByQuery = async (collectionName: string, q: any) => {
+  try {
+    const querySnapshot = await getDocsFromServer(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (err: any) {
+    console.warn('Server error, falling back to cache:', err.message);
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
 };
 
-export const getDocsByQuery = async (collectionName: string, q: any) => {
-  const querySnapshot = await getDocs(query(collection(db, collectionName), q));
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+export const getDocById = async (collectionName: string, id: string) => {
+  const ref = doc(collection(db, collectionName), id);
+  try {
+    const docSnap = await getDocFromServer(ref);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+  } catch (err) {
+    console.warn('Falling back to cache for doc:', collectionName, id);
+    const docSnap = await getDoc(ref);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+  }
 };
 
 export const createDoc = async (collectionName: string, data: any) => {
@@ -36,7 +49,7 @@ export const createDoc = async (collectionName: string, data: any) => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
-  return { id: docRef.id, ...data, id: docRef.id };
+  return { id: docRef.id, ...data };
 };
 
 export const updateDocById = async (collectionName: string, id: string, data: any) => {

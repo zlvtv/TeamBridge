@@ -1,72 +1,141 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useOrganization } from '../../contexts/OrganizationContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useOrganization } from '../../contexts/OrganizationContext';
+import { organizationService } from '../../services/organizationService';
+import { getDocById } from '../../lib/firestore';
+import Button from '../../components/ui/button/button';
+import styles from './InvitePage.module.css';
+import LoadingState from '../../components/ui/loading/LoadingState';
 
-const InvitePage: React.FC = () => {
+const InvitePage = () => {
   const { token } = useParams<{ token: string }>();
   const { user, isInitialized } = useAuth();
-  const { organizations, joinOrganization, refreshOrganizations, setCurrentOrganization } = useOrganization();
+  const { refreshOrganizations, setCurrentOrganization } = useOrganization();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<'checking' | 'already-member' | 'joined' | 'error'>('checking');
+  const [orgName, setOrgName] = useState<string>('');
+
+  if (!isInitialized) return <LoadingState />;
+
   useEffect(() => {
-    if (!isInitialized || !token) return;
-
-    const processInvite = async () => {
-      if (!user) {
-        try {
-          localStorage.setItem('invite_token', token);
-        } catch (e) {
-          console.error('Не удалось сохранить invite_token');
-        }
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      const orgs = await refreshOrganizations();
-      if (orgs.length > 0) {
-        const org = orgs[0];
-        setCurrentOrganization(org);
-        navigate('/dashboard', { replace: true });
+    const checkAndJoin = async () => {
+      if (!token) {
+        setError('Неверная ссылка');
+        setStatus('error');
+        setLoading(false);
         return;
       }
 
       try {
-        const orgId = await joinOrganization(token);
-        const updatedOrgs = await refreshOrganizations();
-        const org = updatedOrgs.find(o => o.id === orgId) || updatedOrgs[0] || null;
-
-        if (org) {
-          setCurrentOrganization(org);
+        const inviteSnap = await getDocById('organization_invites', token);
+        if (!inviteSnap) {
+          setError('Приглашение не найдено. Возможно, оно было отозвано или срок действия истек.');
+          setStatus('error');
+          setLoading(false);
+          return;
         }
 
-        navigate('/dashboard', { replace: true });
-      } catch (err: any) {
-        const msg = err.message || String(err);
-        if (msg.includes('duplicate') || msg.includes('уже состоит')) {
+        if (!inviteSnap.active) {
+          setError('Приглашение отозвано.');
+          setStatus('error');
+          setLoading(false);
+          return;
+        }
+
+        const expiresAt = inviteSnap.expires_at?.toDate ? inviteSnap.expires_at.toDate() : null;
+        if (expiresAt && new Date() > expiresAt) {
+          setError('Срок действия приглашения истек.');
+          setStatus('error');
+          setLoading(false);
+          return;
+        }
+
+        const organizationId = inviteSnap.organization_id;
+        const userId = user?.id;
+
+        if (!userId) {
+          navigate('/login', { replace: true, state: { fromInvite: token } });
+          return;
+        }
+
+        const orgSnap = await getDocById('organizations', organizationId);
+        if (!orgSnap) {
+          setError('Организация не найдена. Возможно, она была удалена.');
+          setStatus('error');
+          setLoading(false);
+          return;
+        }
+
+        const organizationName = orgSnap.name || 'Организация';
+        setOrgName(organizationName);
+
+        const isInOrg = await organizationService.isUserInOrganization(organizationId, userId);
+        if (isInOrg) {
+          setStatus('already-member');
+
           const orgs = await refreshOrganizations();
-          const org = orgs[0] || null;
-          if (org) setCurrentOrganization(org);
-          navigate('/dashboard', { replace: true });
-        } else if (msg.includes('invalid') || msg.includes('not found')) {
-          alert('Приглашение недействительно');
-          navigate('/', { replace: true });
-        } else {
-          alert('Ошибка вступления: ' + (msg.length < 100 ? msg : 'Сервер недоступен'));
-          navigate('/dashboard', { replace: true });
+          const org = orgs.find((o) => o.id === organizationId);
+          if (org) {
+            setCurrentOrganization(org);
+            localStorage.setItem('currentOrgId', org.id);
+          }
+
+          setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
+          return;
         }
+
+        const result = await organizationService.joinOrganization(token);
+        setStatus('joined');
+        setOrgName(result.orgName);
+
+        const orgs = await refreshOrganizations();
+        const newOrg = orgs.find((o) => o.id === result.organizationId);
+        if (newOrg) {
+          setCurrentOrganization(newOrg);
+          localStorage.setItem('currentOrgId', newOrg.id);
+        }
+
+        setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
+      } catch (err: any) {
+        console.error('Ошибка при обработке приглашения:', err);
+        setError(err.message || 'Не удалось присоединиться к организации.');
+        setStatus('error');
+      } finally {
+        setLoading(false);
       }
     };
 
-    processInvite();
-  }, [token, user, isInitialized, refreshOrganizations, joinOrganization, setCurrentOrganization, navigate]);
+    checkAndJoin();
+  }, [token, user, navigate, refreshOrganizations, setCurrentOrganization]);
 
-  return token ? (
-    <div style={{ textAlign: 'center', padding: '40px' }}>
-      <h2>Обработка приглашения...</h2>
-      <p>Выполняется проверка и вступление в организацию</p>
+  return (
+    <div className={styles.container}>
+      {loading ? (
+        <p>Проверка приглашения...</p>
+      ) : status === 'already-member' ? (
+        <>
+          <h2>Вы уже состоите в «{orgName}»</h2>
+          <p>Переадресация на дашборд...</p>
+        </>
+      ) : status === 'joined' ? (
+        <>
+          <h2>Добро пожаловать в «{orgName}»!</h2>
+          <p>Вы успешно присоединились.</p>
+          <p>Переадресация на дашборд...</p>
+        </>
+      ) : error ? (
+        <>
+          <h2>Не удалось присоединиться</h2>
+          <p className={styles.errorMessage}>{error}</p>
+          <Button onClick={() => navigate('/dashboard')}>На главную</Button>
+        </>
+      ) : null}
     </div>
-  ) : null;
+  );
 };
 
 export default InvitePage;

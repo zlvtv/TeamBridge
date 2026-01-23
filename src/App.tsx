@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -9,8 +8,8 @@ import Login from './pages/Login/Login';
 import SignUp from './pages/SignUp/SignUp';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Confirm from './pages/Confirm/Confirm';
-import Landing from './pages/Landing/Landing';
 import InvitePage from './pages/InvitePage/InvitePage';
+import Landing from './pages/Landing/Landing';
 import LoadingState from './components/ui/loading/LoadingState';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
@@ -62,6 +61,12 @@ const AuthCallbackRoute: React.FC<{ children: React.ReactNode }> = ({ children }
   return <>{children}</>;
 };
 
+const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isInitialized } = useAuth();
+  if (!isInitialized) return <LoadingState />;
+  return <>{children}</>;
+};
+
 const UnprotectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
@@ -80,7 +85,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/reset-password" element={<UnprotectedRoute><ResetPassword /></UnprotectedRoute>} />
       <Route path="/recovery/callback" element={<AuthCallbackRoute><RecoveryCallback /></AuthCallbackRoute>} />
       <Route path="/confirm" element={<AuthCallbackRoute><Confirm /></AuthCallbackRoute>} />
-      <Route path="/invite/:token" element={<UnprotectedRoute><InvitePage /></UnprotectedRoute>} />
+      <Route path="/invite/:token" element={<AuthRoute><InvitePage /></AuthRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/auth/callback" element={<UnprotectedRoute><AuthCallback /></UnprotectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />

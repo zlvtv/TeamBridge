@@ -3,7 +3,14 @@ import { useOrganization } from '../../../contexts/OrganizationContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../ui/button/button';
 import Input from '../../ui/input/input';
+import Toast from '../../ui/toast/Toast';
 import styles from './org-info-modal.module.css';
+
+interface ToastState {
+  message: string;
+  type: 'success' | 'error';
+  id: number;
+}
 
 interface OrgInfoModalProps {
   anchorEl: HTMLElement;
@@ -22,11 +29,21 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+
+  const [toasts, setToasts] = useState<ToastState[]>([]);
+  const toastId = useRef(0);
+
   const isOwner = currentOrganization?.created_by === user?.id;
 
   useEffect(() => {
-    refreshCurrentOrganization();
-  }, [refreshCurrentOrganization]);
+  const fetchData = async () => {
+    console.log('🔄 OrgInfoModal: Обновление данных при открытии...');
+    await refreshCurrentOrganization();
+  };
+  fetchData();
+}, [refreshCurrentOrganization]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -54,31 +71,51 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   if (!currentOrganization) return null;
 
-  const handleLeaveOrg = async () => {
-    if (!window.confirm('Вы уверены, что хотите выйти из организации?')) return;
+  const showToast = (message: string, type: 'success' | 'error') => {
+    const id = toastId.current++;
+    setToasts((prev) => [...prev, { message, type, id }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  };
 
+  const closeToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleLeaveOrg = () => {
+    setShowLeaveConfirm(true);
+  };
+
+  const confirmLeave = async () => {
     setIsLeaving(true);
     try {
       await leaveOrganization(currentOrganization.id);
       onClose();
+      showToast('Вы вышли из организации', 'success');
     } catch (err: any) {
-      alert('Ошибка выхода: ' + err.message);
+      showToast('Ошибка выхода: ' + err.message, 'error');
     } finally {
       setIsLeaving(false);
+      setShowLeaveConfirm(false);
     }
   };
 
-  const handleDeleteOrg = async () => {
-    if (!window.confirm('Вы уверены, что хотите удалить организацию? Все данные будут потеряны.')) return;
+  const handleDeleteOrg = () => {
+    setShowDeleteConfirm(true);
+  };
 
+  const confirmDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteOrganization(currentOrganization.id);
       onClose();
+      showToast('Организация удалена', 'success');
     } catch (err: any) {
-      alert('Ошибка удаления: ' + err.message);
+      showToast('Ошибка удаления: ' + err.message, 'error');
     } finally {
       setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -94,11 +131,15 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
       if (data && data.invite_link) {
         setInviteLink(data.invite_link);
         setExpiresAt(data.expires_at);
+        showToast('Ссылка создана', 'success');
       } else {
         setError('Не удалось получить ссылку');
+        showToast('Не удалось создать приглашение', 'error');
       }
     } catch (err: any) {
-      setError(err.message || 'Не удалось создать приглашение');
+      const message = err.message || 'Не удалось создать приглашение';
+      setError(message);
+      showToast(message, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -107,7 +148,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const handleCopyLink = () => {
     if (inviteLink) {
       navigator.clipboard.writeText(inviteLink);
-      alert('Ссылка скопирована в буфер обмена');
+      showToast('Ссылка скопирована в буфер обмена', 'success');
     }
   };
 
@@ -119,100 +160,129 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const top = anchorRect.bottom + 8;
 
   return (
-    <div
-      ref={modalRef}
-      className={styles.modal}
-      style={{ position: 'absolute', top: `${top}px`, left: `${left}px`, zIndex: 10000 }}
-      role="dialog"
-      aria-label="Информация об организации"
-    >
-      <h3 className={styles.title}>{currentOrganization.name}</h3>
+    <>
+      <div
+        ref={modalRef}
+        className={styles.modal}
+        style={{ position: 'absolute', top: `${top}px`, left: `${left}px`, zIndex: 10000 }}
+        role="dialog"
+        aria-label="Информация об организации"
+      >
+        <h3 className={styles.title}>{currentOrganization.name}</h3>
 
-      {currentOrganization.description && (
+        {currentOrganization.description && (
+          <div className={styles.section}>
+            <strong>Описание:</strong>
+            <p>{currentOrganization.description}</p>
+          </div>
+        )}
+
         <div className={styles.section}>
-          <strong>Описание:</strong>
-          <p>{currentOrganization.description}</p>
-        </div>
-      )}
+          <strong>Участники ({currentOrganization.organization_members?.length || 1}):</strong>
+          <div className={styles.members}>
+            {currentOrganization.organization_members?.map((member) => {
+              const displayName = member.user?.full_name ||
+                (member.user?.username ? `@${member.user.username}` : `Пользователь ${member.id.slice(-5)}`);
 
-      <div className={styles.section}>
-        <strong>Участники ({currentOrganization.organization_members?.length || 1}):</strong>
-        <div className={styles.members}>
-          {currentOrganization.organization_members?.map((member) => (
-            <div key={member.id} className={styles.member}>
-              <div
-                className={styles.avatar}
-                title={member.user?.full_name || `@${member.user?.username}`}
-              >
-                {member.user?.full_name?.charAt(0).toUpperCase() ||
-                 member.user?.username?.charAt(0).toUpperCase() ||
-                 'U'}
-              </div>
-              <span>{member.user?.full_name || `@${member.user?.username}`}</span>
-              <span className={styles.role}>
-                {member.role === 'owner' ? 'Владелец' : 'Участник'}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {isOwner && (
-        <div className={styles.section}>
-          <strong>Пригласить участников:</strong>
-          {inviteLink ? (
-            <div className={styles.inviteLink}>
-              <Input
-                value={inviteLink}
-                readOnly
-                fullWidth
-                size="small"
-                style={{ marginBottom: '8px' }}
-              />
-              <Button variant="secondary" size="small" onClick={handleCopyLink}>
-                Скопировать ссылку
-              </Button>
-              {inviteLink && expiresAt && (
-                <div className={styles.inviteInfo}>
-                  <small>Ссылка действительна 1 час.</small>
+              return (
+                <div key={member.id} className={styles.member}>
+                  <div className={styles.avatar} title={displayName}>
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                  <span>{displayName}</span>
+                  <span className={styles.role}>
+                    {member.role === 'owner' ? 'Владелец' : 'Участник'}
+                  </span>
                 </div>
-              )}
-            </div>
-          ) : (
-            <Button
-              variant="primary"
-              size="small"
-              onClick={handleGenerateInvite}
-              disabled={isGenerating}
-            >
-              {isGenerating ? 'Создание...' : 'Создать ссылку-приглашение'}
-            </Button>
-          )}
-          {error && <div className={styles.error}>{error}</div>}
+              );
+            })}
+          </div>
         </div>
-      )}
-
-      <div className={styles.actions}>
-        <Button
-          variant="secondary"
-          onClick={handleLeaveOrg}
-          disabled={isLeaving || isOwner}
-          title={isOwner ? 'Владелец не может выйти. Удалите организацию вместо этого.' : undefined}
-        >
-          {isLeaving ? 'Выход...' : 'Выйти из организации'}
-        </Button>
 
         {isOwner && (
-          <Button
-            variant="danger"
-            onClick={handleDeleteOrg}
-            disabled={isDeleting}
-          >
-            {isDeleting ? 'Удаление...' : 'Удалить организацию'}
-          </Button>
+          <div className={styles.section}>
+            <strong>Пригласить участников:</strong>
+            {inviteLink ? (
+              <div className={styles.inviteLink}>
+                <Input value={inviteLink} readOnly fullWidth size="small" style={{ marginBottom: '8px' }} />
+                <Button variant="secondary" size="small" onClick={handleCopyLink}>
+                  Скопировать ссылку
+                </Button>
+                {expiresAt && (
+                  <div className={styles.inviteInfo}>
+                    <small>Ссылка действительна 1 час.</small>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="small"
+                onClick={handleGenerateInvite}
+                disabled={isGenerating}
+              >
+                {isGenerating ? 'Создание...' : 'Создать ссылку-приглашение'}
+              </Button>
+            )}
+            {error && <div className={styles.error}>{error}</div>}
+          </div>
+        )}
+
+        {showLeaveConfirm && (
+          <div className={styles.section}>
+            <p>Вы уверены, что хотите выйти? Доступ к проектам будет закрыт.</p>
+            <div className={styles.actions}>
+              <Button variant="secondary" size="small" onClick={() => setShowLeaveConfirm(false)}>
+                Отмена
+              </Button>
+              <Button variant="primary" size="small" onClick={confirmLeave} disabled={isLeaving}>
+                {isLeaving ? 'Выход...' : 'Выйти'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {showDeleteConfirm ? (
+          <div className={styles.section}>
+            <p>Вы уверены, что хотите удалить организацию? Все данные будут потеряны безвозвратно.</p>
+            <div className={styles.actions}>
+              <Button variant="secondary" size="small" onClick={() => setShowDeleteConfirm(false)}>
+                Отмена
+              </Button>
+              <Button variant="danger" size="small" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? 'Удаление...' : 'Удалить'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.actions}>
+            <Button
+              variant="secondary"
+              onClick={handleLeaveOrg}
+              disabled={isLeaving || isOwner}
+              title={isOwner ? 'Владелец не может выйти. Удалите организацию вместо этого.' : undefined}
+            >
+              {isLeaving ? 'Выход...' : 'Выйти из организации'}
+            </Button>
+
+            {isOwner && (
+              <Button variant="danger" onClick={handleDeleteOrg} disabled={isDeleting}>
+                {isDeleting ? 'Удаление...' : 'Удалить организацию'}
+              </Button>
+            )}
+          </div>
         )}
       </div>
-    </div>
+
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => closeToast(toast.id)}
+        />
+      ))}
+    </>
   );
 };
 

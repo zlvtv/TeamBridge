@@ -40,33 +40,36 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useAuth();
 
   const refreshOrganizations = useCallback(async (): Promise<OrganizationWithMembers[]> => {
-    try {
-      const orgs = await organizationService.getUserOrganizations();
-      setOrganizations(orgs);
-
-      if (currentOrganization) {
-        const updated = orgs.find(o => o.id === currentOrganization.id);
-        if (updated) {
-          setCurrentOrganization(updated);
-        }
-      }
-      return orgs;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
-      return [];
-    }
-  }, [currentOrganization]);
+  try {
+    const orgs = await organizationService.getUserOrganizations();
+    setOrganizations(orgs);
+    return orgs;
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Ошибка');
+    return [];
+  }
+}, []);
 
   const refreshCurrentOrganization = useCallback(async () => {
-    if (!currentOrganization) return;
-    try {
-      const orgs = await organizationService.getUserOrganizations();
-      const updated = orgs.find(o => o.id === currentOrganization.id);
-      if (updated) setCurrentOrganization(updated);
-    } catch (err) {
-      console.error('Ошибка обновления текущей организации:', err);
+  if (!currentOrganization) return;
+
+  try {
+    const orgs = await organizationService.getUserOrganizations(true);
+
+    const updatedOrg = orgs.find(o => o.id === currentOrganization.id);
+
+    if (updatedOrg) {
+      setCurrentOrganization(updatedOrg);
+      if (currentOrganization.organization_members.length !== updatedOrg.organization_members.length) {
+        console.log('Участники обновлены:', updatedOrg.organization_members.length);
+      }
+    } else {
+      setCurrentOrganization(null);
     }
-  }, [currentOrganization?.id]);
+  } catch (err) {
+    console.error('Ошибка при обновлении текущей организации:', err);
+  }
+}, [currentOrganization?.id]);
 
   useEffect(() => {
   const initialize = async () => {
@@ -84,10 +87,25 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setOrganizations(orgs);
 
       const savedOrgId = localStorage.getItem('currentOrgId');
-      const savedOrg = orgs.find(o => o.id === savedOrgId) || orgs[0] || null;
-      setCurrentOrganization(savedOrg);
+
+      if (savedOrgId) {
+        const savedOrg = orgs.find(o => o.id === savedOrgId);
+        if (savedOrg) {
+          setCurrentOrganization(savedOrg);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (orgs.length > 0) {
+        setCurrentOrganization(orgs[0]);
+        localStorage.setItem('currentOrgId', orgs[0].id);
+      } else {
+        setCurrentOrganization(null);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
+      setCurrentOrganization(null);
     } finally {
       setIsLoading(false);
     }
@@ -96,37 +114,30 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   initialize();
 }, [user?.id]);
 
-  useEffect(() => {
-    if (currentOrganization) {
-      localStorage.setItem('currentOrgId', currentOrganization.id);
-    }
-  }, [currentOrganization]);
-
   const createOrganization = async (data: CreateOrganizationData): Promise<OrganizationWithMembers> => {
-  setError(null);
-  try {
-    await organizationService.createOrganization(data);
-    const orgs = await refreshOrganizations(); 
-
-    const newOrg = orgs[0]; 
-    if (newOrg) {
-      setCurrentOrganization(newOrg);
-      localStorage.setItem('currentOrgId', newOrg.id);
+    setError(null);
+    try {
+      await organizationService.createOrganization(data);
+      const orgs = await refreshOrganizations();
+      const newOrg = orgs[0];
+      if (newOrg) {
+        setCurrentOrganization(newOrg);
+        localStorage.setItem('currentOrgId', newOrg.id);
+      }
+      return newOrg;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка создания');
+      throw err;
     }
-
-    return newOrg;
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Ошибка создания');
-    throw err;
-  }
-};
+  };
 
   const joinOrganization = async (inviteCode: string): Promise<string> => {
     setError(null);
     try {
-      const orgId = await organizationService.joinOrganization(inviteCode);
+      const result = await organizationService.joinOrganization(inviteCode);
       await refreshOrganizations();
-      return orgId;
+      localStorage.setItem('currentOrgId', result.organizationId);
+      return result.organizationId;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
       throw err;
@@ -142,7 +153,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setCurrentOrganization(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка выхода из организации');
+      setError(err instanceof Error ? err.message : 'Ошибка');
       throw err;
     }
   };

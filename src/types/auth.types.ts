@@ -10,7 +10,7 @@ export interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   isInitialized: boolean;
-  isEmailVerified: boolean; 
+  isEmailVerified: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signUp: (
@@ -25,4 +25,5 @@ export interface AuthContextType {
     success: boolean;
     message: string;
   }>;
+  signInAnonymously: () => Promise<void>; 
 }

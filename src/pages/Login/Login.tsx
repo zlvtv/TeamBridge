@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Login.module.css';
+
+interface LocationState {
+  fromInvite?: string;
+  from?: string;
+}
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +14,12 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
+
+  const state = location.state as LocationState | null;
+  const fromInvite = state?.fromInvite;
+  const from = state?.from;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +28,14 @@ const Login: React.FC = () => {
 
     try {
       await signIn(email.trim(), password);
-      navigate('/dashboard', { replace: true });
+
+      if (fromInvite) {
+        navigate(`/invite/${fromInvite}`, { replace: true });
+      } else if (from) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

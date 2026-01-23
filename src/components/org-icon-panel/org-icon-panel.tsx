@@ -9,7 +9,7 @@ const OrgIconPanel: React.FC = () => {
     organizations,
     currentOrganization,
     setCurrentOrganization,
-  } = useOrganization(); 
+  } = useOrganization();
 
   const [searchAnchor, setSearchAnchor] = useState<HTMLElement | null>(null);
   const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
@@ -47,7 +47,9 @@ const OrgIconPanel: React.FC = () => {
   };
 
   const handleOrgClick = (org: (typeof organizations)[0]) => {
+    console.log('👉 Выбрана организация:', org.name);
     setCurrentOrganization(org);
+    localStorage.setItem('currentOrgId', org.id);
   };
 
   const handleWheel = (e: WheelEvent) => {
@@ -111,22 +113,22 @@ const OrgIconPanel: React.FC = () => {
           aria-label="Список организаций"
           style={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}
         >
-          {organizations.map((org) => {  
-  const firstLetter = org.name?.charAt(0).toUpperCase() || 'O';
-  return (
-    <button
-      key={org.id}
-      className={`${styles['org-icon-panel__org-btn']} ${
-        currentOrganization?.id === org.id ? styles['org-icon-panel__org-btn--active'] : ''
-      }`}
-      onClick={() => handleOrgClick(org)}
-      aria-label={org.name}
-      title={org.name}
-    >
-      {firstLetter}
-    </button>
-  );
-})}
+          {organizations.map((org) => {
+            const firstLetter = org.name?.charAt(0).toUpperCase() || 'O';
+            return (
+              <button
+                key={org.id}
+                className={`${styles['org-icon-panel__org-btn']} ${
+                  currentOrganization?.id === org.id ? styles['org-icon-panel__org-btn--active'] : ''
+                }`}
+                onClick={() => handleOrgClick(org)}
+                aria-label={org.name}
+                title={org.name}
+              >
+                {firstLetter}
+              </button>
+            );
+          })}
         </div>
       </div>
     </>
