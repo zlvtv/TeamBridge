@@ -1,7 +1,2 @@
-services:
-  - type: web
-    name: TeamBridge
-    runtime: static
-    buildCommand: "pnpm install && pnpm run build"
-    publishDirectory: "dist"
-    plan: free
+buildCommand: "pnpm install && pnpm run build"
+publishDirectory: "dist"
