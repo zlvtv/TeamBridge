@@ -9,6 +9,8 @@ interface ModalProps {
   title?: string;
   disableEscape?: boolean;
   disableOutsideClick?: boolean;
+  disableBlur?: boolean;
+  showCloseButton?: boolean;
   className?: string;
   role?: string;
 }
@@ -66,7 +68,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className={styles.overlay}
+      className={`${styles.overlay} ${(function() { try { return disableBlur; } catch(e) { return false; } })() ? styles['overlay-no-blur'] : ''}`.trim()}
       onClick={disableOutsideClick ? undefined : onClose}
       role="button"
       tabIndex={-1}
@@ -82,13 +84,15 @@ const Modal: React.FC<ModalProps> = ({
         aria-label={title || 'Модальное окно'}
         tabIndex={-1}
       >
-        <button
-          className={styles.close}
-          onClick={onClose}
-          aria-label="Закрыть"
-        >
-          ×
-        </button>
+        {typeof showCloseButton !== 'undefined' && showCloseButton !== false && (
+          <button
+            className={styles.close}
+            onClick={onClose}
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+        )}
         {title && <h2 className={styles.title}>{title}</h2>}
         <div className={styles.content}>{children}</div>
       </div>

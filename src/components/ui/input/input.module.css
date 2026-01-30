@@ -60,3 +60,21 @@
   border-left: 3px solid var(--color-error, #dc2626);
   border-radius: 2px;
 }
+
+/* Стилизация скроллбара для textarea */
+.input::-webkit-scrollbar {
+  width: 6px;
+}
+
+.input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.input::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+}
+
+.input::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover);
+}

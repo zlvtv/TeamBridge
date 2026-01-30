@@ -10,7 +10,10 @@
   justify-content: center;
   z-index: 1000;
   animation: fade-in 0.2s ease-out;
-  backdrop-filter: blur(4px);
+}
+
+.overlay-no-blur {
+  backdrop-filter: none;
 }
 
 .modal {

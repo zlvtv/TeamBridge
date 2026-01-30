@@ -1,0 +1,5 @@
+.message-text a {
+  color: var(--link-color, #1a73e8);
+  text-decoration: underline;
+  cursor: pointer;
+}

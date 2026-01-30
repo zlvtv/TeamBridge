@@ -66,8 +66,10 @@
 
 .dashboard__board {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   min-width: 300px;
+  overflow-y: auto;
+  position: relative;
 }
 
 .dashboard__fullscreen {

@@ -53,9 +53,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
     const users = currentProject.members.map((m) => ({
       id: m.user_id,
-      full_name: m.profile.full_name,
-      username: m.profile.username,
-      avatar_url: m.profile.avatar_url,
+      full_name: m.profile?.full_name || 'Пользователь',
+      username: m.profile?.username || 'unknown',
+      avatar_url: m.profile?.avatar_url || null,
     }));
 
     setAvailableUsers(users);

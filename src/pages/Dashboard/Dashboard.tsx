@@ -37,11 +37,11 @@ const Dashboard: React.FC = () => {
   }, [isCreateOrgModalOpen, openCreateOrgModal, location.state]);
 
   if (orgLoading) {
-    return <LoadingState message="Загрузка..." />;
+    return <LoadingState message="Загрузка организаций..." />;
   }
 
   if (!orgLoading && organizations.length === 0 && !isCreateOrgModalOpen) {
-    return <LoadingState message="Подготовка рабочего пространства..." />;
+    return <LoadingState message="Загрузка..." />;
   }
 
   return (
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
         {!isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentProject ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />}
+              {currentProject ? <ProjectChat /> : <LoadingState message="Загрузка..." />}
             
             </div>
             <ResizableSplitter />
