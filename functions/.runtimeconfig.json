@@ -1,8 +1,0 @@
-{
-  "jwt": {
-    "secret": "s3cr3t_k3y_f0r_inv1t3s_2025_abcdefghijklmnopqrstuvwxyz123456"
-  },
-  "react_app": {
-    "base_url": "https://teambridge-ncqq.onrender.com"
-  }
-}
