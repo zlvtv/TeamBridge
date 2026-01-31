@@ -1,4 +1,6 @@
 import React from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useProject } from '../../../contexts/ProjectContext';
 
 import styles from './attachment-modal.module.css';
 
@@ -20,6 +22,14 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   onOptionSelect,
   position
 }) => {
+  const { user } = useAuth();
+  const { currentProject } = useProject();
+  const canManageTasks = () => {
+    if (!user || !currentProject) return false;
+    const member = currentProject.members.find(m => m.user_id === user.id);
+    return member?.role === 'owner' || member?.role === 'moderator';
+  };
+
   const handleOptionClick = (type: 'photo' | 'poll' | 'task') => {
     onOptionSelect(type);
   };
@@ -44,6 +54,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         >
           <span>Опрос</span>
         </div>
+        {canManageTasks() && (
         <div
           className={styles['attachment-option']}
           onClick={() => {
@@ -53,6 +64,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         >
           <span>Задача</span>
         </div>
+        )}
       </div>
     </div>
   );

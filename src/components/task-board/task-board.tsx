@@ -29,7 +29,7 @@ const TaskBoard: React.FC = () => {
     if (activeTab === 'project') {
       filtered = tasks.filter(task => task.project_id === currentProject?.id);
     } else if (activeTab === 'user') {
-      filtered = tasks.filter(task => task.assignees.includes(user?.id));
+      filtered = tasks.filter(task => task.assignees?.includes(user?.id));
     }
     return filtered.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(filters.search.toLowerCase());
@@ -45,7 +45,7 @@ const TaskBoard: React.FC = () => {
     const map: { [key: string]: any[] } = {};
     filteredTasks.forEach(task => {
       map[task.id] = currentProject.members
-        .filter(m => task.assignees.includes(m.user_id))
+        .filter(m => task.assignees?.includes(m.user_id))
         .map(m => m.profile);
     });
     return map;

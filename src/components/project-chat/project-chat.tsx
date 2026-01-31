@@ -44,13 +44,19 @@ const ProjectChat: React.FC = () => {
     y: number;
     message: any;
     type: 'message' | 'text';
-  }>({
+  }>({ 
     show: false,
     x: 0,
     y: 0,
     message: null,
     type: 'text',
   });
+
+  const canManageTasks = () => {
+    if (!user || !currentProject) return false;
+    const member = currentProject.members.find(m => m.user_id === user.id);
+    return member?.role === 'owner' || member?.role === 'moderator';
+  };
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -85,6 +91,9 @@ const ProjectChat: React.FC = () => {
   const handleAttachmentOptionClick = (type: 'photo' | 'poll' | 'task') => {
     console.log('handleAttachmentOptionClick triggered with type:', type);
     if (type === 'task') {
+      if (!canManageTasks()) {
+        return;
+      }
       setIsTaskModalOpen(true);
       console.log('Task modal state set to true');
     }
@@ -149,7 +158,14 @@ const ProjectChat: React.FC = () => {
       if (selection && selection.toString().length > 0) {
         return; 
       }
+      
+      // Закрываем контекстное меню
       setContextMenu({ show: false, x: 0, y: 0, message: null });
+      
+      // Если клик вне контекстного меню и модальных окон, сбрасываем ошибку
+      if (!e.target || !(e.target as Element).closest(`.${styles.contextMenu}, .${styles['input-textarea']}, .modal, .modalOverlay`)) {
+        setError(null);
+      }
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
@@ -340,6 +356,7 @@ const ProjectChat: React.FC = () => {
               >
                 Копировать
               </button>
+              {canManageTasks() && (
               <button
                 className={styles.menuItem}
                 onClick={(e) => {
@@ -351,6 +368,7 @@ const ProjectChat: React.FC = () => {
               >
                 Сделать задачей
               </button>
+              )}
               {canDeleteMessage(contextMenu.message) && (
                 <button
                   className={styles.menuItem}
@@ -447,6 +465,7 @@ const ProjectChat: React.FC = () => {
           onClose={() => {
             console.log('Modal closed');
             setIsTaskModalOpen(false);
+            setIsAttachmentModalOpen(false);
           }}
           sourceMessageId={contextMenu.message?.id}
           initialContent={contextMenu.message?.text}

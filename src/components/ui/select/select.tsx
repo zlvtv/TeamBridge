@@ -18,6 +18,7 @@ interface SelectProps {
   className?: string;
   error?: string;
   showAvatar?: boolean;
+  hasSearch?: boolean;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -30,6 +31,7 @@ const Select: React.FC<SelectProps> = ({
   className = '',
   error,
   showAvatar = false,
+  hasSearch = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -143,17 +145,19 @@ const Select: React.FC<SelectProps> = ({
 
       {isOpen && !isDisabled && (
         <div className={styles.menu}>
-          <div className={styles.searchContainer}>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-              placeholder="Поиск..."
-              onClick={(e) => e.stopPropagation()}
-              autoFocus
-            />
-          </div>
+          {hasSearch && (
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={styles.searchInput}
+                placeholder="Поиск..."
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+            </div>
+          )}
           <div className={styles.optionsList}>
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {

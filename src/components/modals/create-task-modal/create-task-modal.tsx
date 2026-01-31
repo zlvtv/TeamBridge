@@ -5,7 +5,7 @@ import { createTask } from '../../../lib/firestore';
 import styles from './create-task-modal.module.css';
 import Button from '../../ui/button/button';
 import Input from '../../ui/input/input';
-import Select from '../../ui/select/select';
+import Select, { SelectOption } from '../../ui/select/select';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -14,21 +14,14 @@ interface CreateTaskModalProps {
   initialContent?: string;
 }
 
-interface UserOption {
-  id: string;
-  full_name: string | null;
-  username: string;
-  avatar_url: string | null;
-}
-
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   sourceMessageId,
   initialContent,
 }) => {
-  const { currentProject, refreshProjects } = useProject();
-  const { user } = useAuth();
+  const { currentProject, refreshProjects, canManageTasks } = useProject();
+  const { user: currentUser } = useAuth();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -42,7 +35,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [availableUsers, setAvailableUsers] = useState<UserOption[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     if (initialContent && initialContent.length > 0) {
@@ -53,20 +46,43 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   useEffect(() => {
     if (!currentProject || !currentProject.members) return;
 
-    const users = currentProject.members.map((m) => ({
-      id: m.user_id,
-      full_name: m.profile?.full_name || 'Пользователь',
-      username: m.profile?.username || 'unknown',
-      avatar_url: m.profile?.avatar_url || null,
-    }));
+    const users = currentProject.members.map((m) => {
+      const displayName = m.profile?.full_name || (m.profile?.username ? `@${m.profile?.username}` : m.user?.full_name || m.user?.email?.split('@')[0] || `Пользователь ${m.user_id.slice(-5)}`);
+      const displayLabel = m.user_id === currentUser?.id ? `${displayName} (вы)` : displayName;
+      return {
+        value: m.user_id,
+        label: displayLabel,
+        avatar_url: m.profile?.avatar_url || null,
+      };
+    });
 
-    setAvailableUsers(users);
-    if (user) setAssignees([user.id]); 
-  }, [currentProject, user]);
+    // Сортируем пользователей: сначала текущий пользователь, затем остальные по алфавиту
+    const sortedUsers = users.sort((a, b) => {
+      // Если один из пользователей - текущий, он идет первым
+      if (a.value === currentUser?.id) return -1;
+      if (b.value === currentUser?.id) return 1;
+      // Иначе сортируем по алфавиту
+      return a.label.localeCompare(b.label, 'ru');
+    });
+
+    setAvailableUsers(sortedUsers);
+    if (currentUser) setAssignees([currentUser.id]); 
+  }, [currentProject, currentUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !currentProject || !user) return;
+    
+    if (!currentProject || !currentUser) return;
+    
+    // Проверяем права пользователя на создание задач
+    if (!canManageTasks) {
+      setError('У вас нет прав для создания задач. Только модераторы и создатели проекта могут создавать задачи.');
+      return;
+    }
+    
+    if (!title.trim()) return setError('Пожалуйста, введите название задачи');
+    if (!dueDate) return setError('Пожалуйста, выберите срок выполнения');
+    if (!isAssignAll && assignees.length === 0) return setError('Пожалуйста, выберите хотя бы одного ответственного');
     if (title.length > 500) return setError('Название слишком длинное');
     if (description.length > 2000) return setError('Описание слишком длинное');
 
@@ -75,17 +91,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
     try {
       const assigneeList = isAssignAll
-        ? availableUsers.map((u) => u.id)
-        : assignees.length > 0
+        ? availableUsers.map((u) => u.value)
+        : assignees.length > 0 || isAssignAll
         ? assignees
-        : [user.id];
+        : [currentUser.id];
+
+      if (!currentProject) throw new Error('Project not found');
+      if (!currentUser) throw new Error('User not authenticated');
+
+      if (dueDate && new Date(dueDate) < new Date()) {
+        setError('Срок выполнения не может быть в прошлом');
+        return;
+      }
 
       await createTask({
         project_id: currentProject.id,
         title: title.trim(),
         description: description.trim(),
-        due_date: dueDate || undefined,
-        source_message_id: sourceMessageId,
+        due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
+        source_message_id: sourceMessageId ? sourceMessageId : null,
         assignee_ids: assigneeList,
         tags: tags,
         priority,
@@ -96,16 +120,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
       onClose();
     } catch (err: any) {
-      setError('Не удалось создать задачу. Попробуйте позже.');
+      console.error('Ошибка создания задачи:', err);
+      setError(`Не удалось создать задачу: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const toggleAssignee = (userId: string) => {
-    setAssignees((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
   };
 
   if (!isOpen) return null;
@@ -116,7 +135,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         <h3>Создать задачу</h3>
         <form onSubmit={handleSubmit}>
           <div className={styles.field}>
-            <label>Название</label>
+            <label className={styles.requiredLabel}>Название</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, 500))}
@@ -124,6 +143,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               required
               maxLength={500}
               autoFocus
+              className={title.trim() ? '' : styles.requiredField}
             />
           </div>
 
@@ -140,16 +160,18 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </div>
 
           <div className={styles.field}>
-            <label>Срок выполнения</label>
+            <label className={styles.requiredLabel}>Срок выполнения</label>
             <Input
               type="datetime-local"
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(e) => { setDueDate(e.target.value); setError(null); }}
+              className={dueDate ? '' : styles.requiredField}
+              min={new Date().toISOString().slice(0, 16)}
             />
           </div>
 
           <div className={styles.field}>
-            <label>Ответственные</label>
+            <label className={styles.requiredLabel}>Ответственные</label>
             <div className={styles.assigneesToggle}>
               <label>
                 <input
@@ -158,36 +180,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   onChange={(e) => {
                     setIsAssignAll(e.target.checked);
                     if (e.target.checked) setAssignees([]);
+                    else setAssignees([currentUser.id]);
                   }}
                 />
                 Назначить всех
               </label>
             </div>
 
-            {!isAssignAll && (
-              <div className={styles.userList}>
-                {availableUsers.map((u) => (
-                  <div
-                    key={u.id}
-                    className={`${styles.userItem} ${assignees.includes(u.id) ? styles.selected : ''}`}
-                    onClick={() => toggleAssignee(u.id)}
-                  >
-                    <div
-                      className={styles.avatar}
-                      style={{ backgroundImage: u.avatar_url ? `url(${u.avatar_url})` : 'none' }}
-                    >
-                      {!u.avatar_url && (
-                        <span>{(u.full_name || u.username)?.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <span>{u.full_name || `@${u.username}`}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {!isAssignAll ? (
+              <Select
+                value={assignees}
+                onChange={setAssignees}
+                options={availableUsers}
+                placeholder="Выберите ответственного"
+                isMulti={true}
+                showAvatar={true}
+                className={styles.selectAssignees}
+              />
+            ) : null}
           </div>
-
-          {error && <div className={styles.error}>{error}</div>}
 
             <div className={styles.field}>
             <label>Теги</label>
@@ -235,10 +246,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 { value: 'high', label: 'Высокий' },
               ]}
               placeholder="Выберите приоритет"
+              hasSearch={false}
             />
           </div>
 
-          <div className={styles.field}>
+          <div className={`${styles.field} ${styles.statusField}`}>
             <label>Статус</label>
             <Select
               value={status}
@@ -249,15 +261,17 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 { value: 'done', label: 'Готово' },
               ]}
               placeholder="Выберите статус"
+              hasSearch={false}
             />
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+
+          {error && <div className={styles['error-message']}>{error}</div>}
           <div className={styles.actions}>
             <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
               Отмена
             </Button>
-            <Button type="submit" variant="primary" disabled={isLoading}>
+            <Button type="submit" variant="primary" disabled={isLoading || !title.trim() || !dueDate || (!isAssignAll && assignees.length === 0)}>
               {isLoading ? 'Создание...' : 'Создать'}
             </Button>
           </div>

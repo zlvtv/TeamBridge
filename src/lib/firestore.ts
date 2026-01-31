@@ -134,10 +134,10 @@ export const createTask = async (taskData: CreateTaskData) => {
     status: 'todo',
     priority: 'medium',
     created_at: serverTimestamp(),
-    created_by: taskData.assignee_ids[0],
+    created_by: taskData.assignee_ids?.[0] || '',
   });
 
-  return { id: docRef.id, ...taskData, status: 'todo', priority: 'medium', created_at: new Date().toISOString(), tags: taskData.tags || [] };
+  return { id: docRef.id, ...taskData, status: 'todo', priority: 'medium', created_at: new Date().toISOString(), created_by: taskData.assignee_ids?.[0] || '', tags: taskData.tags || [] };
 };
 
 export const sendMessage = async (projectId: string, text: string, senderId: string) => {
