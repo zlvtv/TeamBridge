@@ -3,7 +3,7 @@ services:
     name: TeamBridge
     runtime: static
     buildCommand: npm run build
-    publishPath: build
+    publishPath: dist
     envVars:
       - key: REACT_APP_BASE_URL
         value: https://teambridge-29jb.onrender.com
