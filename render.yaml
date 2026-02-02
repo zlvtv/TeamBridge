@@ -6,7 +6,7 @@ services:
     publishPath: dist
     envVars:
       - key: REACT_APP_BASE_URL
-        value: https://teambridge-29jb.onrender.com
+        value: https://teambridge-c991.onrender.com
     routes:
       - type: rewrite
         src: /(.*)

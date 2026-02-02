@@ -57,6 +57,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+      console.log('onAuthStateChanged:', user ? {
+        uid: user.uid,
+        email: user.email,
+        emailVerified: user.emailVerified,
+      } : null);
+
       if (user) {
         const isVerified = user.emailVerified;
 
@@ -109,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = result.user;
 
       const actionCodeSettings = {
-        url: 'https://teambridge-29jb.onrender.com/confirm',
+        url: 'https://teambridge-c991.onrender.com/confirm',
         handleCodeInApp: true,
       };
 
@@ -118,14 +124,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
-        username, 
-        full_name: username, 
+        username,
+        full_name: username,
         avatar_url: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
 
       await sendEmailVerification(user, actionCodeSettings);
+      localStorage.setItem('emailVerificationSent', 'true');
 
       return { data: { user: profileFromUser(user, username) }, error: null };
     } catch (error: any) {
@@ -139,7 +146,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await firebaseSignOut(auth);
     localStorage.removeItem('currentProjectId');
-    window.location.href = '/login';
+    localStorage.removeItem('emailVerificationSent');
+    window.location.href = '/login'; 
   };
 
   const resetPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
@@ -168,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     signUp,
     resetPassword,
-    signInAnonymously, 
+    signInAnonymously,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

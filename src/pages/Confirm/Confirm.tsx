@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { auth } from '../../lib/firebase';
-import { applyActionCode, sendEmailVerification } from 'firebase/auth'; 
+import { applyActionCode } from 'firebase/auth';
 import styles from './Confirm.module.css';
 
 const Confirm: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { isInitialized } = useAuth();
   const currentUser = auth.currentUser;
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -18,20 +18,22 @@ const Confirm: React.FC = () => {
   );
   const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  if (oobCode && status === 'loading') {
+  useEffect(() => {
+    console.log('Confirm: oobCode=', oobCode);
+    console.log('Confirm: isInitialized=', isInitialized);
+    console.log('Confirm: currentUser=', currentUser);
+  }, [oobCode, isInitialized, currentUser]);
+
+  useEffect(() => {
+    if (!isInitialized || !oobCode || status !== 'loading') return;
+
     applyActionCode(auth, oobCode)
       .then(async () => {
         if (auth.currentUser) {
           await auth.currentUser.reload();
         }
-
         setStatus('success');
-
-        const timer = setTimeout(() => {
-          window.location.href = '/dashboard';  
-        }, 2000);
-
+        const timer = setTimeout(() => navigate('/dashboard'), 2000);
         return () => clearTimeout(timer);
       })
       .catch((err) => {
@@ -42,26 +44,24 @@ useEffect(() => {
             : 'Неверная или уже использованная ссылка.'
         );
       });
-  }
-}, [oobCode, status]);
+  }, [isInitialized, oobCode, status, navigate]);
 
   const handleResend = async () => {
     if (!currentUser) {
-      alert('Сессия истекла. Пожалуйста, войдите снова.');
+      alert('Сессия истекла. Войдите снова.');
       navigate('/login');
       return;
     }
-
     try {
-      await sendEmailVerification(currentUser);
-      alert('Письмо отправлено повторно! Проверьте папку «Спам».');
+      await auth.currentUser.sendEmailVerification();
+      alert('Письмо отправлено! Проверьте спам.');
     } catch (err: any) {
-      alert('Не удалось отправить письмо: ' + (err.message || 'Неизвестная ошибка'));
+      alert('Ошибка: ' + err.message);
     }
   };
 
   const handleGoToLogin = () => {
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   if (oobCode) {
@@ -102,17 +102,13 @@ useEffect(() => {
       <div className={styles.formWrapper}>
         <h1 className={styles.title}>Подтвердите email</h1>
         <p className={styles.subtitle}>
-          Мы отправили письмо на <strong>{currentUser?.email}</strong>. Перейдите по ссылке, чтобы подтвердить аккаунт.
+          Мы отправили письмо на <strong>{currentUser?.email}</strong>. Перейдите по ссылке.
         </p>
-
         <button className={styles.submit} onClick={handleGoToLogin}>
           Войти
         </button>
-
         <p className={styles.hint}>
-          <small>
-            Письмо может прийти в течение нескольких минут. Проверьте папку «Спам», если не видите его в входящих.
-          </small>
+          <small>Проверьте папку «Спам», если письма нет.</small>
         </p>
       </div>
     </div>

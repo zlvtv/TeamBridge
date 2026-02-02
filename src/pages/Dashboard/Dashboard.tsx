@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+// src/pages/Dashboard/Dashboard.tsx
+
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import OrgIconPanel from '../../components/org-icon-panel/org-icon-panel';
 import SettingsPanel from '../../components/settings-panel/settings-panel';
@@ -9,6 +11,7 @@ import TaskBoard from '../../components/task-board/task-board';
 import ResizableSplitter from '../../components/resizable-splitter/resizable-splitter';
 import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
 import LoadingState from '../../components/ui/loading/LoadingState';
+import EmptyDashboard from '../../components/empty-dashboard/EmptyDashboard';
 import styles from './Dashboard.module.css';
 import { useUI } from '../../contexts/UIContext';
 import { useOrganization } from '../../contexts/OrganizationContext';
@@ -17,12 +20,10 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
   const { isBoardFullscreen, theme, chatWidth, isCreateOrgModalOpen, openCreateOrgModal, closeCreateOrgModal } = useUI();
-  const { organizations, isLoading: orgLoading, refreshOrganizations, currentOrganization } = useOrganization(); 
+  const { organizations, isLoading: orgLoading, refreshOrganizations, currentOrganization } = useOrganization();
   const { currentProject } = useProject();
   const { user } = useAuth();
   const location = useLocation();
-
-  const displayName = user?.full_name || user?.username || 'Пользователь';
 
   useEffect(() => {
     refreshOrganizations();
@@ -40,10 +41,6 @@ const Dashboard: React.FC = () => {
     return <LoadingState message="Загрузка организаций..." />;
   }
 
-  if (!orgLoading && organizations.length === 0 && !isCreateOrgModalOpen) {
-    return <LoadingState message="Загрузка..." />;
-  }
-
   return (
     <div className={`${styles.dashboard} ${theme}`}>
       <div className={styles['dashboard__panels-container']}>
@@ -55,16 +52,16 @@ const Dashboard: React.FC = () => {
         <MainHeader />
         <ChatHeader />
 
-        {!isBoardFullscreen ? (
+        {organizations.length === 0 ? (
+          <EmptyDashboard />
+        ) : !isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentProject ? <ProjectChat /> : <LoadingState message="Загрузка..." />}
-            
+              {currentProject ? <ProjectChat /> : <LoadingState message="Выберите проект" />}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>
               {currentProject ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />}
-            
             </div>
           </div>
         ) : (

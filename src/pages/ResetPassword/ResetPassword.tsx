@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, confirmPasswordReset } from 'firebase/auth';
 import styles from './ResetPassword.module.css';
@@ -8,9 +8,16 @@ const ResetPassword: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);  
+  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
   const auth = getAuth();
+
+  useEffect(() => {
+    const oobCode = localStorage.getItem('reset_password_oobCode');
+    if (!oobCode) {
+      navigate('/password-recovery', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,20 +46,34 @@ const ResetPassword: React.FC = () => {
 
     try {
       await confirmPasswordReset(auth, oobCode, password);
-
       localStorage.removeItem('reset_password_oobCode');
       setIsSuccess(true);
     } catch (err: any) {
-      if (err.code === 'auth/invalid-action-code') {
-        setError('Ссылка недействительна или уже использована');
-      } else if (err.code === 'auth/expired-action-code') {
-        setError('Срок действия ссылки истек');
-      } else {
-        setError('Не удалось сменить пароль');
+      let message = 'Не удалось сменить пароль';
+
+      switch (err.code) {
+        case 'auth/invalid-action-code':
+          message = 'Ссылка недействительна или уже использована';
+          break;
+        case 'auth/expired-action-code':
+          message = 'Срок действия ссылки истек';
+          break;
+        case 'auth/weak-password':
+          message = 'Пароль слишком слабый';
+          break;
+        default:
+          console.error('Ошибка сброса пароля:', err);
       }
+
+      setError(message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBack = () => {
+    localStorage.removeItem('reset_password_oobCode');
+    navigate('/login');
   };
 
   return (
@@ -62,14 +83,9 @@ const ResetPassword: React.FC = () => {
 
         {isSuccess ? (
           <div className={styles.successContainer}>
-            <h2 className={styles.successTitle}>Пароль изменён!</h2>
-            <p className={styles.successText}>
-              Теперь вы можете войти с новым паролем.
-            </p>
-            <button
-              className={styles.submit}
-              onClick={() => navigate('/login')}
-            >
+            <h2 className={styles.successTitle}>Пароль изменён.</h2>
+            <p className={styles.successText}>Теперь вы можете войти с новым паролем.</p>
+            <button className={styles.submit} onClick={() => navigate('/login')}>
               Войти
             </button>
           </div>
@@ -79,7 +95,9 @@ const ResetPassword: React.FC = () => {
             {error && <div className={styles.error}>{error}</div>}
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.field}>
-                <label htmlFor="password" className={styles.label}>Новый пароль</label>
+                <label htmlFor="password" className={styles.label}>
+                  Новый пароль
+                </label>
                 <input
                   id="password"
                   type="password"
@@ -93,7 +111,9 @@ const ResetPassword: React.FC = () => {
                 />
               </div>
               <div className={styles.field}>
-                <label htmlFor="confirmPassword" className={styles.label}>Подтвердите</label>
+                <label htmlFor="confirmPassword" className={styles.label}>
+                  Подтвердите
+                </label>
                 <input
                   id="confirmPassword"
                   type="password"
@@ -111,12 +131,7 @@ const ResetPassword: React.FC = () => {
               </button>
             </form>
             <p className={styles.footer}>
-              <button
-                type="button"
-                className={styles.link}
-                onClick={() => navigate('/login')}
-                disabled={isLoading}
-              >
+              <button type="button" className={styles.link} onClick={handleBack} disabled={isLoading}>
                 ← Назад ко входу
               </button>
             </p>
