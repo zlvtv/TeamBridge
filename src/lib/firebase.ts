@@ -3,12 +3,12 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDnAd826jCc5Cc5mUN0Rpf-wSLrDxHyX2Y",
-  authDomain: "teambridge-f033d.firebaseapp.com",
-  projectId: "teambridge-f033d",
-  storageBucket: "teambridge-f033d.firebasestorage.app",
-  messagingSenderId: "507962840376",
-  appId: "1:507962840376:web:944d6f030478c5e1dc5dcd"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

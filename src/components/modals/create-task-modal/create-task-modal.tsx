@@ -56,12 +56,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       };
     });
 
-    // Сортируем пользователей: сначала текущий пользователь, затем остальные по алфавиту
     const sortedUsers = users.sort((a, b) => {
-      // Если один из пользователей - текущий, он идет первым
       if (a.value === currentUser?.id) return -1;
       if (b.value === currentUser?.id) return 1;
-      // Иначе сортируем по алфавиту
       return a.label.localeCompare(b.label, 'ru');
     });
 
@@ -74,7 +71,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     
     if (!currentProject || !currentUser) return;
     
-    // Проверяем права пользователя на создание задач
     if (!canManageTasks) {
       setError('У вас нет прав для создания задач. Только модераторы и создатели проекта могут создавать задачи.');
       return;

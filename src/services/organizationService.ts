@@ -220,23 +220,6 @@ async createOrganization(data: CreateOrganizationData): Promise<OrganizationWith
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Сначала войдите в аккаунт');
 
-    const q = query(
-      collection(db, 'organization_members'),
-      where('organization_id', '==', organizationId),
-      where('user_id', '==', userId)
-    );
-    let memberSnap = [];
-    try {
-      const snap = await getDocsFromServer(q);
-      memberSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (err) {
-      const snap = await getDocs(q);
-      memberSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
-
-    if (memberSnap.length > 0) {
-      await deleteDocById('organization_members', memberSnap[0].id);
-    }
 
     await createDoc('organization_members', {
       organization_id: organizationId,

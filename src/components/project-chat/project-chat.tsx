@@ -159,10 +159,8 @@ const ProjectChat: React.FC = () => {
         return; 
       }
       
-      // Закрываем контекстное меню
       setContextMenu({ show: false, x: 0, y: 0, message: null });
       
-      // Если клик вне контекстного меню и модальных окон, сбрасываем ошибку
       if (!e.target || !(e.target as Element).closest(`.${styles.contextMenu}, .${styles['input-textarea']}, .modal, .modalOverlay`)) {
         setError(null);
       }

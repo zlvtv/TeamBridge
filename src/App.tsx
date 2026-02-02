@@ -79,21 +79,14 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
-      <Route path="/password-recovery" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+      <Route path="/login" element={<UnprotectedRoute><Login /></UnprotectedRoute>} />
+      <Route path="/signup" element={<UnprotectedRoute><SignUp /></UnprotectedRoute>} />
+      <Route path="/password-recovery" element={<UnprotectedRoute><ForgotPassword /></UnprotectedRoute>} />
 
       <Route path="/auth/callback" element={<UnprotectedRoute><AuthCallback /></UnprotectedRoute>} />
       <Route path="/recovery/callback" element={<UnprotectedRoute><RecoveryCallback /></UnprotectedRoute>} />
 
-      <Route
-        path="/reset-password"
-        element={
-          <UnprotectedRoute>
-            {useAuth().user ? <Navigate to="/dashboard" replace /> : <ResetPassword />}
-          </UnprotectedRoute>
-        }
-      />
+      <Route path="/reset-password" element={<VerifyEmailRoute><ResetPassword /></VerifyEmailRoute>} />
 
       <Route path="/confirm" element={<VerifyEmailRoute><Confirm /></VerifyEmailRoute>} />
 

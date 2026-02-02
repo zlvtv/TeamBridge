@@ -60,7 +60,6 @@
   margin-top: 30px;
 }
 
-/* Кнопки */
 .btn {
   display: inline-block;
   padding: 14px 32px;
@@ -164,7 +163,6 @@
   font-weight: 600;
 }
 
-/* Demo */
 .landing__demo {
   padding: 100px 20px;
   text-align: center;
@@ -550,7 +548,6 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Footer */
 .landing__footer {
   text-align: center;
   padding: 40px 20px;

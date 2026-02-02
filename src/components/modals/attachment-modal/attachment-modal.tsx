@@ -58,7 +58,6 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         <div
           className={styles['attachment-option']}
           onClick={() => {
-            console.log('Task option clicked');
             handleOptionClick('task');
           }}
         >

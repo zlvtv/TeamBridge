@@ -1,7 +1,7 @@
 .input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color, #e2e8f0); /* same as input */
+  border: 1px solid var(--border-color, #e2e8f0); 
   border-radius: var(--border-radius, 8px);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
@@ -32,7 +32,7 @@
 .input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px var(--color-surface, #f8fafc) inset;
   -webkit-text-fill-color: var(--color-text, #1e293b);
-  border: 1px solid var(--border-color, #e2e8f0); /* same as input */
+  border: 1px solid var(--border-color, #e2e8f0); 
 }
 
 .input:-webkit-autofill:focus {
@@ -61,7 +61,6 @@
   border-radius: 2px;
 }
 
-/* Стилизация скроллбара для textarea */
 .input::-webkit-scrollbar {
   width: 6px;
 }

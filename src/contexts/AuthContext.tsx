@@ -108,6 +108,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await createUserWithEmailAndPassword(auth, email, password);
       const user = result.user;
 
+      const actionCodeSettings = {
+        url: 'https://teambridge-29jb.onrender.com/confirm',
+        handleCodeInApp: true,
+      };
+
       await updateProfile(user, { displayName: username });
 
       await setDoc(doc(db, 'users', user.uid), {
@@ -120,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatedAt: new Date(),
       });
 
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, actionCodeSettings);
 
       return { data: { user: profileFromUser(user, username) }, error: null };
     } catch (error: any) {

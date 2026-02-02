@@ -45,15 +45,6 @@ useEffect(() => {
   }
 }, [oobCode, status]);
 
-  useEffect(() => {
-    if (!oobCode && currentUser?.emailVerified) {
-      const timer = setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser, navigate, oobCode]);
-
   const handleResend = async () => {
     if (!currentUser) {
       alert('Сессия истекла. Пожалуйста, войдите снова.');
@@ -70,7 +61,7 @@ useEffect(() => {
   };
 
   const handleGoToLogin = () => {
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   if (oobCode) {
