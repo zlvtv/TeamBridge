@@ -32,8 +32,13 @@ const Confirm: React.FC = () => {
         if (auth.currentUser) {
           await auth.currentUser.reload();
         }
+
         setStatus('success');
-        const timer = setTimeout(() => navigate('/dashboard'), 2000);
+
+        const timer = setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 2000);
+
         return () => clearTimeout(timer);
       })
       .catch((err) => {
@@ -53,10 +58,12 @@ const Confirm: React.FC = () => {
       return;
     }
     try {
-      await auth.currentUser.sendEmailVerification();
+      await currentUser.sendEmailVerification({
+        url: 'https://teambridge-c991.onrender.com/confirm',
+      });
       alert('Письмо отправлено! Проверьте спам.');
     } catch (err: any) {
-      alert('Ошибка: ' + err.message);
+      alert('Ошибка при отправке: ' + err.message);
     }
   };
 
@@ -110,6 +117,9 @@ const Confirm: React.FC = () => {
         <p className={styles.hint}>
           <small>Проверьте папку «Спам», если письма нет.</small>
         </p>
+        <button type="button" className={styles.link} onClick={handleResend}>
+          Отправить письмо повторно
+        </button>
       </div>
     </div>
   );
