@@ -8,8 +8,10 @@ export interface Task {
   due_date: string | null;
   created_by: string;
   created_at: string;
+  updated_at: string;
   assignees: string[];
   tags?: string[];
+  source_message_id?: string | null;
 }
 
 export interface CreateTaskData {
@@ -20,6 +22,8 @@ export interface CreateTaskData {
   source_message_id?: string;
   assignee_ids: string[];
   tags?: string[];
+  priority: 'low' | 'medium' | 'high';
+  status: 'todo' | 'in_progress' | 'done';
 }
 
 export type TaskTab = 'project' | 'organization' | 'user';

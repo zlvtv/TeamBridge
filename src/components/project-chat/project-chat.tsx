@@ -89,13 +89,11 @@ const ProjectChat: React.FC = () => {
   };
 
   const handleAttachmentOptionClick = (type: 'photo' | 'poll' | 'task') => {
-    console.log('handleAttachmentOptionClick triggered with type:', type);
     if (type === 'task') {
       if (!canManageTasks()) {
         return;
       }
       setIsTaskModalOpen(true);
-      console.log('Task modal state set to true');
     }
   };
 

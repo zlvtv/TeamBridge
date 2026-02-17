@@ -1,35 +1,57 @@
 .calendar {
-  padding: 16px;
-  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 8px;
-  margin-bottom: 8px;
+  display: flex;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .dayHeader {
+  flex: 1;
+  padding: 12px;
   text-align: center;
-  font-weight: 600;
-  color: #1a1a1a;
+  border-right: 1px solid #e2e8f0;
+}
+
+.dayHeader:last-child {
+  border-right: none;
 }
 
 .dayName {
-  text-transform: capitalize;
   font-size: 12px;
-  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.dayNumber {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 400px;
 }
 
 .dayColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 200px;
-  padding: 8px;
-  border-right: 1px solid #f0f0f0;
+  flex: 1;
+  padding: 12px;
+  border-right: 1px solid #e2e8f0;
+  overflow-y: auto;
+  max-height: 400px;
 }
 
 .dayColumn:last-child {
@@ -38,58 +60,101 @@
 
 .empty {
   text-align: center;
-  color: #aaa;
+  color: #718096;
+  font-size: 14px;
+  margin: 12px 0;
   font-style: italic;
-  margin-top: 10px;
 }
 
 .task {
   background: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 13px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.task:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .task.done {
   opacity: 0.6;
   text-decoration: line-through;
+  color: #718096;
 }
 
 .taskTitle {
+  font-size: 14px;
   font-weight: 500;
-  margin-bottom: 4px;
-  word-break: break-word;
+  color: #2d3748;
+  margin-bottom: 6px;
+  line-height: 1.3;
 }
 
 .taskAssignees {
   display: flex;
   gap: 4px;
-  flex-wrap: wrap;
 }
 
 .avatar {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background-color: #ddd;
-  font-size: 10px;
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
   color: white;
-  background-color: #5a67d8;
+  background-color: #4a5568;
+  font-weight: 500;
 }
 
 .avatarMore {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background-color: #777;
-  font-size: 10px;
+  background-color: #718096;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
   color: white;
+  font-weight: 500;
+}
+
+/* Стили для случая, когда нет задач на неделю */
+.noTasksContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  color: #718096;
+  min-height: 300px;
+}
+
+.noTasksIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.noTasksTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #2d3748;
+}
+
+.noTasksSubtitle {
+  font-size: 14px;
+  max-width: 300px;
+  line-height: 1.5;
 }

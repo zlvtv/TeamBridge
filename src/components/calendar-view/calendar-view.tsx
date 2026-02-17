@@ -1,5 +1,5 @@
-import React from 'react';
-import { format, parseISO, eachDayOfInterval, startOfWeek, endOfWeek } from 'date-fns';
+import React, { useMemo } from 'react';
+import { format, parseISO, eachDayOfInterval, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './calendar-view.module.css';
 
@@ -9,23 +9,41 @@ interface CalendarViewProps {
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({ tasks, assignees }) => {
-  const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
-  const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+    return eachDayOfInterval({ start: weekStart, end: weekEnd });
+  }, []);
 
-  const tasksByDay = days.map((day) => ({
-    day,
-    tasks: tasks.filter((task) => {
-      if (!task.due_date) return false;
-      const taskDate = parseISO(task.due_date);
-      return (
-        taskDate.getDate() === day.getDate() &&
-        taskDate.getMonth() === day.getMonth() &&
-        taskDate.getFullYear() === day.getFullYear()
-      );
-    }),
-  }));
+  const tasksByDay = useMemo(() => {
+    return weekDays.map(day => {
+      const dayTasks = tasks.filter(task => {
+        if (!task.due_date) return false;
+        
+        let taskDate: Date | null = null;
+        
+        if (typeof task.due_date === 'string') {
+          taskDate = parseISO(task.due_date);
+        } else if (task.due_date?.toDate) {
+          taskDate = task.due_date.toDate();
+        }
+        
+        if (!taskDate || isNaN(taskDate.getTime())) return false;
+        
+        return isSameDay(taskDate, day);
+      });
+      
+      return {
+        day,
+        tasks: dayTasks
+      };
+    });
+  }, [tasks, weekDays]);
+
+  const hasTasksThisWeek = useMemo(() => {
+    return tasksByDay.some(day => day.tasks.length > 0);
+  }, [tasksByDay]);
 
   return (
     <div className={styles.calendar}>
@@ -43,39 +61,48 @@ const CalendarView: React.FC<CalendarViewProps> = ({ tasks, assignees }) => {
       </div>
 
       <div className={styles.body}>
-        {tasksByDay.map(({ day, tasks }) => (
-          <div key={day.toISOString()} className={styles.dayColumn}>
-            {tasks.length === 0 ? (
-              <div className={styles.empty}>Нет задач</div>
-            ) : (
-              tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`${styles.task} ${task.status === 'done' ? styles.done : ''}`}
-                  style={{ borderColor: getPriorityColor(task.priority) }}
-                >
-                  <div className={styles.taskTitle}>{task.title}</div>
-                  <div className={styles.taskAssignees}>
-                    {assignees[task.id]?.slice(0, 2).map((user) => (
-                      <div
-                        key={user.id}
-                        className={styles.avatar}
-                        style={{ backgroundImage: user.avatar_url ? `url(${user.avatar_url})` : 'none' }}
-                      >
-                        {!user.avatar_url && (
-                          <span>{(user.full_name || user.username)?.charAt(0).toUpperCase()}</span>
-                        )}
-                      </div>
-                    ))}
-                    {assignees[task.id]?.length > 2 && (
-                      <div className={styles.avatarMore}>+{assignees[task.id].length - 2}</div>
-                    )}
+        {hasTasksThisWeek ? (
+          tasksByDay.map(({ day, tasks }) => (
+            <div key={day.toISOString()} className={styles.dayColumn}>
+              {tasks.length === 0 ? (
+                <div className={styles.empty}>Нет задач</div>
+              ) : (
+                tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className={`${styles.task} ${task.status === 'done' ? styles.done : ''}`}
+                    style={{ borderColor: getPriorityColor(task.priority) }}
+                    title={`Срок: ${format(parseISO(task.due_date), 'dd.MM.yyyy HH:mm')}`}
+                  >
+                    <div className={styles.taskTitle}>{task.title}</div>
+                    <div className={styles.taskAssignees}>
+                      {assignees[task.id]?.slice(0, 2).map((user) => (
+                        <div
+                          key={user.id}
+                          className={styles.avatar}
+                          style={{ backgroundImage: user.avatar_url ? `url(${user.avatar_url})` : 'none' }}
+                        >
+                          {!user.avatar_url && (
+                            <span>{(user.full_name || user.username)?.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                      ))}
+                      {assignees[task.id]?.length > 2 && (
+                        <div className={styles.avatarMore}>+{assignees[task.id].length - 2}</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
+          ))
+        ) : (
+          <div className={styles.noTasksContainer}>
+            <div className={styles.noTasksIcon}>🗓️</div>
+            <div className={styles.noTasksTitle}>Нет задач на этой неделе</div>
+            <div className={styles.noTasksSubtitle}>Добавьте задачи с датой выполнения, чтобы они отобразились в календаре</div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

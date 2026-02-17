@@ -19,12 +19,6 @@ const Confirm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('Confirm: oobCode=', oobCode);
-    console.log('Confirm: isInitialized=', isInitialized);
-    console.log('Confirm: currentUser=', currentUser);
-  }, [oobCode, isInitialized, currentUser]);
-
-  useEffect(() => {
     if (!isInitialized || !oobCode || status !== 'loading') return;
 
     applyActionCode(auth, oobCode)

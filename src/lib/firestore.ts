@@ -115,29 +115,42 @@ export const createProject = async (orgId: string, name: string, description?: s
 };
 
 export const addMessage = async (projectId: string, text: string, senderId: string) => {
-  await addDoc(collection(db, `projects/${projectId}/messages`), {
-    text,
-    senderId,
-    createdAt: serverTimestamp(),
+    await addDoc(collection(db, 'messages'), {
+    text: encryptedText,
+    sender_id: userId,
+    project_id: projectId,  
+    created_at: serverTimestamp(),
   });
 };
 
 export const getMessages = async (projectId: string) => {
-  const q = query(collection(db, `projects/${projectId}/messages`));
+  const q = query(collection(db, 'messages'), where('project_id', '==', projectId));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
 export const createTask = async (taskData: CreateTaskData) => {
+  const status = taskData.status || 'todo';
+  const priority = taskData.priority || 'medium';
   const docRef = await addDoc(collection(db, 'tasks'), {
     ...taskData,
-    status: 'todo',
-    priority: 'medium',
+    status,
+    priority,
     created_at: serverTimestamp(),
+    updated_at: serverTimestamp(),
     created_by: taskData.assignee_ids?.[0] || '',
   });
 
-  return { id: docRef.id, ...taskData, status: 'todo', priority: 'medium', created_at: new Date().toISOString(), created_by: taskData.assignee_ids?.[0] || '', tags: taskData.tags || [] };
+  return { 
+    id: docRef.id, 
+    ...taskData, 
+    status, 
+    priority, 
+    created_at: new Date().toISOString(), 
+    updated_at: new Date().toISOString(),
+    created_by: taskData.assignee_ids?.[0] || '', 
+    tags: taskData.tags || [] 
+  };
 };
 
 export const sendMessage = async (projectId: string, text: string, senderId: string) => {

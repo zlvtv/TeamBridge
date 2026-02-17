@@ -37,12 +37,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   const isOwner = currentOrganization?.created_by === user?.id;
 
-  useEffect(() => {
-  const fetchData = async () => {
-    await refreshCurrentOrganization();
-  };
-  fetchData();
-}, [refreshCurrentOrganization]);
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -227,7 +222,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
           </div>
         )}
 
-        {showLeaveConfirm && (
+        {showLeaveConfirm ? (
           <div className={styles.section}>
             <p>Вы уверены, что хотите выйти? Доступ к проектам будет закрыт.</p>
             <div className={styles.actions}>
@@ -239,9 +234,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
               </Button>
             </div>
           </div>
-        )}
-
-        {showDeleteConfirm ? (
+        ) : showDeleteConfirm ? (
           <div className={styles.section}>
             <p>Вы уверены, что хотите удалить организацию? Все данные будут потеряны безвозвратно.</p>
             <div className={styles.actions}>

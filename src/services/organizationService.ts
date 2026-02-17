@@ -257,37 +257,69 @@ async createOrganization(data: CreateOrganizationData): Promise<OrganizationWith
   },
 
   async deleteOrganization(organizationId: string): Promise<void> {
-    const batch = writeBatch(db);
+  const batch1 = writeBatch(db);
+  batch1.delete(doc(db, 'organizations', organizationId));
 
-    batch.delete(doc(db, 'organizations', organizationId));
+  const membersSnap = await getDocs(
+    query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
+  );
+  membersSnap.docs.forEach(doc => batch1.delete(doc.ref));
 
-    const membersSnap = await getDocs(
-      query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
-    );
-    membersSnap.docs.forEach((doc) => batch.delete(doc.ref));
+  const invitesSnap = await getDocs(
+    query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
+  );
+  invitesSnap.docs.forEach(doc => batch1.delete(doc.ref));
 
-    const invitesSnap = await getDocs(
-      query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
-    );
-    invitesSnap.docs.forEach((doc) => batch.delete(doc.ref));
+  const tasksSnap = await getDocs(
+    query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
+  );
+  tasksSnap.docs.forEach(doc => batch1.delete(doc.ref));
 
-    const projectsSnap = await getDocs(
-      query(collection(db, 'projects'), where('orgId', '==', organizationId))
-    );
-    for (const projectDoc of projectsSnap.docs) {
-      const messagesSnap = await getDocs(collection(db, `projects/${projectDoc.id}/messages`));
-      messagesSnap.docs.forEach((msgDoc) => batch.delete(msgDoc.ref));
-      batch.delete(projectDoc.ref);
-    }
+  await batch1.commit();
 
-    const tasksSnap = await getDocs(
-      query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
-    );
-    tasksSnap.docs.forEach((taskDoc) => batch.delete(taskDoc.ref));
+  const projectsSnap = await getDocs(
+    query(collection(db, 'projects'), where('organization_id', '==', organizationId))
+  );
+  const projectIds = projectsSnap.docs.map(d => d.id);
 
+  if (projectIds.length === 0) return;
+
+  const pmSnap = await getDocs(
+    query(collection(db, 'project_members'), where('project_id', 'in', projectIds))
+  );
+
+  const messagesSnap = await getDocs(
+    query(collection(db, 'messages'), where('project_id', 'in', projectIds))
+  );
+
+  const MAX_BATCH_SIZE = 499;
+  let batch = writeBatch(db);
+  let opCount = 0;
+
+  const addToBatch = (ref: any) => {
+    batch.delete(ref);
+    opCount++;
+    if (opCount >= MAX_BATCH_SIZE) throw new Error('Batch full');
+  };
+
+  try {
+    pmSnap.docs.forEach(doc => addToBatch(doc.ref));
+    messagesSnap.docs.forEach(doc => addToBatch(doc.ref));
+    projectsSnap.docs.forEach(doc => addToBatch(doc.ref));
+  } catch (err) {
     await batch.commit();
-    },
+    batch = writeBatch(db);
+    opCount = 0;
+    [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].forEach(d => {
+      if (opCount < MAX_BATCH_SIZE) {
+        batch.delete(d.ref);
+        opCount++;
+      }
+    });
+  }
 
+  if (opCount > 0) await batch.commit();
+},
   async isUserInOrganization(organizationId: string, userId: string): Promise<boolean> {
   const membersQuery = query(
     collection(db, 'organization_members'),

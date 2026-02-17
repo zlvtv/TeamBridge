@@ -8,12 +8,13 @@ interface TaskCardProps {
   task: any;
   assignees: any[];
   onStatusChange: (status: 'todo' | 'in_progress' | 'done') => void;
+  onEdit: () => void;
   tags?: string[];
   priority?: 'low' | 'medium' | 'high';
   dueDate?: string | null;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, assignees, onStatusChange, priority, dueDate }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, assignees, onStatusChange, onEdit, priority, dueDate }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (dateString: string | null) => {
@@ -76,15 +77,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, assignees, onStatusChange, pr
       <div className={styles.header}>
         <h4
           className={styles.title}
-          onClick={() => setIsExpanded(!isExpanded)}
-          title="Нажмите, чтобы развернуть"
+          onClick={onEdit}
+          title="Нажмите, чтобы редактировать задачу"
         >
           {task.title}
         </h4>
 
         <div
           className={styles.statusBadge}
-          style={{ backgroundColor: getPriorityColor(priority || task.priority) }}
+          style={{ backgroundColor: getPriorityColor(priority || task.priority), cursor: 'pointer' }}
           onClick={toggleStatus}
           title="Нажмите, чтобы изменить статус"
         >

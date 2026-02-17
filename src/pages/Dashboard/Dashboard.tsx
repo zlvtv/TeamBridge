@@ -1,6 +1,4 @@
-// src/pages/Dashboard/Dashboard.tsx
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import OrgIconPanel from '../../components/org-icon-panel/org-icon-panel';
 import SettingsPanel from '../../components/settings-panel/settings-panel';
@@ -21,7 +19,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const Dashboard: React.FC = () => {
   const { isBoardFullscreen, theme, chatWidth, isCreateOrgModalOpen, openCreateOrgModal, closeCreateOrgModal } = useUI();
   const { organizations, isLoading: orgLoading, refreshOrganizations, currentOrganization } = useOrganization();
-  const { currentProject } = useProject();
+  const { currentProject, isLoading: projectLoading } = useProject();
   const { user } = useAuth();
   const location = useLocation();
 
@@ -57,11 +55,11 @@ const Dashboard: React.FC = () => {
         ) : !isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentProject ? <ProjectChat /> : <LoadingState message="Выберите проект" />}
+              {(currentProject && !projectLoading) ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>
-              {currentProject ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />}
+              {(currentProject && !projectLoading) ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />}
             </div>
           </div>
         ) : (

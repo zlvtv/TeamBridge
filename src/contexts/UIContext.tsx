@@ -88,9 +88,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   setIsCreateOrgModalOpen(true);
 }, []);
 
-useEffect(() => {
-  console.log('isCreateOrgModalOpen изменился:', isCreateOrgModalOpen);
-}, [isCreateOrgModalOpen]);
   const closeCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(false), []);
   const toggleFullscreen = useCallback(() => {
     setIsBoardFullscreen((prev) => !prev);
