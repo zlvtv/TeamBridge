@@ -102,8 +102,8 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const confirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteOrganization(currentOrganization.id);
       onClose();
+      await deleteOrganization(currentOrganization.id);
       showToast('Организация удалена', 'success');
     } catch (err: any) {
       showToast('Ошибка удаления: ' + err.message, 'error');

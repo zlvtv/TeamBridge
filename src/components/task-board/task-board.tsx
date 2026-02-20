@@ -1,7 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styles from './task-board.module.css';
 import { useProject } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useOrganization } from '../../contexts/OrganizationContext';
+import LoadingState from '../ui/loading/LoadingState';
+import { useAllUserProjects } from '../../hooks/useAllUserProjects';
 import TaskCard from '../task-card/task-card';
 import Button from '../ui/button/button';
 import Select from '../ui/select/select';
@@ -22,10 +25,13 @@ interface EditTaskData {
 }
 
 const TaskBoard: React.FC = () => {
-  const { currentProject, refreshProjects, projects } = useProject();
+  const { currentProject, refreshProjects, projects: orgProjects } = useProject();
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
 
-  const [activeTab, setActiveTab] = useState<TaskTab | 'calendar'>('project');
+  const { projects: allUserProjects, loading: loadingAllProjects } = useAllUserProjects();
+
+  const [activeTab, setActiveTab] = useState<TaskTab | 'calendar'>('user');
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
@@ -35,60 +41,78 @@ const TaskBoard: React.FC = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const hasProject = !!currentProject;
+  const hasProject = !!currentProject && !!currentOrganization;
 
   const allOrganizationTasks = useMemo(() => {
     if (!currentProject?.organization_id) return [];
-    
-    const allTasks: Task[] = [];
-    
-    projects.forEach(project => {
-      
-      if (project.id !== currentProject.id) { 
-        project.tasks.forEach(task => {
-          const taskWithProject = {
-            ...task,
-            project_id: project.id,
-            project_name: project.name 
-          };
-          allTasks.push(taskWithProject);
-        });
-      }
-    });
-    
-    return allTasks;
-  }, [projects, currentProject]);
 
-  const tasks = hasProject ? currentProject.tasks : [];
+    const allTasks: Task[] = [];
+    orgProjects.forEach(project => {
+      project.tasks.forEach(task => {
+        allTasks.push({
+          ...task,
+          project_id: project.id,
+          project_name: project.name,
+        });
+      });
+    });
+    return allTasks;
+  }, [orgProjects, currentProject?.organization_id]);
+
+  const allUserTasks = useMemo(() => {
+    const tasks: Task[] = [];
+    allUserProjects.forEach(project => {
+      project.tasks.forEach(task => {
+        tasks.push({
+          ...task,
+          project_id: project.id,
+          project_name: project.name,
+        });
+      });
+    });
+    return tasks;
+  }, [allUserProjects]);
+
+  const currentProjectTasks = useMemo(() => {
+    if (!currentProject) return [];
+    return currentProject.tasks.map(task => ({
+      ...task,
+      project_id: currentProject.id,
+      project_name: currentProject.name,
+    }));
+  }, [currentProject]);
 
   const filteredTasks = useMemo(() => {
-    if (!hasProject) return [];
-    
     let filtered: Task[] = [];
-    
-    if (activeTab === 'project') {
-      filtered = tasks.filter(task => task.project_id === currentProject?.id);
-    } else if (activeTab === 'user') {
-      filtered = tasks;
+
+    if (activeTab === 'project' && currentProject) {
+      filtered = currentProjectTasks;
     } else if (activeTab === 'organization' && currentProject?.organization_id) {
       filtered = allOrganizationTasks;
-    } else if (activeTab === 'calendar') {
-      filtered = tasks;
+    } else if (activeTab === 'calendar' && currentProject) {
+      filtered = currentProjectTasks;
+    } else {
+      filtered = allUserTasks;
     }
 
-    const filteredBySearch = filtered.filter(task => {
-      const matchesSearch = task.title.toLowerCase().includes(filters.search.toLowerCase());
+    return filtered.filter(task => {
+      const matchesSearch = !filters.search || task.title.toLowerCase().includes(filters.search.toLowerCase());
       const matchesStatus = !filters.status || task.status === filters.status;
       const matchesPriority = !filters.priority || task.priority === filters.priority;
       return matchesSearch && matchesStatus && matchesPriority;
     });
-    
-    return filteredBySearch;
-  }, [hasProject, tasks, filters, activeTab, currentProject?.id, currentProject?.organization_id, allOrganizationTasks]);
+  }, [
+    activeTab,
+    currentProject,
+    currentProjectTasks,
+    allOrganizationTasks,
+    allUserTasks,
+    filters,
+  ]);
 
   const assigneesMap = useMemo(() => {
-    if (!hasProject || !currentProject?.members) return {};
-    
+    if (!currentProject?.members) return {};
+
     const map: { [key: string]: any[] } = {};
     filteredTasks.forEach(task => {
       map[task.id] = currentProject.members
@@ -96,14 +120,15 @@ const TaskBoard: React.FC = () => {
         .map(m => m.profile);
     });
     return map;
-  }, [hasProject, filteredTasks, currentProject?.members]);
+  }, [currentProject?.members, filteredTasks]);
 
   const tabs = [
-    { id: 'project', label: 'Задачи проекта' },
-    { id: 'organization', label: 'Задачи организации' },
+    ...(currentProject ? [{ id: 'project', label: 'Задачи проекта' }] : []),
+    ...(currentProject ? [{ id: 'organization', label: 'Задачи организации' }] : []),
     { id: 'user', label: 'Все задачи' },
-    { id: 'calendar', label: 'Календарь' },
+    ...(currentProject ? [{ id: 'calendar', label: 'Календарь' }] : []),
   ];
+
 
   const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'done') => {
     try {
@@ -123,6 +148,12 @@ const TaskBoard: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
+  useEffect(() => {
+    if (!hasProject && activeTab !== 'user') {
+      setActiveTab('user');
+    }
+  }, [hasProject, activeTab]);
+
   const handleUpdateTask = async (taskId: string, data: EditTaskData) => {
     try {
       await updateDocById('tasks', taskId, { ...data, updated_at: new Date().toISOString() });
@@ -131,10 +162,6 @@ const TaskBoard: React.FC = () => {
       console.error('Ошибка обновления задачи:', err);
     }
   };
-
-  if (!hasProject) {
-    return <div className={styles.placeholder}>Выберите проект</div>;
-  }
 
   return (
     <div className={styles.board}>
@@ -188,6 +215,8 @@ const TaskBoard: React.FC = () => {
 
       {activeTab === 'calendar' ? (
         <CalendarView tasks={filteredTasks} assignees={assigneesMap} />
+      ) : loadingAllProjects ? (
+        <LoadingState message="Загрузка всех задач..." />
       ) : (
         <div className={styles.taskList}>
           {filteredTasks.length === 0 ? (

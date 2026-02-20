@@ -40,7 +40,7 @@ const profileFromUser = (user: FirebaseUser, username: string): UserProfile => (
   avatar_url: null,
 });
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<{
@@ -57,11 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
-      console.log('onAuthStateChanged:', user ? {
-        uid: user.uid,
-        email: user.email,
-        emailVerified: user.emailVerified,
-      } : null);
 
       if (user) {
         const isVerified = user.emailVerified;

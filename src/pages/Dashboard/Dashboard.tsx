@@ -55,11 +55,11 @@ const Dashboard: React.FC = () => {
         ) : !isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {(currentProject && !projectLoading) ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />}
+              {currentOrganization ? (currentProject && !projectLoading ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />) : null}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>
-              {(currentProject && !projectLoading) ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />}
+              {currentOrganization ? (currentProject && !projectLoading ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />) : <TaskBoard />}
             </div>
           </div>
         ) : (

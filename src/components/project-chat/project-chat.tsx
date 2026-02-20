@@ -357,7 +357,6 @@ const ProjectChat: React.FC = () => {
                 className={styles.menuItem}
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('Context menu: Сделать задачей clicked');
                   setIsTaskModalOpen(true);
                   e.preventDefault();
                 }}
@@ -386,7 +385,6 @@ const ProjectChat: React.FC = () => {
             onClose={() => setIsConfirmModalOpen(false)}
             onConfirm={async () => {
               if (!contextMenu.message?.id) {
-                console.error('Нет сообщения для удаления');
                 setIsConfirmModalOpen(false);
                 return;
               }
@@ -394,7 +392,6 @@ const ProjectChat: React.FC = () => {
                 await deleteMessage(contextMenu.message.id);
                 setIsConfirmModalOpen(false);
               } catch (err) {
-                console.error('Ошибка при удалении сообщения:', err);
                 alert('Не удалось удалить сообщение');
               }
             }}
@@ -459,7 +456,6 @@ const ProjectChat: React.FC = () => {
         <CreateTaskModal
           isOpen={isTaskModalOpen}
           onClose={() => {
-            console.log('Modal closed');
             setIsTaskModalOpen(false);
             setIsAttachmentModalOpen(false);
           }}

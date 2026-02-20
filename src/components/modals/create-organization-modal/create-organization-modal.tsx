@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Modal from '../../ui/modal/modal';
 import Input from '../../ui/input/input';
 import Button from '../../ui/button/button';
@@ -16,6 +16,13 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const setFocus = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -23,11 +30,12 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       setDescription('');
       setError(null);
       setIsCreating(false); 
+      setTimeout(setFocus, 0);
     } else {
       setIsCreating(false);
       setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, setFocus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +71,9 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            autoFocus
             error={error}
             disabled={isCreating}
+            ref={inputRef}
           />
           {error && <div className={styles.errorMessage}>{error}</div>}
         </div>

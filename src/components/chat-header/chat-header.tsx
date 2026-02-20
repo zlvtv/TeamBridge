@@ -31,15 +31,17 @@ const ChatHeader: React.FC = () => {
           ))}
         </div>
 
-        <button
-          ref={setAddBtnEl}
-          className={styles['chat-header__add-btn']}
-          onClick={handleAddClick}
-          aria-label="Создать проект"
-          title="Создать новый проект"
-        >
-          +
-        </button>
+        {projects.length > 0 && (
+          <button
+            ref={setAddBtnEl}
+            className={styles['chat-header__add-btn']}
+            onClick={handleAddClick}
+            aria-label="Создать проект"
+            title="Создать новый проект"
+          >
+            +
+          </button>
+        )}
       </header>
 
       {isCreateProjectOpen && addBtnEl &&

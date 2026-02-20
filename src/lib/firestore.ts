@@ -132,13 +132,18 @@ export const getMessages = async (projectId: string) => {
 export const createTask = async (taskData: CreateTaskData) => {
   const status = taskData.status || 'todo';
   const priority = taskData.priority || 'medium';
+  const assignee_ids = taskData.assignee_ids || [];
+  const tags = taskData.tags || [];
+  
   const docRef = await addDoc(collection(db, 'tasks'), {
     ...taskData,
     status,
     priority,
+    assignee_ids,
+    tags, 
     created_at: serverTimestamp(),
     updated_at: serverTimestamp(),
-    created_by: taskData.assignee_ids?.[0] || '',
+    created_by: assignee_ids?.[0] || '',
   });
 
   return { 
@@ -146,10 +151,11 @@ export const createTask = async (taskData: CreateTaskData) => {
     ...taskData, 
     status, 
     priority, 
+    assignee_ids,
+    tags,
     created_at: new Date().toISOString(), 
     updated_at: new Date().toISOString(),
-    created_by: taskData.assignee_ids?.[0] || '', 
-    tags: taskData.tags || [] 
+    created_by: assignee_ids?.[0] || ''
   };
 };
 
