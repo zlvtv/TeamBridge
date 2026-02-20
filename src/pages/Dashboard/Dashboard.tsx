@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
         ) : !isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentOrganization ? (currentProject && !projectLoading ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />) : null}
+              {currentOrganization && currentProject ? (currentProject && !projectLoading ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />) : <div className={styles.placeholder}>Выберите проект</div>}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>

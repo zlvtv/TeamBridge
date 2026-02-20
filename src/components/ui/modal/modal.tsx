@@ -36,29 +36,16 @@ const Modal: React.FC<ModalProps> = ({
         }
       };
 
-      const handleFocus = (e: FocusEvent) => {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-          const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          if (focusable.length > 0) {
-            focusable[0].focus();
-          }
-        }
-      };
+      // handleFocus полностью отключен для предотвращения рекурсии
 
       document.addEventListener('keydown', handleEsc);
-      document.addEventListener('focus', handleFocus, true);
-
-      if (modalRef.current) {
-        modalRef.current.focus();
-      }
+      // document.addEventListener('focus', handleFocus, true); // Не используется
 
       document.body.style.overflow = 'hidden';
 
       return () => {
         document.removeEventListener('keydown', handleEsc);
-        document.removeEventListener('focus', handleFocus, true);
+        // document.removeEventListener('focus', handleFocus, true); // Не используется
         document.body.style.overflow = '';
       };
     }

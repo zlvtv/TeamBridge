@@ -20,6 +20,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from 'firebase/firestore';
+import { messageService } from '../services/messageService';
 
 interface ProjectMember {
   id: string;
@@ -56,6 +57,7 @@ interface Project {
   created_by: string;
   members: ProjectMember[];
   tasks: Task[];
+  hasUnreadMessages?: boolean;
 }
 
 interface ProjectContextType {
@@ -65,11 +67,13 @@ interface ProjectContextType {
   error: string | null;
   setCurrentProject: (project: Project | null) => void;
   createProject: (name: string, description?: string) => Promise<Project>;
+
   refreshProjects: () => Promise<Project[]>;
   isMember: (projectId: string) => boolean;
   canManageTasks: (projectId: string) => boolean;
   canCreateProjects: () => boolean;
   canRemoveMembers: () => boolean;
+  markProjectAsRead: (projectId: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -124,7 +128,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       const fetchedProjects = await Promise.all(
         snap.docs.map(async (docSnap) => {
-          const projData = { id: docSnap.id, ...docSnap.data() } as Omit<Project, 'members' | 'tasks'>;
+          const projData = { id: docSnap.id, ...docSnap.data() } as Omit<Project, 'members' | 'tasks' | 'hasUnreadMessages'>;
 
           const membersQuery = query(
             collection(db, 'project_members'),
@@ -151,7 +155,14 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
           const tasksSnap = await getDocs(tasksQuery);
           const tasks = tasksSnap.docs.map(t => ({ id: t.id, ...t.data() })) as Task[];
 
-          return { ...projData, members, tasks };
+          const hasUnread = await messageService.hasUnreadMessages(projData.id, user.id);
+
+          return {
+            ...projData,
+            members,
+            tasks,
+            hasUnreadMessages: hasUnread,
+          };
         })
       );
 
@@ -207,13 +218,21 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
       ],
       tasks: [],
+      hasUnreadMessages: false,
     };
 
     setProjects((prev) => [newProject, ...prev]);
     setCurrentProject(newProject);
     localStorage.setItem('currentProjectId', newProject.id);
-
     return newProject;
+  };
+
+  const setProject = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setCurrentProject(project);
+      localStorage.setItem('currentProjectId', project.id);
+    }
   };
 
   const isMember = (projectId: string) => {
@@ -237,6 +256,17 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return canCreateProjects();
   };
 
+  const markProjectAsRead = useCallback((projectId: string) => {
+  messageService.markAsRead(projectId);
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === projectId
+        ? { ...project, hasUnreadMessages: false }
+        : project
+    )
+  );
+}, []);
+
   useEffect(() => {
     if (!currentOrganization) return;
 
@@ -250,7 +280,16 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
 
     return () => unsubscribe();
-  }, [currentOrganization, fetchProjects]);
+  }, [currentOrganization]);
+
+  useEffect(() => {
+  if (!currentProject) return;
+
+  const updated = projects.find(p => p.id === currentProject.id);
+  if (updated && updated.hasUnreadMessages !== currentProject.hasUnreadMessages) {
+    setCurrentProject(updated);
+  }
+}, [projects, currentProject]);
 
   useEffect(() => {
     if (projects.length === 0) {
@@ -268,8 +307,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     const firstProject = projects[0];
-    setCurrentProject(firstProject);
-    localStorage.setItem('currentProjectId', firstProject.id);
+    if (firstProject) {
+      setCurrentProject(firstProject);
+      localStorage.setItem('currentProjectId', firstProject.id);
+    }
   }, [projects]);
 
   const value = {
@@ -277,13 +318,14 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     currentProject,
     isLoading,
     error,
-    setCurrentProject,
+    setCurrentProject: setProject,
     createProject,
     refreshProjects,
     isMember,
     canManageTasks,
     canCreateProjects,
     canRemoveMembers,
+    markProjectAsRead,
   };
 
   return (

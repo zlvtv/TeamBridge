@@ -8,17 +8,19 @@ import './messageStyles.css';
 import CreateTaskModal from '../../components/modals/create-task-modal/create-task-modal';
 import ConfirmModal from '../../components/modals/confirm-modal/confirm-modal';
 import AttachmentModal from '../../components/modals/attachment-modal/attachment-modal';
+import EmojiPicker from './emoji-picker';
 import { getMessages, sendMessage, subscribeToMessages, deleteMessage } from '../../lib/firestore';
 import { encryptMessage, decryptMessage } from '../../lib/crypto';
 
 const ProjectChat: React.FC = () => {
   const [messages, setMessages] = useState<any[]>([]);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [newMessage, setNewMessage] = useState('');
   const messageStateRef = useRef<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { currentProject } = useProject();
+  const { currentProject, markProjectAsRead } = useProject();
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
 
@@ -26,17 +28,23 @@ const ProjectChat: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const attachmentButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Сохранение черновика
   useEffect(() => {
     if (!currentProject) return;
-    
     const savedMessage = messageStateRef.current[currentProject.id] || '';
     setNewMessage(savedMessage);
-    
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [currentProject]);
+
+  // Отмечаем проект как прочитанный при входе
+  useEffect(() => {
+    if (currentProject?.id) {
+      markProjectAsRead(currentProject.id);
+    }
+  }, [currentProject?.id, markProjectAsRead]);
 
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
@@ -44,7 +52,7 @@ const ProjectChat: React.FC = () => {
     y: number;
     message: any;
     type: 'message' | 'text';
-  }>({ 
+  }>({
     show: false,
     x: 0,
     y: 0,
@@ -62,14 +70,14 @@ const ProjectChat: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false);
   const [attachmentModalPosition, setAttachmentModalPosition] = useState({ bottom: 0, left: 0 });
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [emojiPickerPosition, setEmojiPickerPosition] = useState({ bottom: 0, left: 0 });
 
   const canDeleteMessage = (message: any) => {
     if (!user || !currentOrganization) return false;
-    
     if (currentOrganization.organization_members.some(m => m.user_id === user.id && m.role === 'member')) {
       return message.sender_id === user.id;
     }
-    
     return currentOrganization.organization_members.some(
       m => m.user_id === user.id && (m.role === 'admin' || m.role === 'owner')
     );
@@ -83,20 +91,34 @@ const ProjectChat: React.FC = () => {
     const rect = attachmentButtonRef.current.getBoundingClientRect();
     setAttachmentModalPosition({
       bottom: window.innerHeight - rect.top + 16,
-      left: rect.left + rect.width / 2
+      left: rect.left + rect.width / 2,
     });
     setIsAttachmentModalOpen(!isAttachmentModalOpen);
   };
 
+  const handleEmojiClick = () => {
+    if (!attachmentButtonRef.current) {
+      setIsEmojiPickerOpen(!isEmojiPickerOpen);
+      return;
+    }
+    const rect = attachmentButtonRef.current.getBoundingClientRect();
+    setEmojiPickerPosition({
+      bottom: window.innerHeight - rect.top + 16,
+      left: rect.left + rect.width / 2,
+    });
+    setIsEmojiPickerOpen(!isEmojiPickerOpen);
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+    setIsEmojiPickerOpen(false);
+  };
+
   const handleAttachmentOptionClick = (type: 'photo' | 'poll' | 'task') => {
-    if (type === 'task') {
-      if (!canManageTasks()) {
-        return;
-      }
+    if (type === 'task' && canManageTasks()) {
       setIsTaskModalOpen(true);
     }
   };
-
 
   useEffect(() => {
     if (!currentProject?.id) return;
@@ -117,8 +139,6 @@ const ProjectChat: React.FC = () => {
     return () => unsubscribe();
   }, [currentProject?.id]);
 
-
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentProject || !user) return;
@@ -128,22 +148,42 @@ const ProjectChat: React.FC = () => {
     }
 
     setError(null);
-
     try {
       const encryptedText = encryptMessage(newMessage.trim(), currentProject.id);
-      await sendMessage(currentProject.id, encryptedText, user.id);
+      const tempMessageId = 'temp_' + Date.now();
+      const tempMessage = {
+        id: tempMessageId,
+        text: encryptedText,
+        sender_id: user.id,
+        created_at: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+        temp: true
+      };
+      
+      // Добавляем сообщение во временный список
+      setMessages(prev => [...prev, tempMessage]);
+      
+      // Очищаем поле ввода
       messageStateRef.current[currentProject.id] = '';
       setNewMessage('');
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
+      
+      // Отправляем сообщение на сервер
+      try {
+        await sendMessage(currentProject.id, encryptedText, user.id);
+      } catch (err) {
+        // При ошибке удаляем временное сообщение
+        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+        setError('Ошибка отправки сообщения');
+      }
     } catch (err: any) {
       setError('Ошибка отправки сообщения');
     }
   };
 
   const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -153,12 +193,9 @@ const ProjectChat: React.FC = () => {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const selection = window.getSelection();
-      if (selection && selection.toString().length > 0) {
-        return; 
-      }
-      
+      if (selection && selection.toString().length > 0) return;
+
       setContextMenu({ show: false, x: 0, y: 0, message: null });
-      
       if (!e.target || !(e.target as Element).closest(`.${styles.contextMenu}, .${styles['input-textarea']}, .modal, .modalOverlay`)) {
         setError(null);
       }
@@ -174,74 +211,60 @@ const ProjectChat: React.FC = () => {
         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'a'],
         ADD_ATTR: ['target', 'rel', 'href'],
       });
-      
+
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = sanitized;
-      
+
       const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
-      const textNodes = [];
+      const textNodes: Text[] = [];
       let node;
-      
-      while (node = walker.nextNode()) {
-        if (node.textContent.trim() !== '') {
-          textNodes.push(node);
-        }
+      while ((node = walker.nextNode())) {
+        if (node.textContent?.trim()) textNodes.push(node as Text);
       }
-      
+
       const urlRegex = /(https?:\/\/[\da-z.-]+\.[a-z.]{2,}[\/\w .-]*)/gi;
-      
-      textNodes.forEach(textNode => {
-        const parent = textNode.parentNode;
-        const content = textNode.textContent;
-        
+      textNodes.forEach((textNode) => {
+        const parent = textNode.parentNode!;
+        const content = textNode.textContent!;
         const matches = content.match(urlRegex);
-        
-        if (matches) {
-          let lastIndex = 0;
-          let fragment = document.createDocumentFragment();
-          
-          content.replace(urlRegex, (match, url, index) => {
-            if (index > lastIndex) {
-              fragment.appendChild(document.createTextNode(content.substring(lastIndex, index)));
-            }
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.textContent = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            link.className = 'message-link';
-            fragment.appendChild(link);
-            
-            lastIndex = index + match.length;
-          });
-          
-          if (lastIndex < content.length) {
-            fragment.appendChild(document.createTextNode(content.substring(lastIndex)));
+        if (!matches) return;
+
+        let lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        content.replace(urlRegex, (match, url, index) => {
+          if (index > lastIndex) {
+            fragment.appendChild(document.createTextNode(content.substring(lastIndex, index)));
           }
-          
-          parent.replaceChild(fragment, textNode);
+          const link = document.createElement('a');
+          link.href = url;
+          link.textContent = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'message-link';
+          fragment.appendChild(link);
+          lastIndex = index + match.length;
+        });
+        if (lastIndex < content.length) {
+          fragment.appendChild(document.createTextNode(content.substring(lastIndex)));
         }
+        parent.replaceChild(fragment, textNode);
       });
-      
+
       return { __html: tempDiv.innerHTML };
     } catch (err) {
-      return { __html: '' }; 
+      return { __html: '' };
     }
   };
 
   const formatTime = (dateString: string) => {
     try {
       let date: Date;
-      
       if (dateString && typeof dateString === 'object' && 'seconds' in dateString) {
         date = new Date(dateString.seconds * 1000);
       } else {
         date = new Date(dateString);
       }
-      
       if (isNaN(date.getTime())) return '';
-      
       return date.toLocaleDateString('ru-RU', {
         day: '2-digit',
         month: '2-digit',
@@ -272,16 +295,23 @@ const ProjectChat: React.FC = () => {
 
   return (
     <div className={styles.chat}>
-      <div className={styles['messages-container']}>
+      {/* Индикатор непрочитанных сообщений */}
+      {currentProject.hasUnreadMessages && (
+        <div className={styles.unreadIndicator}>
+          Есть новые сообщения
+        </div>
+      )}
+
+      <div className={styles['messages-container']} ref={messagesContainerRef}>
         {messages.length === 0 ? (
           <div className={styles.placeholder}>Нет сообщений. Начните общение!</div>
         ) : (
           messages.map((msg) => {
             const isMyMessage = msg.sender_id === user?.id;
-            const sender = isMyMessage 
-              ? user 
-              : (msg.sender_profile || 
-                 currentOrganization?.organization_members?.find(m => m.user_id === msg.sender_id)?.user || 
+            const sender = isMyMessage
+              ? user
+              : (msg.sender_profile ||
+                 currentOrganization?.organization_members?.find(m => m.user_id === msg.sender_id)?.user ||
                  { full_name: 'Пользователь', username: 'Пользователь' });
 
             const senderName = sender?.full_name || sender?.username || sender?.email || 'Пользователь';
@@ -290,11 +320,6 @@ const ProjectChat: React.FC = () => {
               <div
                 key={msg.id}
                 className={`${styles.message} ${isMyMessage ? styles['message-mine'] : ''}`}
-                onMouseDown={(e) => {
-                  const selection = window.getSelection();
-                  if (selection && selection.toString().length > 0) {
-                  }
-                }}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   const selection = window.getSelection();
@@ -316,14 +341,20 @@ const ProjectChat: React.FC = () => {
                     <span>{senderName.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-
                 <div className={styles['message-content']}>
                   <div className={styles['message-sender']}>{senderName}</div>
                   <div
                     className={styles['message-text']}
                     dangerouslySetInnerHTML={renderContent(msg.text)}
                   />
-                  <div className={styles['message-time']}>{formatTime(msg.created_at)}</div>
+                  <div className={styles['message-time']}>
+              {formatTime(msg.created_at)}
+              {isMyMessage && (
+                <span className={styles['message-status']}>
+                  {msg.read ? '✓✓' : '✓'}
+                </span>
+              )}
+            </div>
                 </div>
               </div>
             );
@@ -331,51 +362,49 @@ const ProjectChat: React.FC = () => {
         )}
         <div ref={messagesEndRef} />
 
+        {/* Контекстное меню */}
         {contextMenu.show && (
           <div
             className={styles.contextMenu}
             style={{ top: contextMenu.y, left: contextMenu.x }}
             onClick={(e) => e.stopPropagation()}
           >
-            <>
-              <button
-                className={styles.menuItem}
-                onClick={() => {
-                  try {
-                    const decrypted = decryptMessage(contextMenu.message.text, currentProject!.id);
-                    navigator.clipboard.writeText(decrypted);
-                  } catch {
-                    navigator.clipboard.writeText(contextMenu.message.text);
-                  }
-                  setContextMenu({ show: false, x: 0, y: 0, message: null, type: 'message' });
-                }}
-              >
-                Копировать
-              </button>
-              {canManageTasks() && (
+            <button
+              className={styles.menuItem}
+              onClick={() => {
+                try {
+                  const decrypted = decryptMessage(contextMenu.message.text, currentProject.id);
+                  navigator.clipboard.writeText(decrypted);
+                } catch {
+                  navigator.clipboard.writeText(contextMenu.message.text);
+                }
+                setContextMenu({ show: false, x: 0, y: 0, message: null, type: 'message' });
+              }}
+            >
+              Копировать
+            </button>
+            {canManageTasks() && (
               <button
                 className={styles.menuItem}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsTaskModalOpen(true);
-                  e.preventDefault();
                 }}
               >
                 Сделать задачей
               </button>
-              )}
-              {canDeleteMessage(contextMenu.message) && (
-                <button
-                  className={styles.menuItem}
-                  onClick={(e) => {
+            )}
+            {canDeleteMessage(contextMenu.message) && (
+              <button
+                className={styles.menuItem}
+                onClick={(e) => {
                   e.stopPropagation();
                   setIsConfirmModalOpen(true);
                 }}
-                >
-                  Удалить
-                </button>
-              )}
-            </>
+              >
+                Удалить
+              </button>
+            )}
           </div>
         )}
 
@@ -384,10 +413,7 @@ const ProjectChat: React.FC = () => {
             isOpen={isConfirmModalOpen}
             onClose={() => setIsConfirmModalOpen(false)}
             onConfirm={async () => {
-              if (!contextMenu.message?.id) {
-                setIsConfirmModalOpen(false);
-                return;
-              }
+              if (!contextMenu.message?.id) return;
               try {
                 await deleteMessage(contextMenu.message.id);
                 setIsConfirmModalOpen(false);
@@ -411,9 +437,7 @@ const ProjectChat: React.FC = () => {
           onChange={(e) => {
             const value = e.target.value.slice(0, 4000);
             setNewMessage(value);
-            if (currentProject) {
-              messageStateRef.current[currentProject.id] = value;
-            }
+            messageStateRef.current[currentProject.id] = value;
             e.target.style.height = 'auto';
             e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
           }}
@@ -423,27 +447,37 @@ const ProjectChat: React.FC = () => {
               handleSendMessage(e);
             }
           }}
-          onInput={(e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-          }}
           placeholder="Напишите сообщение..."
           className={styles['input-textarea']}
           maxLength={4000}
           rows={1}
         />
-        <button
-          ref={attachmentButtonRef}
-          type="button"
-          className={styles['attachment-button']}
-          onClick={handleAttachmentClick}
-          aria-label="Прикрепить файл"
-        >
-          📎
-        </button>
-        <button type="submit" className={styles['send-button']} disabled={!newMessage.trim()}>
-          Отправить
-        </button>
+        <div className={styles['right-side']}>
+          <div className={styles['attachment-actions']}>
+            <div className={styles['emoji-menu']}>
+              <button 
+                type="button" 
+                className={styles['emoji-button']} 
+                aria-label="Добавить эмоджи" 
+                onClick={handleEmojiClick}
+              >
+                😊
+              </button>
+            </div>
+            <button
+              ref={attachmentButtonRef}
+              type="button"
+              className={styles['attachment-button']}
+              onClick={handleAttachmentClick}
+              aria-label="Прикрепить файл"
+            >
+              📎
+            </button>
+          </div>
+          <button type="submit" className={styles['send-button']} disabled={!newMessage.trim()}>
+            Отправить
+          </button>
+        </div>
       </form>
 
       <AttachmentModal
@@ -463,8 +497,13 @@ const ProjectChat: React.FC = () => {
           initialContent={contextMenu.message?.text}
         />
       )}
-
-
+      {isEmojiPickerOpen && (
+        <EmojiPicker 
+          onEmojiSelect={handleEmojiSelect} 
+          onClose={() => setIsEmojiPickerOpen(false)} 
+          position={emojiPickerPosition} 
+        /> 
+      )}
     </div>
   );
 };

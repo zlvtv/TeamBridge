@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';
 import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
+import CreateProjectModal from '../../components/modals/create-project-modal/create-project-modal';
 import styles from './org-icon-panel.module.css';
+import { useUI } from '../../contexts/UIContext';
 
 const OrgIconPanel: React.FC = () => {
   const {
@@ -10,12 +12,21 @@ const OrgIconPanel: React.FC = () => {
     currentOrganization,
     setCurrentOrganization,
   } = useOrganization();
+  const { 
+    isCreateModalOpen, 
+    openCreateModal, 
+    closeCreateModal,
+    isCreateProjectOpen,
+    openCreateProject,
+    isCreateOrgModalOpen,
+    openCreateOrgModal
+  } = useUI();
 
   const [searchAnchor, setSearchAnchor] = useState<HTMLElement | null>(null);
-  const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const orgsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const createBtnRef = useRef<HTMLButtonElement>(null);
 
   const [maxHeight, setMaxHeight] = useState(400);
 
@@ -66,11 +77,29 @@ const OrgIconPanel: React.FC = () => {
     orgsRef.current?.removeEventListener('wheel', handleWheel);
   };
 
+  const handleCreateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    openCreateModal(); // Открываем выпадающее меню с опциями
+  };
+
+  const handleCreateProject = () => {
+    closeCreateModal();
+    openCreateProject();
+  };
+
+  const handleCreateOrganization = () => {
+    closeCreateModal();
+    openCreateOrgModal();
+  };
+
   return (
     <>
       <CreateOrganizationModal
         isOpen={isCreateOrgModalOpen}
-        onClose={() => setIsCreateOrgModalOpen(false)}
+        onClose={closeCreateModal}
+      />
+      <CreateProjectModal
+        isOpen={isCreateProjectOpen}
+        onClose={closeCreateModal}
       />
 
       {isSearchModalOpen && searchAnchor && (
@@ -80,6 +109,21 @@ const OrgIconPanel: React.FC = () => {
           anchorEl={searchAnchor}
           organizations={organizations}
         />
+      )}
+
+      {isCreateModalOpen && createBtnRef.current && (
+        <div
+          className={styles['create-dropdown']}
+          style={{
+            position: 'absolute',
+            top: `${createBtnRef.current.getBoundingClientRect().bottom + 8}px`,
+            left: `${createBtnRef.current.getBoundingClientRect().left}px`,
+            zIndex: 10000,
+          }}
+        >
+          <button onClick={handleCreateProject} className={styles['create-dropdown-item']}>Создать проект</button>
+          <button onClick={handleCreateOrganization} className={styles['create-dropdown-item']}>Создать организацию</button>
+        </div>
       )}
 
       <div
@@ -98,9 +142,11 @@ const OrgIconPanel: React.FC = () => {
         </button>
 
         <button
+          ref={createBtnRef}
           className={styles['org-icon-panel__create-org-btn']}
-          onClick={() => setIsCreateOrgModalOpen(true)}
+          onClick={handleCreateClick}
           aria-label="Создать организацию"
+        title="Создать новую организацию"
         >
           +
         </button>
@@ -119,7 +165,7 @@ const OrgIconPanel: React.FC = () => {
                 key={org.id}
                 className={`${styles['org-icon-panel__org-btn']} ${
                   currentOrganization?.id === org.id ? styles['org-icon-panel__org-btn--active'] : ''
-                }`}
+                } ${org.hasUnreadMessages ? 'unread' : ''}`}
                 onClick={() => handleOrgClick(org)}
                 aria-label={org.name}
                 title={org.name}

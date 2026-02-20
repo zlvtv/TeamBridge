@@ -41,10 +41,35 @@
 .org-icon-panel__create-org-btn {
   background: var(--color-primary);
   color: white;
+  position: relative;
 }
 
 .org-icon-panel__create-org-btn:hover {
   background: var(--color-primary-hover);
+}
+
+.create-dropdown {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-large);
+  overflow: hidden;
+}
+
+.create-dropdown-item {
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text);
+  transition: background 0.2s;
+}
+
+.create-dropdown-item:hover {
+  background: var(--color-surface);
 }
 
 .org-icon-panel__orgs {
@@ -95,6 +120,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 
 .org-icon-panel__org-btn:hover {
@@ -104,6 +130,18 @@
 .org-icon-panel__org-btn--active {
   background: var(--color-primary);
   color: white;
+}
+
+.org-icon-panel__org-btn.unread::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar {

@@ -1,271 +1,222 @@
+/* Существующие стили */
+
 .chat {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--chat-bg);
-  border-left: 1px solid var(--chat-border);
-  overflow: hidden;
-
+  position: relative;
 }
 
 .messages-container {
-  flex: 1;
+  flex-grow: 1;
   overflow-y: auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  justify-content: flex-start;
-}
-
-.messages-container::-webkit-scrollbar, .input-textarea::-webkit-scrollbar {
-  width: 4px;
-}
-
-.messages-container::-webkit-scrollbar-track, .input-textarea::-webkit-scrollbar {
-  background: transparent;
-}
-
-.messages-container::-webkit-scrollbar-thumb, .input-textarea::-webkit-scrollbar {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-.message {
-  display: flex;
-  margin-bottom: 8px;
-}
-
-.message-mine {
-  flex-direction: row-reverse;
-}
-
-.message .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--avatar-bg);
-  color: white;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-  margin: 0 8px;
-  border: 2px solid var(--avatar-border);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.message-content {
-  background-color: var(--message-bg);
-  border-radius: 12px;
-  max-width: 60%;
-  padding: 10px 14px 10px 12px;
-  box-shadow: var(--message-shadow);
-  position: relative;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  overflow: visible;
-  hyphens: auto;
-  word-break: break-word;
-  white-space: pre-wrap;
-  line-height: 1.4;
-  font-size: 1rem; 
-  text-align: left; 
-}
-
-.message-mine .message-content {
-  background-color: var(--message-mine-bg);
-  color: var(--text-on-accent);
-  text-align: right; 
-}
-
-
-.message-sender {
-  font-weight: 600;
-  font-size: 0.8em;
-  color: var(--text-primary);
-  margin-bottom: 2px;
-}
-
-.message-time {
-  font-size: 0.6em;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-.message-mine .message-time {
-  text-align: right; 
-}
-
-.input-form {
-  display: flex;
-  padding: 12px;
-  background-color: var(--chat-bg);
-  border-top: 1px solid var(--chat-border);
   gap: 8px;
-  align-items: flex-end;
-}
-
-.attachment-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  border: none;
-  outline: none;
-  font-size: 18px;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-}
-
-
-.attachment-button:active {
-  transform: scale(0.95);
-}
-
-.attachment-modal {
-  position: absolute;
-  background-color: var(--menu-bg);
-  border: 1px solid var(--menu-border);
-  border-radius: 8px;
-  box-shadow: var(--menu-shadow);
-  padding: 8px 0;
-  z-index: 1000;
-  min-width: 100px;
-  max-width: 90vw;
-  overflow-x: hidden;
-  word-wrap: break-word;
-  box-sizing: border-box;
-  border: 1px solid var(--menu-border);
-  border-radius: 8px;
-}
-
-.attachment-option {
-  padding: 10px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text-primary);
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-}
-
-.attachment-option:hover {
-  background-color: var(--menu-hover);
-}
-
-.attachment-icon {
-  font-size: 16px;
-}
-
-.input-textarea {
-  flex: 1;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 14px;
-  line-height: 1.4;
-  resize: none;
-  background-color: var(--input-bg);
-  color: var(--text-primary);
-  min-height: 40px;
-  max-height: 120px;
-  overflow-y: hidden;
-  transition: all 0.2s ease;
-}
-
-.input-textarea:focus,
-.input-textarea:not(:placeholder-shown) {
-  overflow-y: auto;
-}
-
-.input-textarea:focus {
-  outline: none;
-  border-color: var(--send-btn-bg);
-}
-
-.send-button {
-  background-color: var(--send-btn-bg);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-weight: 500;
-  height: 40px;
-}
-
-.send-button:disabled {
-  background-color: var(--send-btn-disabled);
-  cursor: not-allowed;
-}
-
-.char-count {
-  text-align: right; 
-  font-size: 11px;
-  color: var(--text-secondary);
-  padding: 0 12px 8px;
-}
-
-.error {
-  color: var(--error-text);
-  text-align: center;
-  font-size: 12px; 
-  padding: 8px;
-  background-color: var(--error-bg);
-  border-radius: 4px;
-  margin: 0 12px;
-}
-
-.loading {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  padding: 20px;
-  font-style: italic;
-  opacity: 0.8;
 }
 
 .placeholder {
   text-align: center;
-  color: var(--text-muted);
+  color: #888;
+  margin: 50px 0;
+  font-style: italic;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  margin: 20px 0;
+}
+
+.unreadIndicator {
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+  padding: 8px;
   font-size: 14px;
-  padding: 40px;
-  opacity: 0.6;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.message {
+  display: flex;
+  gap: 8px;
+  max-width: 80%;
+}
+
+.message-mine {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.message-content {
+  background-color: #f1f1f1;
+  padding: 8px 12px;
+  border-radius: 18px;
+  max-width: 100%;
+}
+
+.message-sender {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.message-text {
+  line-height: 1.4;
+}
+
+.message-text a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.message-status {
+  margin-left: 4px;
 }
 
 .contextMenu {
-  position: fixed;
-  background: var(--menu-bg);
-  border: 1px solid var(--menu-border);
-  border-radius: 8px;
-  box-shadow: var(--menu-shadow);
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   z-index: 1000;
-  min-width: 160px;
-  padding: 4px 0;
+  min-width: 120px;
 }
 
 .menuItem {
+  display: block;
   width: 100%;
-  text-align: left;
-  line-height: 1.4;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border: none;
   background: none;
+  text-align: left;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #333;
 }
 
 .menuItem:hover {
-  background-color: var(--menu-hover);
+  background-color: #f5f5f5;
+}
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.input-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border-top: 1px solid #ddd;
+}
+
+.input-textarea {
+  flex-grow: 1;
+  resize: none;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 14px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.send-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.send-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.emoji-menu, .attachment-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.emoji-button, .attachment-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.emoji-button:hover, .attachment-button:hover {
+  background-color: #f0f0f0;
+}
+
+.attachment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Новые стили для правой колонки */
+.right-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-width: 60px;
+}
+
+/* Стили для контейнера кнопок */
+.right-side > div:first-child {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.right-side .send-button {
+  padding: 12px;
+  width: 100%;
+  min-height: 40px;
+  align-self: flex-end;
 }

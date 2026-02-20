@@ -6,7 +6,8 @@ type UIContextType = {
   isProfileOpen: boolean;
   isOrgInfoOpen: boolean;
   isCreateProjectOpen: boolean;
-  isCreateOrgModalOpen: boolean; 
+  isCreateOrgModalOpen: boolean;
+  isCreateModalOpen: boolean; 
   chatWidth: number;
   isBoardFullscreen: boolean;
   selectedOrgId: string | null;
@@ -36,7 +37,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isOrgInfoOpen, setIsOrgInfoOpen] = useState(false);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
-  const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false); 
+  const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [chatWidth, setChatWidthState] = useState(400);
   const [isBoardFullscreen, setIsBoardFullscreen] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -84,10 +86,9 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const closeOrgInfo = useCallback(() => setIsOrgInfoOpen(false), []);
   const openCreateProject = useCallback(() => setIsCreateProjectOpen(true), []);
   const closeCreateProject = useCallback(() => setIsCreateProjectOpen(false), []);
-  const openCreateOrgModal = useCallback(() => {
-  setIsCreateOrgModalOpen(true);
-}, []);
-
+  const openCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
+  const closeCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
+  const openCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(true), []);
   const closeCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(false), []);
   const toggleFullscreen = useCallback(() => {
     setIsBoardFullscreen((prev) => !prev);
@@ -109,6 +110,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       isOrgInfoOpen,
       isCreateProjectOpen,
       isCreateOrgModalOpen, 
+      isCreateModalOpen, 
       chatWidth,
       isBoardFullscreen,
       selectedOrgId,
@@ -122,6 +124,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       closeOrgInfo,
       openCreateProject,
       closeCreateProject,
+      openCreateModal,
+      closeCreateModal,
       openCreateOrgModal, 
       closeCreateOrgModal, 
       setChatWidth,
@@ -136,6 +140,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       isOrgInfoOpen,
       isCreateProjectOpen,
       isCreateOrgModalOpen, 
+      isCreateModalOpen, 
       chatWidth,
       isBoardFullscreen,
       selectedOrgId,

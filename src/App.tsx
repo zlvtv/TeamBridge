@@ -91,8 +91,8 @@ const HomeRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <UIProvider>
+    <UIProvider>
+      <AuthProvider>
         <Router>
           <Routes>
             <Route path="/" element={<HomeRoute><Landing /></HomeRoute>} />
@@ -135,8 +135,8 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
-      </UIProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </UIProvider>
   );
 };
 

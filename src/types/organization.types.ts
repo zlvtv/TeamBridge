@@ -16,6 +16,7 @@ export interface Organization {
   created_by: string;
   created_at: string;
   updated_at: string;
+  hasUnreadMessages?: boolean;
 }
 
 export interface OrganizationWithMembers extends Organization {

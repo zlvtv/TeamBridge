@@ -84,7 +84,7 @@ export const deleteDocById = async (collectionName: string, id: string) => {
 
 export const subscribeToMessages = (projectId: string, callback: (messages: any[]) => void) => {
   const q = query(collection(db, 'messages'), where('project_id', '==', projectId));
-  return onSnapshot(q, snapshot => {
+  return onSnapshot(q, async snapshot => {
     const messages = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -93,7 +93,35 @@ export const subscribeToMessages = (projectId: string, callback: (messages: any[
         sender_profile: data.sender_profile
       };
     });
+    
+    // Sort messages by creation date
+    messages.sort((a, b) => {
+      const aTime = a.created_at?.seconds || 0;
+      const bTime = b.created_at?.seconds || 0;
+      return aTime - bTime;
+    });
+    
     callback(messages);
+    
+    // Mark messages as read if they belong to current user
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const userId = JSON.parse(currentUser).id;
+      const batch = writeBatch(db);
+      let hasUnread = false;
+      
+      messages.forEach(msg => {
+        if (msg.sender_id === userId && !msg.read) {
+          const msgRef = doc(db, 'messages', msg.id);
+          batch.update(msgRef, { read: true });
+          hasUnread = true;
+        }
+      });
+      
+      if (hasUnread) {
+        await batch.commit();
+      }
+    }
   });
 };
 

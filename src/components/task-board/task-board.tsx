@@ -48,7 +48,7 @@ const TaskBoard: React.FC = () => {
 
     const allTasks: Task[] = [];
     orgProjects.forEach(project => {
-      project.tasks.forEach(task => {
+      (project.tasks || []).forEach(task => {
         allTasks.push({
           ...task,
           project_id: project.id,
@@ -62,7 +62,7 @@ const TaskBoard: React.FC = () => {
   const allUserTasks = useMemo(() => {
     const tasks: Task[] = [];
     allUserProjects.forEach(project => {
-      project.tasks.forEach(task => {
+      (project.tasks || []).forEach(task => {
         tasks.push({
           ...task,
           project_id: project.id,
@@ -75,7 +75,7 @@ const TaskBoard: React.FC = () => {
 
   const currentProjectTasks = useMemo(() => {
     if (!currentProject) return [];
-    return currentProject.tasks.map(task => ({
+    return (currentProject.tasks || []).map(task => ({
       ...task,
       project_id: currentProject.id,
       project_name: currentProject.name,

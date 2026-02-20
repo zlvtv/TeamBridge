@@ -1,18 +1,22 @@
 import React from 'react';
 import { useProject } from '../../contexts/ProjectContext';
 import { useUI } from '../../contexts/UIContext';
-import CreateTaskModal from '../../components/modals/create-task-modal/create-task-modal';
+import CreateProjectModal from '../../components/modals/create-project-modal/create-project-modal';
 import styles from './chat-header.module.css';
 import { createPortal } from 'react-dom';
 
 const ChatHeader: React.FC = () => {
-  const { projects } = useProject();
+  const { projects, currentProject, setCurrentProject } = useProject();
   const { isCreateProjectOpen, openCreateProject, closeCreateProject } = useUI();
   const [addBtnEl, setAddBtnEl] = React.useState<HTMLButtonElement | null>(null);
 
   const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAddBtnEl(e.currentTarget);
     openCreateProject();
+  };
+
+  const handleTabClick = (projectId: string) => {
+    setCurrentProject(projectId);
   };
 
   return (
@@ -23,8 +27,9 @@ const ChatHeader: React.FC = () => {
             <button
               key={project.id}
               role="tab"
-              className={styles['chat-header__tab']}
-              aria-selected="false"
+              className={`${styles['chat-header__tab']} ${currentProject?.id === project.id ? styles['chat-header__tab--active'] : ''}`}
+              aria-selected={currentProject?.id === project.id}
+              onClick={() => handleTabClick(project.id)}
             >
               {project.name}
             </button>
@@ -46,7 +51,7 @@ const ChatHeader: React.FC = () => {
 
       {isCreateProjectOpen && addBtnEl &&
         createPortal(
-          <CreateTaskModal isOpen={isCreateProjectOpen} onClose={closeCreateProject} />,
+          <CreateProjectModal isOpen={isCreateProjectOpen} onClose={closeCreateProject} />,
           document.body
         )}
     </>

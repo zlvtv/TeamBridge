@@ -10,6 +10,7 @@ import {
   type OrganizationWithMembers,
   type CreateOrganizationData,
 } from '../services/organizationService';
+import { messageService } from '../services/messageService';
 import { useAuth } from './AuthContext';
 
 interface OrganizationContextType {
@@ -27,6 +28,7 @@ interface OrganizationContextType {
   createOrganizationInvite: (organizationId: string) => Promise<any>;
   regenerateInviteCode: (organizationId: string) => Promise<void>;
   deactivateInviteCode: (organizationId: string) => Promise<void>;
+  markOrganizationAsRead: (organizationId: string) => void;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
@@ -57,16 +59,23 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const orgs = await organizationService.getUserOrganizations(true);
 
     const updatedOrg = orgs.find(o => o.id === currentOrganization.id);
-
-    if (updatedOrg) {
-      setCurrentOrganization(updatedOrg);
+    
+    if (updatedOrg && user) {
+      const hasUnread = await messageService.hasUnreadMessages(updatedOrg.id, user.id);
+      const orgWithUnread = { ...updatedOrg, hasUnreadMessages: hasUnread };
+      setCurrentOrganization(orgWithUnread);
+      
+      // Update in the organizations list
+      setOrganizations(prev => prev.map(org => 
+        org.id === orgWithUnread.id ? orgWithUnread : org
+      ));
     } else {
       setCurrentOrganization(null);
     }
   } catch (err) {
     console.error('Ошибка при обновлении текущей организации:', err);
   }
-}, [currentOrganization?.id]);
+}, [currentOrganization?.id, user?.id]);
 
   useEffect(() => {
   const initialize = async () => {
@@ -81,17 +90,29 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     try {
       const orgs = await organizationService.getUserOrganizations();
-      setOrganizations(orgs);
+      
+      // Check for unread messages in each organization
+      const orgsWithUnread = await Promise.all(
+        orgs.map(async (org) => {
+          const hasUnread = await messageService.hasUnreadMessages(org.id, user.id);
+          return {
+            ...org,
+            hasUnreadMessages: hasUnread
+          };
+        })
+      );
+      
+      setOrganizations(orgsWithUnread);
 
       let targetOrg: OrganizationWithMembers | null = null;
       const savedOrgId = localStorage.getItem('currentOrgId');
 
       if (savedOrgId) {
-        targetOrg = orgs.find(o => o.id === savedOrgId) || null;
+        targetOrg = orgsWithUnread.find(o => o.id === savedOrgId) || null;
       }
 
-      if (!targetOrg && orgs.length > 0) {
-        targetOrg = orgs[0];
+      if (!targetOrg && orgsWithUnread.length > 0) {
+        targetOrg = orgsWithUnread[0];
         localStorage.setItem('currentOrgId', targetOrg.id);
       }
 
@@ -212,6 +233,14 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     createOrganizationInvite,
     regenerateInviteCode,
     deactivateInviteCode,
+    markOrganizationAsRead: (organizationId: string) => {
+      messageService.markAsRead(organizationId);
+      setOrganizations(prev => prev.map(org => 
+        org.id === organizationId 
+          ? { ...org, hasUnreadMessages: false } 
+          : org
+      ));
+    },
   };
 
   return (

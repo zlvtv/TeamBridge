@@ -46,7 +46,7 @@
   background: var(--color-surface);
 }
 
-.chat-header__tab[aria-selected="true"] {
+.chat-header__tab--active {
   background: var(--color-primary);
   color: white;
   font-weight: 500;
