@@ -7,12 +7,74 @@
   overflow: hidden;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 8px;
+  margin-left: 8px;
+}
+
+.navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #4a5568;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background-color: #edf2f7;
+}
+
+.viewToggle {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.viewButton {
+  background: #f7fafc;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #4a5568;
+  transition: all 0.2s;
+}
+
+.viewButton.active, .viewButton:hover {
+  background: #e2e8f0;
+}
+
+.viewButton.active {
+  font-weight: 600;
+}
+
+.weekRange {
+  font-weight: 600;
+  color: #2d3748;
+  min-width: 150px;
+  text-align: center;
 }
 
 .header {
   display: flex;
   background: #f7fafc;
   border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .dayHeader {
@@ -40,10 +102,31 @@
   color: #2d3748;
 }
 
+.dayNumber.outside {
+  color: #a0aec0;
+  opacity: 0.6;
+}
+
+.dayColumn.outside {
+  background-color: #f7fafc;
+}
+
 .body {
   flex: 1;
   display: flex;
-  min-height: 400px;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.monthGrid {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.weekRow {
+  display: flex;
+  height: 100%;
 }
 
 .dayColumn {
@@ -51,7 +134,7 @@
   padding: 12px;
   border-right: 1px solid #e2e8f0;
   overflow-y: auto;
-  max-height: 400px;
+  min-height: 80px;
 }
 
 .dayColumn:last-child {
@@ -129,7 +212,6 @@
   font-weight: 500;
 }
 
-/* Стили для случая, когда нет задач на неделю */
 .noTasksContainer {
   display: flex;
   flex-direction: column;

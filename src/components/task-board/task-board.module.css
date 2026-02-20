@@ -33,9 +33,28 @@
   font-size: 14px;
   cursor: pointer;
   color: #555;
+  min-width: 80px;
+  text-align: center;
 }
 
 .tab.active {
+  background: #5a67d8;
+  color: white;
+}
+
+.viewButton {
+  padding: 6px 12px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #555;
+  min-width: 80px;
+  text-align: center;
+}
+
+.viewButton.active {
   background: #5a67d8;
   color: white;
 }
@@ -44,6 +63,12 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.viewControls {
+  display: flex;
+  gap: 4px;
+  margin: 16px 16px 0;
 }
 
 .search {

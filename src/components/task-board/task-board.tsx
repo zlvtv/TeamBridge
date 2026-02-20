@@ -31,7 +31,8 @@ const TaskBoard: React.FC = () => {
 
   const { projects: allUserProjects, loading: loadingAllProjects } = useAllUserProjects();
 
-  const [activeTab, setActiveTab] = useState<TaskTab | 'calendar'>('user');
+  const [activeTab, setActiveTab] = useState<TaskTab>('user');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
@@ -126,7 +127,6 @@ const TaskBoard: React.FC = () => {
     ...(currentProject ? [{ id: 'project', label: 'Задачи проекта' }] : []),
     ...(currentProject ? [{ id: 'organization', label: 'Задачи организации' }] : []),
     { id: 'user', label: 'Все задачи' },
-    ...(currentProject ? [{ id: 'calendar', label: 'Календарь' }] : []),
   ];
 
 
@@ -161,6 +161,33 @@ const TaskBoard: React.FC = () => {
     } catch (err) {
       console.error('Ошибка обновления задачи:', err);
     }
+  };
+
+  const renderTaskView = () => {
+    if (viewMode === 'calendar') {
+      return <CalendarView tasks={filteredTasks} assignees={assigneesMap} />;
+    }
+    
+    return (
+      <div className={styles.taskList}>
+        {filteredTasks.length === 0 ? (
+          <div className={styles.noTasks}>Нет задач по заданным фильтрам</div>
+        ) : (
+          filteredTasks.map(task => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              assignees={assigneesMap[task.id] || []}
+              onStatusChange={(newStatus) => handleStatusChange(task.id, newStatus)}
+              onEdit={() => handleEditTask(task)}
+              tags={task.tags || []}
+              priority={task.priority || 'medium'}
+              dueDate={task.due_date}
+            />
+          ))
+        )}
+      </div>
+    );
   };
 
   return (
@@ -213,29 +240,26 @@ const TaskBoard: React.FC = () => {
         </div>
       </div>
 
-      {activeTab === 'calendar' ? (
-        <CalendarView tasks={filteredTasks} assignees={assigneesMap} />
-      ) : loadingAllProjects ? (
+      {loadingAllProjects ? (
         <LoadingState message="Загрузка всех задач..." />
       ) : (
-        <div className={styles.taskList}>
-          {filteredTasks.length === 0 ? (
-            <div className={styles.noTasks}>Нет задач по заданным фильтрам</div>
-          ) : (
-            filteredTasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                assignees={assigneesMap[task.id] || []}
-                onStatusChange={(newStatus) => handleStatusChange(task.id, newStatus)}
-                onEdit={() => handleEditTask(task)}
-                tags={task.tags || []}
-                priority={task.priority || 'medium'}
-                dueDate={task.due_date}
-              />
-            ))
-          )}
-        </div>
+        <>
+          <div className={styles.viewControls}>
+            <button
+              className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              Список
+            </button>
+            <button
+              className={`${styles.viewButton} ${viewMode === 'calendar' ? styles.active : ''}`}
+              onClick={() => setViewMode('calendar')}
+            >
+              Календарь
+            </button>
+          </div>
+          {renderTaskView()}
+        </>
       )}
 
       {isEditModalOpen && editingTask && (

@@ -78,7 +78,7 @@ const OrgIconPanel: React.FC = () => {
   };
 
   const handleCreateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    openCreateModal(); // Открываем выпадающее меню с опциями
+    openCreateModal();
   };
 
   const handleCreateProject = () => {
@@ -95,7 +95,9 @@ const OrgIconPanel: React.FC = () => {
     <>
       <CreateOrganizationModal
         isOpen={isCreateOrgModalOpen}
-        onClose={closeCreateModal}
+        onClose={() => {
+          openCreateModal();
+        }}
       />
       <CreateProjectModal
         isOpen={isCreateProjectOpen}
@@ -145,8 +147,7 @@ const OrgIconPanel: React.FC = () => {
           ref={createBtnRef}
           className={styles['org-icon-panel__create-org-btn']}
           onClick={handleCreateClick}
-          aria-label="Создать организацию"
-        title="Создать новую организацию"
+          aria-label="Создать"
         >
           +
         </button>
