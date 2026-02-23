@@ -10,7 +10,8 @@
   box-sizing: border-box;
   z-index: 100;
   box-shadow: var(--shadow-medium);
-  overflow: visible;
+  height: 100%;
+  overflow: hidden;
 }
 
 .org-icon-panel__search-btn,
@@ -79,10 +80,11 @@
   gap: 8px;
   padding: 4px 0;
   margin-top: 4px;
+  flex: 1; 
+  min-height: 0; 
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
   -ms-overflow-style: none;
-  flex-shrink: 0;
 }
 
 .org-icon-panel__orgs::-webkit-scrollbar {
