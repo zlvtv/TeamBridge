@@ -15,6 +15,7 @@ interface FieldProps {
   disabled?: boolean;
   validators?: ((value: any) => string | null)[];
   className?: string;
+  hasSearch?: boolean; 
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -28,7 +29,8 @@ const Field: React.FC<FieldProps> = ({
   rows = 3,
   disabled = false,
   validators = [],
-  className
+  className,
+  hasSearch = true 
 }) => {
   const { 
     values, 
@@ -75,7 +77,7 @@ const Field: React.FC<FieldProps> = ({
           onChange={handleSelectChange}
           options={options}
           placeholder={placeholder}
-          hasSearch={true}
+          hasSearch={hasSearch} 
           disabled={disabled}
         />
       );

@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { useOrganization } from './OrganizationContext';
 import { useAuth } from './AuthContext';
 import { projectService } from '../services/projectService';
-import { messageService } from '../services/messageService'; // ✅ Добавлен импорт
+import { messageService } from '../services/messageService';
 import { buildUserFromSnapshot } from '../utils/user.utils';
 
 interface Task {
@@ -50,7 +50,7 @@ interface ProjectContextType {
   error: string | null;
   setCurrentProject: (project: Project | null) => void;
   createProject: (name: string, description?: string) => Promise<Project>;
-  deleteProject: (projectId: string) => Promise<void>; // ✅ объявлено
+  deleteProject: (projectId: string) => Promise<void>;
   addMember: (projectId: string, userId: string) => Promise<void>;
   removeMember: (projectId: string, userId: string) => Promise<void>;
   updateTask: (taskId: string, data: any) => Promise<void>;
@@ -144,31 +144,31 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteProject = async (projectId: string): Promise<void> => {
-  if (!currentOrganization || !user) throw new Error('Нет доступа');
+    if (!currentOrganization || !user) throw new Error('Нет доступа');
 
-  const projectToDelete = projects.find(p => p.id === projectId);
-  if (!projectToDelete) throw new Error('Проект не найден');
+    const projectToDelete = projects.find(p => p.id === projectId);
+    if (!projectToDelete) throw new Error('Проект не найден');
 
-  try {
-    await projectService.deleteProject(projectId);
-    await messageService.sendSystemMessage(projectId, `Проект **${projectToDelete.name}** был удалён`);
+    try {
+      await projectService.deleteProject(projectId);
+      await messageService.sendSystemMessage(projectId, `Проект **${projectToDelete.name}** был удалён`);
 
-    setProjects(prev => prev.filter(p => p.id !== projectId));
+      setProjects(prev => prev.filter(p => p.id !== projectId));
 
-    if (currentProject?.id === projectId) {
-      const remaining = projects.filter(p => p.id !== projectId);
-      const newCurrent = remaining[0] || null;
-      setCurrentProject(newCurrent);
-      if (newCurrent) {
-        localStorage.setItem('currentProjectId', newCurrent.id);
-      } else {
-        localStorage.removeItem('currentProjectId');
+      if (currentProject?.id === projectId) {
+        const remaining = projects.filter(p => p.id !== projectId);
+        const newCurrent = remaining[0] || null;
+        setCurrentProject(newCurrent);
+        if (newCurrent) {
+          localStorage.setItem('currentProjectId', newCurrent.id);
+        } else {
+          localStorage.removeItem('currentProjectId');
+        }
       }
+    } catch (err: any) {
+      throw new Error(`Не удалось удалить проект: ${err.message}`);
     }
-  } catch (err: any) {
-    throw new Error(`Не удалось удалить проект: ${err.message}`);
-  }
-};
+  };
 
   const addMember = async (projectId: string, userId: string): Promise<void> => {
     await projectService.addMember(projectId, userId);
@@ -194,6 +194,13 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await messageService.sendSystemMessage(projectId, `**${action}**: ${details}`);
   };
 
+  const markProjectAsRead = useCallback((id: string) => {
+    messageService.markAsRead(id);
+    setProjects(prev =>
+      prev.map(p => (p.id === id ? { ...p, hasUnreadMessages: false } : p))
+    );
+  }, []);
+
   const value = useMemo(() => ({
     projects,
     currentProject,
@@ -201,7 +208,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     error,
     setCurrentProject,
     createProject,
-    deleteProject, 
+    deleteProject,
     addMember,
     removeMember,
     updateTask,
@@ -213,27 +220,42 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const m = p?.members.find(m => m.user_id === user?.id);
       return m?.status === 'owner' || m?.status === 'admin';
     },
-    canCreateProjects: () => !!user && (currentOrganization?.created_by === user.id),
-    canRemoveMembers: () => !!user && (currentOrganization?.created_by === user.id),
-    markProjectAsRead: (id) => {
-      messageService.markAsRead(id);
-      setProjects(prev => prev.map(p => p.id === id ? { ...p, hasUnreadMessages: false } : p));
-    }
-  }), [projects, currentProject, isLoading, error, user, currentOrganization]);
+    canCreateProjects: () => !!user && currentOrganization?.created_by === user.id,
+    canRemoveMembers: () => !!user && currentOrganization?.created_by === user.id,
+    markProjectAsRead,
+  }), [
+    projects,
+    currentProject,
+    isLoading,
+    error,
+    user,
+    currentOrganization,
+    markProjectAsRead, 
+  ]);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
   useEffect(() => {
-    const savedId = localStorage.getItem('currentProjectId');
-    if (savedId && projects.length > 0) {
-      const saved = projects.find(p => p.id === savedId);
-      if (saved) setCurrentProject(saved);
-    } else if (projects[0]) {
-      setCurrentProject(projects[0]);
-      localStorage.setItem('currentProjectId', projects[0].id);
+    if (projects.length === 0) {
+      setCurrentProject(null);
+      localStorage.removeItem('currentProjectId');
+      return;
     }
+
+    const savedId = localStorage.getItem('currentProjectId');
+    if (savedId) {
+      const saved = projects.find(p => p.id === savedId);
+      if (saved) {
+        setCurrentProject(saved);
+        return;
+      }
+    }
+
+    const firstProject = projects[0];
+    setCurrentProject(firstProject);
+    localStorage.setItem('currentProjectId', firstProject.id);
   }, [projects]);
 
   return (

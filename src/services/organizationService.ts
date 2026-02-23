@@ -175,12 +175,14 @@ export const organizationService = {
       created_at: serverTimestamp(),
     });
 
-    await createDoc('project_members', {
+    const projMemberData = {
       project_id: commonProject.id,
       user_id: userId,
       status: 'owner',
       joined_at: serverTimestamp(),
-    });
+    };
+
+    await createDoc('project_members', projMemberData);
 
     const userObj = getCurrentUser();
 
@@ -199,9 +201,6 @@ export const organizationService = {
     };
   },
 
-  /**
-   * Вступление в организацию по токену
-   */
   async joinOrganization(inviteToken: string): Promise<{ organizationId: string; orgName: string }> {
     const invite = await getDocById('organization_invites', inviteToken);
     if (!invite) throw new Error('Приглашение не найдено');
@@ -241,9 +240,6 @@ export const organizationService = {
     return { organizationId, orgName };
   },
 
-  /**
-   * Создание приглашения в организацию
-   */
   async createOrganizationInvite(organizationId: string): Promise<OrganizationInvite> {
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Не авторизован');
@@ -264,9 +260,6 @@ export const organizationService = {
     };
   },
 
-  /**
-   * Удаление организации (в будущем — через Cloud Function)
-   */
   async deleteOrganization(organizationId: string): Promise<void> {
     const batch = writeBatch(db);
 
@@ -335,9 +328,6 @@ export const organizationService = {
     if (opCount > 0) await batch2.commit();
   },
 
-  /**
-   * Проверка, состоит ли пользователь в организации
-   */
   async isUserInOrganization(organizationId: string, userId: string): Promise<boolean> {
     const membersQuery = query(
       collection(db, 'organization_members'),
@@ -348,9 +338,6 @@ export const organizationService = {
     return snap.length > 0;
   },
 
-  /**
-   * Покинуть организацию
-   */
   async leaveOrganization(organizationId: string): Promise<void> {
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Не авторизован');
@@ -368,24 +355,15 @@ export const organizationService = {
     }
   },
 
-  /**
-   * Обновление ролей участника
-   */
   async updateMemberRoles(organizationId: string, memberId: string, roles: string[]): Promise<void> {
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { roles });
   },
 
-  /**
-   * Удаление участника
-   */
   async removeMember(organizationId: string, memberId: string): Promise<void> {
     await deleteDocById('organization_members', memberId);
   },
 
-  /**
-   * Назначение модератора
-   */
   async makeModerator(organizationId: string, memberId: string): Promise<void> {
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { status: 'admin' });

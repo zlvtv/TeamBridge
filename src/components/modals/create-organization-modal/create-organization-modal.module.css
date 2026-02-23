@@ -52,9 +52,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
 }
 
 .roleField {
@@ -110,7 +107,6 @@
   gap: 12px;
   margin-top: 8px;
   padding-top: 12px;
-  border-top: 1px solid var(--border-color);
 }
 
 .btn {
@@ -126,7 +122,6 @@
 .btn-secondary {
   background: var(--color-background);
   color: var(--color-text);
-  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {

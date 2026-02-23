@@ -87,10 +87,13 @@ export const getCollection = async <T extends FirestoreDocument>(
 export const createDoc = async <T extends FirestoreDocument>(
   collectionName: CollectionName,
   data: Omit<T, 'id'>
-): Promise<string> => {
+): Promise<{ id: string } & T> => {
   try {
     const docRef = await addDoc(collection(db, collectionName), withTimestamps(data));
-    return docRef.id;
+    return {
+      id: docRef.id,
+      ...data as any
+    };
   } catch (error) {
     console.error(`Error creating in ${collectionName}:`, error);
     throw error;
@@ -181,9 +184,6 @@ export const subscribeToCollection = (
   );
 };
 
-/**
- * Универсальный метод для выполнения запроса (query) и получения документов
- */
 export const getDocsByQuery = async <T extends FirestoreDocument>(
   q: any 
 ): Promise<T[]> => {
@@ -199,9 +199,6 @@ export const getDocsByQuery = async <T extends FirestoreDocument>(
   }
 };
 
-/**
- * Подписка на сообщения определённого проекта
- */
 export const subscribeToMessages = (
   projectId: string,
   callback: (messages: Message[]) => void,

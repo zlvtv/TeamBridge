@@ -57,23 +57,6 @@
   padding-right: 8px;
 }
 
-.org-info-modal__members::-webkit-scrollbar {
-  width: 6px;
-}
-
-.org-info-modal__members::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.org-info-modal__members::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-
-.org-info-modal__members::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-light);
-}
-
 .org-info-modal__search-input {
   margin-bottom: 16px;
   padding: 8px 12px;

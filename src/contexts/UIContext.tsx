@@ -13,7 +13,8 @@ type ModalKey =
   | 'orgInfo'
   | 'createProject'
   | 'createOrg'
-  | 'createTask';
+  | 'createTask'
+  | 'create';
 
 type UIContextType = {
   theme: 'light' | 'dark';
@@ -41,6 +42,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
     createProject: false,
     createOrg: false,
     createTask: false,
+    create: false,
   });
   const [chatWidth, setChatWidthState] = useState(400);
   const [isBoardFullscreen, setIsBoardFullscreen] = useState(false);

@@ -41,8 +41,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={`${styles.dashboard} ${theme}`}>
-      <div className={styles['dashboard__panels-container']}>
-        <OrgIconPanel />
+      <div className={styles['dashboard__left']}>
+        <div className={styles['org-icon-panel-wrapper']}>
+          <OrgIconPanel />
+        </div>
         <SettingsPanel />
       </div>
 
@@ -54,16 +56,31 @@ const Dashboard: React.FC = () => {
         ) : !isBoardFullscreen ? (
           <div className={styles['dashboard__content']}>
             <div className={styles['dashboard__chat']} style={{ width: `${chatWidth}px` }}>
-              {currentOrganization && currentProject ? (currentProject && !projectLoading ? <ProjectChat /> : <LoadingState message="Загрузка чата..." />) : <div className={styles.placeholder}>Выберите проект</div>}
+              {currentOrganization && currentProject ? (
+                currentProject && !projectLoading ? (
+                  <ProjectChat />
+                ) : (
+                  <LoadingState message="Загрузка чата..." />
+                )
+              ) : (
+                <div className={styles.placeholder}>Выберите проект</div>
+              )}
             </div>
             <ResizableSplitter />
             <div className={styles['dashboard__board']}>
-              {currentOrganization ? (currentProject && !projectLoading ? <TaskBoard /> : <LoadingState message="Загрузка панели задач..." />) : <TaskBoard />}
+              {currentOrganization ? (
+                currentProject && !projectLoading ? (
+                  <TaskBoard />
+                ) : (
+                  <LoadingState message="Загрузка панели задач..." />
+                )
+              ) : (
+                <TaskBoard />
+              )}
             </div>
           </div>
         ) : (
-          <div className={styles['dashboard__fullscreen']}>
-          </div>
+          <div className={styles['dashboard__fullscreen']}></div>
         )}
       </main>
 

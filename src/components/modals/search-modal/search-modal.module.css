@@ -1,5 +1,5 @@
 .search-modal__content {
-  padding: 16px;
+  padding: 10px;
   min-width: 300px;
 }
 
@@ -31,10 +31,12 @@
   padding: 10px 12px;
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border: 1px solid transparent; 
+  outline: none; 
 }
 
 .search-modal__result-item:hover {
@@ -64,4 +66,12 @@
   text-align: center;
   color: var(--color-text-light);
   font-size: 14px;
+}
+
+.search-modal__result-item:hover,
+.search-modal__result-item:focus {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary); 
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); 
+  transform: translateY(-1px); 
 }

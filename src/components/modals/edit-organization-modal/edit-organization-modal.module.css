@@ -158,23 +158,6 @@
   padding: 0 16px;
 }
 
-.edit-org-modal__members-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.edit-org-modal__members-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.edit-org-modal__members-list::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-
-.edit-org-modal__members-list::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-light);
-}
-
 .edit-org-modal__member-item {
   display: flex;
   justify-content: space-between;

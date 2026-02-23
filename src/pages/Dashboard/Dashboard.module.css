@@ -1,56 +1,92 @@
+
 .dashboard {
   display: flex;
-  height: 100vh;
+  justify-content: space-between;
   overflow: hidden;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  padding-bottom: 10px;
+  height: calc(100vh - 40px);
+  gap: 20px;
+  overflow-y: hidden;
+  position: relative;}
+
+body, html {
+  overflow-y: hidden;
 }
 
+.dashboard__left {
+  width: 64px;
+  display: flex;
+  gap: 20px;
+  align-items: space-between;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.org-icon-panel-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  width: 100%;
+}
 .dashboard__panels-container {
   position: fixed;
   left: 20px;
-  top: var(--panel-top-offset);
-  width: var(--panel-width);
+  top: var(--panel-top-offset, 20px);
+  width: var(--panel-width, 64px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--panel-gap);
+  gap: var(--panel-gap, 16px);
   z-index: 100;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
 }
 
+
 .dashboard__main {
-  margin: 20px 20px 20px 100px;
-  width: calc(100% - 140px);
-  height: calc(100vh - 40px);
   background: var(--color-surface);
   border-radius: 12px;
   box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-color);
   overflow: hidden;
   display: flex;
   flex-direction: column; 
+  flex: 1;
+  min-height: 0;
 }
 
-.dashboard__content,
-.dashboard__fullscreen {
+.dashboard__content {
   display: flex;
-  flex: 1; 
-  min-height: 0; 
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
+  position: relative;
+  height: 100%; 
 }
 
 .dashboard__chat {
   overflow-y: auto;
   border-right: 1px solid var(--border-color);
-  transition: width 0.2s ease;
-  overflow: hidden;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
+  flex: none; 
+  width: 400px; 
+  min-height: 0;
 }
 
 .dashboard__board {
   flex: 1;
-  overflow: hidden;
   min-width: 300px;
-  overflow-y: auto;
+  overflow: auto;
   position: relative;
+  min-height: 0;
 }
 
 .dashboard__fullscreen {

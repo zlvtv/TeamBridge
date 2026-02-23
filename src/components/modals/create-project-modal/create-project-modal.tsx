@@ -12,9 +12,15 @@ import { projectService } from '../../../services/projectService';
 import { messageService } from '../../../services/messageService';
 
 const CreateProjectModal: React.FC = () => {
-  const { currentOrganization } = useOrganization();
-  const { refreshProjects } = useProject();
-  const { isCreateProjectOpen, closeCreateProject } = useUI();
+const { currentOrganization } = useOrganization();
+const { refreshProjects } = useProject();
+const {
+  isModalOpen,
+  closeModal,
+} = useUI();
+
+const isCreateProjectOpen = isModalOpen('createProject');
+const closeCreateProject = () => closeModal('createProject');
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);

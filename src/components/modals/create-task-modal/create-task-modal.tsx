@@ -77,12 +77,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           priority: 'medium',
           status: 'todo'
         }}
+        
         onSubmit={handleSubmit}
       >
         <div className={styles['create-task-modal__field']}>
           <Field
             name="title"
-            label="Название задачи *"
+            label="Название задачи"
             placeholder="Введите название"
             required
             validators={[
@@ -123,6 +124,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 { value: 'medium', label: 'Средний' },
                 { value: 'high', label: 'Высокий' }
               ]}
+              hasSearch={false}
             />
           </div>
         </div>
@@ -134,7 +136,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             type="select"
             multiple
             options={assigneeOptions}
-            hasSearch
+
           />
         </div>
 
@@ -157,6 +159,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               { value: 'in_progress', label: 'В процессе' },
               { value: 'done', label: 'Готово' }
             ]}
+            hasSearch={false} 
           />
         </div>
 

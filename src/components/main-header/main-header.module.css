@@ -2,12 +2,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 10px 20px;
   background: var(--color-surface);
   border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
   border-bottom: 1px solid var(--border-color);
   color: var(--color-text);
-  min-height: 72px;
+  min-height: 50px;
   box-sizing: border-box;
 }
 
@@ -16,7 +16,6 @@
   margin: 0;
   color: var(--color-text);
   font-weight: 500;
-  cursor: pointer;
 }
 
 .main-header__info-btn {

@@ -34,6 +34,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
     if (isOpen) {
       setName('');
       setDescription('');
+      setRoles([]);
       setError(null);
       setIsCreating(false);
       setTimeout(setFocus, 0);
@@ -59,16 +60,32 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    const trimmedDescription = description.trim();
+    const validRoles = roles.filter(r => r.name.trim());
+    const roleNames = validRoles.map(r => r.name.trim());
+
+    if (!trimmedName) {
       setError('Введите название организации');
       return;
     }
 
-    const roleNames = roles.map(r => r.name.trim()).filter(n => n);
+    if (trimmedName.length < 2) {
+      setError('Название организации должно быть не менее 2 символов');
+      return;
+    }
+
+    if (trimmedName.length > 50) {
+      setError('Название организации не должно превышать 50 символов');
+      return;
+    }
+
     if (new Set(roleNames).size !== roleNames.length) {
       setError('Названия ролей должны быть уникальными');
       return;
     }
+
+
 
     setIsCreating(true);
     setError(null);
@@ -96,7 +113,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             id="org-name"
             placeholder="Введите название"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value.slice(0, 50))}
+            maxLength={50}
             required
             error={error}
             disabled={isCreating}
@@ -111,7 +129,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             id="org-description"
             placeholder="Расскажите, чем занимается организация"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value.slice(0, 200))}
+            maxLength={200}
             textarea
             disabled={isCreating}
           />
@@ -125,7 +144,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
                 className={styles.roleName}
                 placeholder="Название роли"
                 value={role.name}
-                onChange={(e) => updateRole(index, 'name', e.target.value)}
+                onChange={(e) => updateRole(index, 'name', e.target.value.slice(0, 30))}
+                maxLength={30}
                 disabled={isCreating}
               />
               <div className={styles.colorPicker}>

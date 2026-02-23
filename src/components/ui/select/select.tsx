@@ -34,7 +34,7 @@ const Select: React.FC<SelectProps> = ({
   placeholder = 'Выберите...',
   isMulti = false,
   isDisabled = false,
-  isClearable = false, // ✅ Добавлено с дефолтом
+  isClearable = false, 
   className = '',
   error,
   showAvatar = false,
@@ -120,27 +120,7 @@ const Select: React.FC<SelectProps> = ({
               })}
             </div>
           )}
-          {!isMulti && (
-            <div className={styles.singleValue}>
-              {showAvatar && selectedValues.length > 0 ? (
-                <>
-                  {options
-                    .filter((o) => o.value === value)
-                    .map((o) => (
-                      <img
-                        key={o.value}
-                        src={o.avatar_url || undefined}
-                        alt=""
-                        className={styles.avatar}
-                      />
-                    ))}
-                  <span>{getLabel()}</span>
-                </>
-              ) : (
-                <span>{getLabel()}</span>
-              )}
-            </div>
-          )}
+
           {!isMulti && !selectedValues.length && (
             <span className={styles.placeholder}>{placeholder}</span>
           )}

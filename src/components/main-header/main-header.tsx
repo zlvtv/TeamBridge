@@ -44,7 +44,6 @@ const MainHeader: React.FC = () => {
         <h1
           ref={setTitleEl}
           className={styles['main-header__title']}
-          onClick={handleTitleClick}
         >
           {currentOrganization ? currentOrganization.name : 'Выберите организацию'}
         </h1>
