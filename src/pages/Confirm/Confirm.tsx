@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { auth } from '../../lib/firebase';
-import { applyActionCode } from 'firebase/auth';
+import { 
+  applyActionCode,
+  sendEmailVerification 
+} from 'firebase/auth';
 import Button from '../../components/ui/button/button';
 import LoadingState from '../../components/ui/loading/LoadingState';
 import styles from './Confirm.module.css';
@@ -47,13 +50,18 @@ const Confirm: React.FC = () => {
       navigate('/login');
       return;
     }
+
+    const actionCodeSettings = {
+      url: 'https://teambridge-c991.onrender.com/confirm',
+      handleCodeInApp: true,
+    };
+
     try {
-      await currentUser.sendEmailVerification({
-        url: 'https://teambridge-c991.onrender.com/confirm',
-      });
+      await sendEmailVerification(currentUser, actionCodeSettings);
       alert('Письмо отправлено! Проверьте спам.');
     } catch (err: any) {
-      alert('Ошибка при отправке: ' + err.message);
+      console.error('Ошибка отправки письма:', err);
+      alert('Ошибка при отправке: ' + (err.message || 'Неизвестная ошибка'));
     }
   };
 
