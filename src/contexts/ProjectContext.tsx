@@ -1,39 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useOrganization } from './OrganizationContext';
 import { useAuth } from './AuthContext';
-import { db } from '../lib/firebase';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { messageService } from '../services/messageService';
-
-interface ProjectMember {
-  id: string;
-  user_id: string;
-  role: 'member' | 'moderator' | 'owner';
-  joined_at: string;
-  profile: {
-    id: string;
-    username: string;
-    full_name: string | null;
-    avatar_url: string | null;
-  };
-}
+import { projectService } from '../services/projectService';
+import { messageService } from '../services/messageService'; // ✅ Добавлен импорт
+import { buildUserFromSnapshot } from '../utils/user.utils';
 
 interface Task {
   id: string;
@@ -46,6 +16,19 @@ interface Task {
   created_by: string;
   created_at: string;
   assignees: string[];
+}
+
+interface ProjectMember {
+  id: string;
+  user_id: string;
+  status: 'member' | 'admin' | 'owner';
+  joined_at: string;
+  profile: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
 }
 
 interface Project {
@@ -67,7 +50,11 @@ interface ProjectContextType {
   error: string | null;
   setCurrentProject: (project: Project | null) => void;
   createProject: (name: string, description?: string) => Promise<Project>;
-
+  deleteProject: (projectId: string) => Promise<void>; // ✅ объявлено
+  addMember: (projectId: string, userId: string) => Promise<void>;
+  removeMember: (projectId: string, userId: string) => Promise<void>;
+  updateTask: (taskId: string, data: any) => Promise<void>;
+  sendProjectEvent: (projectId: string, action: string, details: string) => Promise<void>;
   refreshProjects: () => Promise<Project[]>;
   isMember: (projectId: string) => boolean;
   canManageTasks: (projectId: string) => boolean;
@@ -77,30 +64,6 @@ interface ProjectContextType {
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
-
-const getDocById = async (collectionName: string, id: string) => {
-  const docRef = doc(db, collectionName, id);
-  const docSnap = await getDocs(query(collection(db, collectionName), where('__name__', '==', id)));
-  return docSnap.docs[0]?.data() || null;
-};
-
-const buildUserFromSnapshot = (userSnap: any, userId: string) => {
-  if (!userSnap) {
-    const fallbackUsername = `user_${userId.slice(-5)}`;
-    return {
-      id: userId,
-      username: fallbackUsername,
-      full_name: fallbackUsername,
-      avatar_url: null,
-    };
-  }
-  return {
-    id: userId,
-    username: userSnap.username || userSnap.email?.split('@')[0] || `user_${userId.slice(-5)}`,
-    full_name: userSnap.full_name || userSnap.username || 'Пользователь',
-    avatar_url: userSnap.avatar_url || null,
-  };
-};
 
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -120,56 +83,19 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
       setIsLoading(true);
-      const q = query(
-        collection(db, 'projects'),
-        where('organization_id', '==', currentOrganization.id)
-      );
-      const snap = await getDocs(q);
+      const projectsWithDetails = await projectService.getProjectsByOrganization(currentOrganization.id);
 
-      const fetchedProjects = await Promise.all(
-        snap.docs.map(async (docSnap) => {
-          const projData = { id: docSnap.id, ...docSnap.data() } as Omit<Project, 'members' | 'tasks' | 'hasUnreadMessages'>;
-
-          const membersQuery = query(
-            collection(db, 'project_members'),
-            where('project_id', '==', projData.id)
-          );
-          const membersSnap = await getDocs(membersQuery);
-          const members = await Promise.all(
-            membersSnap.docs.map(async (mDoc) => {
-              const mData = mDoc.data();
-              const userSnap = await getDocById('users', mData.user_id);
-              const profile = buildUserFromSnapshot(userSnap, mData.user_id);
-              return {
-                id: mDoc.id,
-                ...mData,
-                user: profile,
-              };
-            })
-          );
-
-          const tasksQuery = query(
-            collection(db, 'tasks'),
-            where('project_id', '==', projData.id)
-          );
-          const tasksSnap = await getDocs(tasksQuery);
-          const tasks = tasksSnap.docs.map(t => ({ id: t.id, ...t.data() })) as Task[];
-
-          const hasUnread = await messageService.hasUnreadMessages(projData.id, user.id);
-
-          return {
-            ...projData,
-            members,
-            tasks,
-            hasUnreadMessages: hasUnread,
-          };
+      const projectsWithReadStatus = await Promise.all(
+        projectsWithDetails.map(async (proj) => {
+          const hasUnread = await messageService.hasUnreadMessages(proj.id, user.id);
+          return { ...proj, hasUnreadMessages: hasUnread };
         })
       );
 
-      setProjects(fetchedProjects);
-      return fetchedProjects;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
+      setProjects(projectsWithReadStatus);
+      return projectsWithReadStatus;
+    } catch (err: any) {
+      setError(err.message);
       return [];
     } finally {
       setIsLoading(false);
@@ -179,154 +105,136 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refreshProjects = useCallback(() => fetchProjects(), [fetchProjects]);
 
   const createProject = async (name: string, description?: string): Promise<Project> => {
-    if (!currentOrganization || !user) throw new Error('Нет доступа');
+    if (!currentOrganization || !user) throw new Error('No access');
 
-    const projRef = await addDoc(collection(db, 'projects'), {
-      organization_id: currentOrganization.id,
+    const projectId = await projectService.createProject({
       name,
-      description: description || null,
-      created_by: user.id,
-      created_at: serverTimestamp(),
+      description,
+      organization_id: currentOrganization.id,
+      created_by: user.id
     });
 
-    const memberRef = await addDoc(collection(db, 'project_members'), {
-      project_id: projRef.id,
-      user_id: user.id,
-      role: 'owner',
-      joined_at: serverTimestamp(),
-    });
+    await projectService.addMember(projectId, user.id, 'owner');
 
     const newProject: Project = {
-      id: projRef.id,
+      id: projectId,
       organization_id: currentOrganization.id,
       name,
       description: description || null,
       created_at: new Date().toISOString(),
       created_by: user.id,
-      members: [
-        {
-          id: memberRef.id,
-          user_id: user.id,
-          role: 'owner',
-          joined_at: new Date().toISOString(),
-          profile: {
-            id: user.id,
-            username: user.username,
-            full_name: user.full_name,
-            avatar_url: user.avatar_url,
-          },
-        },
-      ],
+      members: [{
+        id: 'temp',
+        user_id: user.id,
+        status: 'owner',
+        joined_at: new Date().toISOString(),
+        profile: { id: user.id, username: user.username, full_name: user.full_name, avatar_url: user.avatar_url }
+      }],
       tasks: [],
-      hasUnreadMessages: false,
+      hasUnreadMessages: false
     };
 
-    setProjects((prev) => [newProject, ...prev]);
+    setProjects(prev => [newProject, ...prev]);
     setCurrentProject(newProject);
-    localStorage.setItem('currentProjectId', newProject.id);
+    localStorage.setItem('currentProjectId', projectId);
+
+    await messageService.sendSystemMessage(projectId, `Создан проект: **${name}**`);
+
     return newProject;
   };
 
-  const setProject = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-      setCurrentProject(project);
-      localStorage.setItem('currentProjectId', project.id);
-    }
-  };
+  const deleteProject = async (projectId: string): Promise<void> => {
+  if (!currentOrganization || !user) throw new Error('Нет доступа');
 
-  const isMember = (projectId: string) => {
-    return projects.some(p => p.id === projectId);
-  };
+  const projectToDelete = projects.find(p => p.id === projectId);
+  if (!projectToDelete) throw new Error('Проект не найден');
 
-  const canManageTasks = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    const member = project?.members.find(m => m.user_id === user?.id);
-    return member?.role === 'owner' || member?.role === 'moderator';
-  };
+  try {
+    await projectService.deleteProject(projectId);
+    await messageService.sendSystemMessage(projectId, `Проект **${projectToDelete.name}** был удалён`);
 
-  const canCreateProjects = () => {
-    return !!user && (
-      currentOrganization?.created_by === user.id ||
-      currentOrganization?.moderators?.includes(user.id)
-    );
-  };
+    setProjects(prev => prev.filter(p => p.id !== projectId));
 
-  const canRemoveMembers = () => {
-    return canCreateProjects();
-  };
-
-  const markProjectAsRead = useCallback((projectId: string) => {
-  messageService.markAsRead(projectId);
-  setProjects(prev =>
-    prev.map(project =>
-      project.id === projectId
-        ? { ...project, hasUnreadMessages: false }
-        : project
-    )
-  );
-}, []);
-
-  useEffect(() => {
-    if (!currentOrganization) return;
-
-    const q = query(
-      collection(db, 'projects'),
-      where('organization_id', '==', currentOrganization.id)
-    );
-
-    const unsubscribe = onSnapshot(q, () => {
-      fetchProjects();
-    });
-
-    return () => unsubscribe();
-  }, [currentOrganization]);
-
-  useEffect(() => {
-  if (!currentProject) return;
-
-  const updated = projects.find(p => p.id === currentProject.id);
-  if (updated && updated.hasUnreadMessages !== currentProject.hasUnreadMessages) {
-    setCurrentProject(updated);
-  }
-}, [projects, currentProject]);
-
-  useEffect(() => {
-    if (projects.length === 0) {
-      setCurrentProject(null);
-      return;
-    }
-
-    const savedId = localStorage.getItem('currentProjectId');
-    if (savedId) {
-      const saved = projects.find(p => p.id === savedId);
-      if (saved) {
-        setCurrentProject(saved);
-        return;
+    if (currentProject?.id === projectId) {
+      const remaining = projects.filter(p => p.id !== projectId);
+      const newCurrent = remaining[0] || null;
+      setCurrentProject(newCurrent);
+      if (newCurrent) {
+        localStorage.setItem('currentProjectId', newCurrent.id);
+      } else {
+        localStorage.removeItem('currentProjectId');
       }
     }
+  } catch (err: any) {
+    throw new Error(`Не удалось удалить проект: ${err.message}`);
+  }
+};
 
-    const firstProject = projects[0];
-    if (firstProject) {
-      setCurrentProject(firstProject);
-      localStorage.setItem('currentProjectId', firstProject.id);
-    }
-  }, [projects]);
+  const addMember = async (projectId: string, userId: string): Promise<void> => {
+    await projectService.addMember(projectId, userId);
+    await refreshProjects();
+  };
 
-  const value = {
+  const removeMember = async (projectId: string, userId: string): Promise<void> => {
+    const member = projects
+      .find(p => p.id === projectId)
+      ?.members.find(m => m.user_id === userId);
+
+    if (!member) throw new Error('Участник не найден');
+
+    await projectService.removeMember(projectId, member.id);
+    await refreshProjects();
+  };
+
+  const updateTask = async (taskId: string, data: any): Promise<void> => {
+    console.log('updateTask', taskId, data);
+  };
+
+  const sendProjectEvent = async (projectId: string, action: string, details: string): Promise<void> => {
+    await messageService.sendSystemMessage(projectId, `**${action}**: ${details}`);
+  };
+
+  const value = useMemo(() => ({
     projects,
     currentProject,
     isLoading,
     error,
-    setCurrentProject: setProject,
+    setCurrentProject,
     createProject,
+    deleteProject, 
+    addMember,
+    removeMember,
+    updateTask,
+    sendProjectEvent,
     refreshProjects,
-    isMember,
-    canManageTasks,
-    canCreateProjects,
-    canRemoveMembers,
-    markProjectAsRead,
-  };
+    isMember: (id) => !!projects.find(p => p.id === id),
+    canManageTasks: (id) => {
+      const p = projects.find(p => p.id === id);
+      const m = p?.members.find(m => m.user_id === user?.id);
+      return m?.status === 'owner' || m?.status === 'admin';
+    },
+    canCreateProjects: () => !!user && (currentOrganization?.created_by === user.id),
+    canRemoveMembers: () => !!user && (currentOrganization?.created_by === user.id),
+    markProjectAsRead: (id) => {
+      messageService.markAsRead(id);
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, hasUnreadMessages: false } : p));
+    }
+  }), [projects, currentProject, isLoading, error, user, currentOrganization]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  useEffect(() => {
+    const savedId = localStorage.getItem('currentProjectId');
+    if (savedId && projects.length > 0) {
+      const saved = projects.find(p => p.id === savedId);
+      if (saved) setCurrentProject(saved);
+    } else if (projects[0]) {
+      setCurrentProject(projects[0]);
+      localStorage.setItem('currentProjectId', projects[0].id);
+    }
+  }, [projects]);
 
   return (
     <ProjectContext.Provider value={value}>

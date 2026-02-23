@@ -1,0 +1,85 @@
+.user-info-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-large);
+  min-width: 280px;
+  max-width: 320px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.user-info-modal__header {
+  padding: 16px;
+  text-align: center;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-info-modal__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-primary);
+}
+
+.user-info-modal__fallback {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-info-modal__body {
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.user-info-modal__name {
+  margin: 8px 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.user-info-modal__email {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--color-text-light);
+  word-break: break-all;
+}
+
+.user-info-modal__description {
+  margin: 8px 0;
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.user-info-modal__roles {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--color-text);
+  padding-bottom: 8px;
+}
+
+.user-info-modal__role {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 2px 4px 2px 0;
+  font-weight: 500;
+  white-space: nowrap;
+}

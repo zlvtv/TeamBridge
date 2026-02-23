@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Input from '../../components/ui/input/input';
+import Button from '../../components/ui/button/button';
 import styles from './Login.module.css';
 
 interface LocationState {
@@ -29,13 +31,8 @@ const Login: React.FC = () => {
     try {
       await signIn(email.trim(), password);
 
-      if (fromInvite) {
-        navigate(`/invite/${fromInvite}`, { replace: true });
-      } else if (from) {
-        navigate(from, { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+      const redirectPath = fromInvite ? `/invite/${fromInvite}` : from || '/dashboard';
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -44,17 +41,19 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formWrapper}>
-        <h1 className={styles.title}>Войти в аккаунт</h1>
-        <p className={styles.subtitle}>Введите свои данные, чтобы продолжить</p>
+    <div className={styles.auth}>
+      <div className={styles['auth__wrapper']}>
+        <h1 className={styles['auth__title']}>Войти в аккаунт</h1>
+        <p className={styles['auth__subtitle']}>Введите свои данные, чтобы продолжить</p>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div className={styles['auth__error']}>{error}</div>}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.field}>
-            <label htmlFor="email" className={styles.label}>Электронная почта</label>
-            <input
+        <form onSubmit={handleSubmit} className={styles['auth__form']}>
+          <div className={styles['auth__field']}>
+            <label htmlFor="email" className={styles['auth__label']}>
+              Электронная почта
+            </label>
+            <Input
               id="email"
               type="email"
               value={email}
@@ -62,13 +61,14 @@ const Login: React.FC = () => {
               placeholder="name@example.com"
               required
               disabled={isLoading}
-              className={styles.input}
             />
           </div>
 
-          <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>Пароль</label>
-            <input
+          <div className={styles['auth__field']}>
+            <label htmlFor="password" className={styles['auth__label']}>
+              Пароль
+            </label>
+            <Input
               id="password"
               type="password"
               value={password}
@@ -76,14 +76,13 @@ const Login: React.FC = () => {
               placeholder="••••••••"
               required
               disabled={isLoading}
-              className={styles.input}
             />
           </div>
 
-          <div className={styles.actions}>
+          <div style={{ marginTop: '-8px' }}>
             <button
               type="button"
-              className={styles.link}
+              className={styles['auth__link']}
               onClick={() => navigate('/password-recovery')}
               disabled={isLoading}
             >
@@ -91,16 +90,16 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          <button type="submit" className={styles.submit} disabled={isLoading}>
-            {isLoading ? 'Вход...' : 'Войти'}
-          </button>
+          <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
+            Войти
+          </Button>
         </form>
 
-        <p className={styles.footer}>
+        <p className={styles['auth__footer']}>
           Нет аккаунта?{' '}
           <button
             type="button"
-            className={styles.link}
+            className={styles['auth__link']}
             onClick={() => navigate('/signup')}
             disabled={isLoading}
           >

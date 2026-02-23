@@ -1,5 +1,6 @@
 import React from 'react';
-import './emoji-picker.css';
+import Button from '../ui/button/button';
+import styles from './emoji-picker.module.css';
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;
@@ -27,30 +28,31 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, onClose, posit
   };
 
   return (
-    <div className="emoji-picker-overlay" onClick={handleOutsideClick}>
+    <div className={styles['emoji-picker-overlay']} onClick={handleOutsideClick}>
       <div 
-        className="emoji-picker" 
+        className={styles['emoji-picker']} 
         style={{ 
           bottom: position.bottom, 
           left: position.left,
           transform: 'translateX(-50%)'
         }}
       >
-        <div className="emoji-grid">
+        <div className={styles['emoji-grid']}>
           {emojis.map((emoji, index) => (
-            <button 
-              key={index} 
-              className="emoji-button" 
+            <Button
+              key={index}
+              variant="ghost"
+              className={styles['emoji-button']}
               onClick={() => handleEmojiClick(emoji)}
               aria-label="Выбрать эмоджи"
             >
               {emoji}
-            </button>
+            </Button>
           ))}
         </div>
-        <button className="close-button" onClick={onClose}>
+        <Button variant="secondary" className={styles['close-button']} onClick={onClose}>
           Закрыть
-        </button>
+        </Button>
       </div>
     </div>
   );

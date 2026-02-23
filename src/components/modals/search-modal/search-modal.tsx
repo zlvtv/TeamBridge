@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import Modal from '../../ui/modal/Modal';
 import { useOrganization } from '../../../contexts/OrganizationContext';
-import { useUI } from '../../../contexts/UIContext';
 import { formatCount } from '../../../utils/formatCount';
 import styles from './search-modal.module.css';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  anchorEl?: HTMLElement | null;
 }
 
-const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, anchorEl }) => {
+const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const { organizations, setCurrentOrganization } = useOrganization();
-  const { closeSearch } = useUI();
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -22,14 +20,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, anchorEl }) 
     if (isOpen) document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose]);
-
-  if (!isOpen || !anchorEl) return null;
-
-  const rect = anchorEl.getBoundingClientRect();
-  const position = {
-    top: rect.bottom + 8,
-    left: rect.right + 8,
-  };
 
   const filteredOrgs = query
     ? organizations.filter((org) => {
@@ -44,26 +34,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, anchorEl }) 
 
   const handleOrgClick = (org: (typeof organizations)[0]) => {
     setCurrentOrganization(org);
-    closeSearch();
+    onClose();
   };
 
   return (
-    <div
-      className={styles['search-modal-backdrop']}
-      onClick={onClose}
-      role="button"
-      tabIndex={-1}
-      aria-hidden={!isOpen}
-    >
-      <div
-        className={styles['search-modal']}
-        style={{ position: 'absolute', top: `${position.top}px`, left: `${position.left}px` }}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-label="Поиск по организациям"
-      >
-        <h3 className={styles['search-modal__title']}>Поиск</h3>
-
+    <Modal isOpen={isOpen} onClose={onClose} title="Поиск по организациям" showCloseButton={false}>
+      <div className={styles['search-modal__content']}>
         <input
           type="text"
           className={styles['search-modal__input']}
@@ -76,9 +52,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, anchorEl }) 
         />
 
         {query && filteredOrgs.length > 0 && (
-          <div className={styles['search-modal__results']}>
+          <ul className={styles['search-modal__results']}>
             {filteredOrgs.map((org) => (
-              <div
+              <li
                 key={org.id}
                 className={styles['search-modal__result-item']}
                 onClick={() => handleOrgClick(org)}
@@ -93,33 +69,16 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, anchorEl }) 
                 <span className={styles['search-modal__result-meta']}>
                   {formatCount(org.organization_members.length, 'участник', 'участника', 'участников')}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
 
         {query && filteredOrgs.length === 0 && (
           <div className={styles['search-modal__no-results']}>Организации не найдены</div>
         )}
-
-        <button
-          className={styles['search-modal__close']}
-          onClick={onClose}
-          aria-label="Закрыть"
-        >
-          ×
-        </button>
-
-        <div className={styles['search-modal__actions']}>
-          <button
-            className={`${styles['btn']} ${styles['btn-primary']}`}
-            onClick={onClose}
-          >
-            Закрыть
-          </button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

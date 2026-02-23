@@ -1,0 +1,41 @@
+.edit-profile-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.edit-profile-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-profile-modal__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.edit-profile-modal__file-input {
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.edit-profile-modal__file-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.edit-profile-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 16px;
+}

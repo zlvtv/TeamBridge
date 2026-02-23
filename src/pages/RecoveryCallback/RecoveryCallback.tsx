@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AuthLoadingPage from '../../components/ui/loading/AuthLoadingPage';
 
 const RecoveryCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const RecoveryCallback: React.FC = () => {
     }
   }, [navigate]);
 
-  return null;
+  return <AuthLoadingPage message="Подготовка к восстановлению пароля..." />;
 };
 
 export default RecoveryCallback;

@@ -4,7 +4,8 @@ export interface OrganizationMember {
   id: string;
   organization_id: string;
   user_id: string;
-  role: 'owner' | 'admin' | 'member';
+  status: 'owner' | 'admin' | 'member' | 'active' | 'pending';
+  roles?: string[];
   joined_at: string;
   user: UserProfile;
 }
@@ -32,4 +33,13 @@ export interface OrganizationInvite {
 export interface CreateOrganizationData {
   name: string;
   description?: string;
+  roles?: Array<{ name: string; color: string }>; 
+  autoRemoveMembers?: boolean;
+}
+
+export interface UpdateOrganizationData {
+  name?: string;
+  description?: string;
+  roles?: Array<{ name: string; color: string }>;
+  autoRemoveMembers?: boolean;
 }

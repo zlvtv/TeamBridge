@@ -1,23 +1,25 @@
-import { Organization, OrganizationWithMembers, CreateOrganizationData, OrganizationInvite } from '../types/organization.types';
+import { Organization, OrganizationWithMembers, CreateOrganizationData, UpdateOrganizationData, OrganizationInvite } from '../types/organization.types';
 import { auth, db } from '../lib/firebase';
 import {
   getDocById,
   createDoc,
   deleteDocById,
-} from '../lib/firestore';
+  getDocsByQuery,
+} from './firestore/firestoreService';
 import {
   collection,
   doc,
   query,
   where,
   getDocs,
-  getDocsFromServer,
   writeBatch,
   serverTimestamp,
   updateDoc,
+  arrayRemove,
 } from 'firebase/firestore';
+import { buildUserFromSnapshot } from '../utils/user.utils';
 
-const getCurrentUserId = () => {
+const getCurrentUserId = (): string | null => {
   return auth.currentUser?.uid || null;
 };
 
@@ -27,204 +29,207 @@ const getCurrentUser = () => {
   return {
     id: user.uid,
     email: user.email || '',
-    full_name: user.displayName || user.email?.split('@')[0] || 'User',
+    full_name: user.displayName || user.email?.split('@')[0] || 'Пользователь',
     username: user.email?.split('@')[0] || `user_${user.uid.slice(-5)}`,
     avatar_url: user.photoURL || null,
   };
 };
 
-const buildUserFromSnapshot = (userSnap: any, userId: string) => {
-  if (!userSnap) {
-    const fallbackUsername = `user_${userId.slice(-5)}`;
-    return {
-      id: userId,
-      email: '',
-      username: fallbackUsername,
-      full_name: fallbackUsername,
-      avatar_url: null,
-    };
-  }
+/**
+ * Получение всех членов организации
+ */
+const getOrganizationMembers = async (organizationId: string): Promise<any[]> => {
+  const membersQuery = query(
+    collection(db, 'organization_members'),
+    where('organization_id', '==', organizationId)
+  );
 
-  return {
-    id: userId,
-    email: userSnap.email || '',
-    username: userSnap.username || userSnap.email?.split('@')[0] || `user_${userId.slice(-5)}`,
-    full_name: userSnap.full_name || userSnap.username || userSnap.email?.split('@')[0] || `Пользователь ${userId.slice(-5)}`,
-    avatar_url: userSnap.avatar_url || null,
-  };
+  const memberDocs = await getDocsByQuery(membersQuery);
+  return memberDocs;
+};
+
+/**
+ * Получение профиля пользователя с fallback
+ */
+const getUserProfile = async (userId: string) => {
+  const userSnap = await getDocById('users', userId);
+  return buildUserFromSnapshot(userSnap, userId);
+};
+
+/**
+ * Формирование данных об участниках с профилями
+ */
+const buildMembersWithProfiles = async (members: any[]): Promise<OrganizationWithMembers['organization_members']> => {
+  return await Promise.all(
+    members.map(async (member) => {
+      const user = await getUserProfile(member.user_id);
+      return {
+        ...member,
+        joined_at: member.joined_at?.toDate ? member.joined_at.toDate().toISOString() : new Date().toISOString(),
+        user,
+      };
+    })
+  );
 };
 
 export const organizationService = {
-  async getUserOrganizations(forceServer = false): Promise<OrganizationWithMembers[]> {
-  const userId = getCurrentUserId();
-  if (!userId) return [];
+  /**
+   * Обновление организации
+   */
+  async updateOrganization(id: string, data: UpdateOrganizationData): Promise<void> {
+    const orgRef = doc(db, 'organizations', id);
+    await updateDoc(orgRef, {
+      name: data.name,
+      description: data.description,
+      roles: data.roles,
+      autoRemoveMembers: data.autoRemoveMembers,
+      updated_at: serverTimestamp(),
+    });
+  },
 
-  try {
-    const membersQuery = query(
-      collection(db, 'organization_members'),
-      where('user_id', '==', userId)
-    );
+  /**
+   * Получение организаций пользователя
+   */
+  async getUserOrganizations(): Promise<OrganizationWithMembers[]> {
+    const userId = getCurrentUserId();
+    if (!userId) return [];
 
-    let membersSnap;
     try {
-      membersSnap = forceServer ? await getDocsFromServer(membersQuery) : await getDocs(membersQuery);
-    } catch (err) {
-      const snap = await getDocs(membersQuery);
-      membersSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
-
-    const memberRecords = membersSnap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    if (memberRecords.length === 0) return [];
-    const orgIds = [...new Set(memberRecords.map(m => m.organization_id))];
-
-    const orgsQuery = query(
-      collection(db, 'organizations'),
-      where('__name__', 'in', orgIds)
-    );
-
-    let orgSnap;
-    try {
-      orgSnap = forceServer ? await getDocsFromServer(orgsQuery) : await getDocs(orgsQuery);
-    } catch (err) {
-      const snap = await getDocs(orgsQuery);
-      orgSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
-
-    const organizations = orgSnap.docs.map(doc => ({
-      id: doc.id, 
-      ...doc.data(),
-      created_at: doc.data().created_at?.toDate ? doc.data().created_at.toDate().toISOString() : null,
-      updated_at: doc.data().updated_at?.toDate ? doc.data().updated_at.toDate().toISOString() : null,
-    })) as Organization[];
-
-    const result: OrganizationWithMembers[] = [];
-
-    for (const org of organizations) {
-      const membersOfOrgQuery = query(
+      const membersQuery = query(
         collection(db, 'organization_members'),
-        where('organization_id', '==', org.id)
+        where('user_id', '==', userId)
       );
+      const memberDocs = await getDocsByQuery(membersQuery);
+      const memberRecords = memberDocs.map(d => ({ id: d.id, ...d }));
 
-      let membersOfOrgSnap;
-      try {
-        membersOfOrgSnap = forceServer 
-          ? await getDocsFromServer(membersOfOrgQuery)
-          : await getDocs(membersOfOrgQuery);
-      } catch (err) {
-        const snap = await getDocs(membersOfOrgQuery);
-        membersOfOrgSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (memberRecords.length === 0) return [];
+
+      const orgIds = [...new Set(memberRecords.map(m => m.organization_id))];
+
+      const orgsQuery = query(
+        collection(db, 'organizations'),
+        where('__name__', 'in', orgIds)
+      );
+      const orgDocs = await getDocsByQuery(orgsQuery);
+
+      const organizations = orgDocs.map(doc => ({
+        id: doc.id,
+        ...doc,
+        created_at: doc.created_at?.toDate ? doc.created_at.toDate().toISOString() : null,
+        updated_at: doc.updated_at?.toDate ? doc.updated_at.toDate().toISOString() : null,
+      })) as Organization[];
+
+      const result: OrganizationWithMembers[] = [];
+
+      for (const org of organizations) {
+        const members = await getOrganizationMembers(org.id);
+        const membersWithUsers = await buildMembersWithProfiles(members);
+
+        const lastActivityAt = Math.max(...membersWithUsers.map(m => new Date(m.joined_at).getTime()));
+
+        result.push({
+          ...org,
+          organization_members: membersWithUsers,
+          lastActivityAt: new Date(lastActivityAt).toISOString(),
+        });
       }
 
-      const membersWithUsers = await Promise.all(
-        membersOfOrgSnap.docs.map(async (memberDoc) => {
-          const memberData = { id: memberDoc.id, ...memberDoc.data() };
-          const userSnap = await getDocById('users', memberData.user_id);
-          const user = buildUserFromSnapshot(userSnap, memberData.user_id);
-
-          return {
-            ...memberData,
-            joined_at: memberData.joined_at?.toDate 
-              ? memberData.joined_at.toDate().toISOString() 
-              : null,
-            user,
-          };
-        })
-      );
-
-      const lastActivityAt = Math.max(...membersWithUsers.map(m => new Date(m.joined_at).getTime()));
-
-      result.push({
-        ...org,
-        organization_members: membersWithUsers,
-        lastActivityAt: new Date(lastActivityAt).toISOString(),
+      return result.sort((a, b) => {
+        const dateA = new Date(a.lastActivityAt).getTime();
+        const dateB = new Date(b.lastActivityAt).getTime();
+        return dateB - dateA;
       });
+    } catch {
+      return [];
     }
+  },
 
-    return result.sort((a, b) => {
-      const dateA = new Date(a.lastActivityAt).getTime();
-      const dateB = new Date(b.lastActivityAt).getTime();
-      return dateB - dateA;
+  /**
+   * Создание новой организации
+   */
+  async createOrganization(data: CreateOrganizationData): Promise<OrganizationWithMembers> {
+    const userId = getCurrentUserId();
+    if (!userId) throw new Error('Пользователь не авторизован');
+
+    const orgData = {
+      name: data.name,
+      description: data.description || null,
+      created_by: userId,
+      roles: data.roles || [],
+    };
+
+    const newOrg = await createDoc('organizations', orgData);
+
+    await createDoc('organization_members', {
+      organization_id: newOrg.id,
+      user_id: userId,
+      status: 'owner',
+      joined_at: serverTimestamp(),
     });
-  } catch (err) {
-    return [];
-  }
-},
 
-  
-async createOrganization(data: CreateOrganizationData): Promise<OrganizationWithMembers> {
-  const userId = getCurrentUserId();
-  if (!userId) throw new Error('Пользователь не авторизован');
+    const commonProject = await createDoc('projects', {
+      organization_id: newOrg.id,
+      name: 'Общий',
+      description: 'Общий чат всей организации',
+      created_by: userId,
+      created_at: serverTimestamp(),
+    });
 
-  const orgData = {
-    name: data.name,
-    description: data.description || null,
-    created_by: userId,
-  };
+    await createDoc('project_members', {
+      project_id: commonProject.id,
+      user_id: userId,
+      status: 'owner',
+      joined_at: serverTimestamp(),
+    });
 
-  const newOrg = await createDoc('organizations', orgData);
+    const userObj = getCurrentUser();
 
-  await createDoc('organization_members', {
-    organization_id: newOrg.id,
-    user_id: userId,
-    role: 'owner',
-    joined_at: serverTimestamp(),
-  });
+    return {
+      ...newOrg,
+      organization_members: [
+        {
+          id: 'temp',
+          organization_id: newOrg.id,
+          user_id: userId,
+          status: 'owner',
+          joined_at: new Date().toISOString(),
+          user: userObj!,
+        },
+      ],
+    };
+  },
 
-  const commonProject = await createDoc('projects', {
-    organization_id: newOrg.id,
-    name: 'Общий',
-    description: 'Общий чат всей организации',
-    created_by: userId,
-    created_at: serverTimestamp(),
-  });
-
-  await createDoc('project_members', {
-    project_id: commonProject.id,
-    user_id: userId,
-    role: 'owner',
-    joined_at: serverTimestamp(),
-  });
-
-  const userObj = getCurrentUser();
-
-  return {
-    ...newOrg,
-    organization_members: [
-      {
-        id: 'temp',
-        organization_id: newOrg.id,
-        user_id: userId,
-        role: 'owner',
-        joined_at: new Date().toISOString(),
-        user: userObj!,
-      },
-    ],
-  };
-},
-
+  /**
+   * Вступление в организацию по токену
+   */
   async joinOrganization(inviteToken: string): Promise<{ organizationId: string; orgName: string }> {
-    const inviteSnap = await getDocById('organization_invites', inviteToken);
-    if (!inviteSnap) throw new Error('Приглашение не найдено');
-    if (!inviteSnap.active) throw new Error('Приглашение отозвано');
+    const invite = await getDocById('organization_invites', inviteToken);
+    if (!invite) throw new Error('Приглашение не найдено');
+    if (!invite.active) throw new Error('Приглашение отозвано');
 
-    const expiresAt = inviteSnap.expires_at?.toDate ? inviteSnap.expires_at.toDate() : null;
+    const expiresAt = invite.expires_at?.toDate ? invite.expires_at.toDate() : null;
     if (!expiresAt || new Date() > expiresAt) {
       throw new Error('Приглашение истекло');
     }
 
-    const organizationId = inviteSnap.organization_id;
+    const organizationId = invite.organization_id;
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Сначала войдите в аккаунт');
 
+    const existingMemberQuery = query(
+      collection(db, 'organization_members'),
+      where('organization_id', '==', organizationId),
+      where('user_id', '==', userId)
+    );
+    const existingSnap = await getDocs(existingMemberQuery);
+    if (!existingSnap.empty) {
+      throw new Error('Вы уже состоите в этой организации');
+    }
 
     await createDoc('organization_members', {
       organization_id: organizationId,
       user_id: userId,
-      role: 'member',
+      status: 'member',
       joined_at: serverTimestamp(),
     });
 
@@ -236,6 +241,9 @@ async createOrganization(data: CreateOrganizationData): Promise<OrganizationWith
     return { organizationId, orgName };
   },
 
+  /**
+   * Создание приглашения в организацию
+   */
   async createOrganizationInvite(organizationId: string): Promise<OrganizationInvite> {
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Не авторизован');
@@ -256,85 +264,93 @@ async createOrganization(data: CreateOrganizationData): Promise<OrganizationWith
     };
   },
 
+  /**
+   * Удаление организации (в будущем — через Cloud Function)
+   */
   async deleteOrganization(organizationId: string): Promise<void> {
-  const batch1 = writeBatch(db);
-  batch1.delete(doc(db, 'organizations', organizationId));
+    const batch = writeBatch(db);
 
-  const membersSnap = await getDocs(
-    query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
-  );
-  membersSnap.docs.forEach(doc => batch1.delete(doc.ref));
+    batch.delete(doc(db, 'organizations', organizationId));
 
-  const invitesSnap = await getDocs(
-    query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
-  );
-  invitesSnap.docs.forEach(doc => batch1.delete(doc.ref));
+    const membersSnap = await getDocs(
+      query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
+    );
+    membersSnap.docs.forEach(doc => batch.delete(doc.ref));
 
-  const tasksSnap = await getDocs(
-    query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
-  );
-  tasksSnap.docs.forEach(doc => batch1.delete(doc.ref));
+    const invitesSnap = await getDocs(
+      query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
+    );
+    invitesSnap.docs.forEach(doc => batch.delete(doc.ref));
 
-  await batch1.commit();
+    const tasksSnap = await getDocs(
+      query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
+    );
+    tasksSnap.docs.forEach(doc => batch.delete(doc.ref));
 
-  const projectsSnap = await getDocs(
-    query(collection(db, 'projects'), where('organization_id', '==', organizationId))
-  );
-  const projectIds = projectsSnap.docs.map(d => d.id);
-
-  if (projectIds.length === 0) return;
-
-  const pmSnap = await getDocs(
-    query(collection(db, 'project_members'), where('project_id', 'in', projectIds))
-  );
-
-  const messagesSnap = await getDocs(
-    query(collection(db, 'messages'), where('project_id', 'in', projectIds))
-  );
-
-  const MAX_BATCH_SIZE = 499;
-  let batch = writeBatch(db);
-  let opCount = 0;
-
-  const addToBatch = (ref: any) => {
-    batch.delete(ref);
-    opCount++;
-    if (opCount >= MAX_BATCH_SIZE) throw new Error('Batch full');
-  };
-
-  try {
-    pmSnap.docs.forEach(doc => addToBatch(doc.ref));
-    messagesSnap.docs.forEach(doc => addToBatch(doc.ref));
-    projectsSnap.docs.forEach(doc => addToBatch(doc.ref));
-  } catch (err) {
     await batch.commit();
-    batch = writeBatch(db);
-    opCount = 0;
-    [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].forEach(d => {
-      if (opCount < MAX_BATCH_SIZE) {
-        batch.delete(d.ref);
-        opCount++;
-      }
-    });
-  }
 
-  if (opCount > 0) await batch.commit();
-},
-  async isUserInOrganization(organizationId: string, userId: string): Promise<boolean> {
-  const membersQuery = query(
-    collection(db, 'organization_members'),
-    where('organization_id', '==', organizationId),
-    where('user_id', '==', userId)
-  );
-  try {
-    const snap = await getDocsFromServer(membersQuery);
-    return !snap.empty;
-  } catch (err) {
-    const snap = await getDocs(membersQuery);
-    return !snap.empty;
-  }
+    const projectsSnap = await getDocs(
+      query(collection(db, 'projects'), where('organization_id', '==', organizationId))
+    );
+    const projectIds = projectsSnap.docs.map(d => d.id);
+
+    if (projectIds.length === 0) return;
+
+    const pmSnap = await getDocs(
+      query(collection(db, 'project_members'), where('project_id', 'in', projectIds))
+    );
+
+    const messagesSnap = await getDocs(
+      query(collection(db, 'messages'), where('project_id', 'in', projectIds))
+    );
+
+    const MAX_BATCH_SIZE = 499;
+    let opCount = 0;
+    let batch2 = writeBatch(db);
+
+    const addToBatch = (ref: any) => {
+      batch2.delete(ref);
+      opCount++;
+      if (opCount >= MAX_BATCH_SIZE) {
+        throw new Error('batch_full');
+      }
+    };
+
+    try {
+      pmSnap.docs.forEach(doc => addToBatch(doc.ref));
+      messagesSnap.docs.forEach(doc => addToBatch(doc.ref));
+      projectsSnap.docs.forEach(doc => addToBatch(doc.ref));
+    } catch (err) {
+      await batch2.commit();
+      batch2 = writeBatch(db);
+      opCount = 0;
+      [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].forEach(d => {
+        if (opCount < MAX_BATCH_SIZE) {
+          batch2.delete(d.ref);
+          opCount++;
+        }
+      });
+    }
+
+    if (opCount > 0) await batch2.commit();
   },
 
+  /**
+   * Проверка, состоит ли пользователь в организации
+   */
+  async isUserInOrganization(organizationId: string, userId: string): Promise<boolean> {
+    const membersQuery = query(
+      collection(db, 'organization_members'),
+      where('organization_id', '==', organizationId),
+      where('user_id', '==', userId)
+    );
+    const snap = await getDocsByQuery(membersQuery);
+    return snap.length > 0;
+  },
+
+  /**
+   * Покинуть организацию
+   */
   async leaveOrganization(organizationId: string): Promise<void> {
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Не авторизован');
@@ -344,18 +360,34 @@ async createOrganization(data: CreateOrganizationData): Promise<OrganizationWith
       where('organization_id', '==', organizationId),
       where('user_id', '==', userId)
     );
-    let membersSnap;
-    try {
-      const snap = await getDocsFromServer(membersQuery);
-      membersSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (err) {
-      const snap = await getDocs(membersQuery);
-      membersSnap = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
+    const members = await getDocsByQuery(membersQuery);
+    const member = members[0];
 
-    const member = membersSnap[0];
     if (member) {
       await deleteDocById('organization_members', member.id);
     }
+  },
+
+  /**
+   * Обновление ролей участника
+   */
+  async updateMemberRoles(organizationId: string, memberId: string, roles: string[]): Promise<void> {
+    const memberDocRef = doc(db, 'organization_members', memberId);
+    await updateDoc(memberDocRef, { roles });
+  },
+
+  /**
+   * Удаление участника
+   */
+  async removeMember(organizationId: string, memberId: string): Promise<void> {
+    await deleteDocById('organization_members', memberId);
+  },
+
+  /**
+   * Назначение модератора
+   */
+  async makeModerator(organizationId: string, memberId: string): Promise<void> {
+    const memberDocRef = doc(db, 'organization_members', memberId);
+    await updateDoc(memberDocRef, { status: 'admin' });
   },
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useUI } from '../../contexts/UIContext';
+import Button from '../../components/ui/button/button';
 import styles from './EmptyDashboard.module.css';
 
 const EmptyDashboard: React.FC = () => {
@@ -11,7 +12,7 @@ const EmptyDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(); 
+      await signOut();
     } finally {
       navigate('/login', { replace: true });
     }
@@ -22,26 +23,28 @@ const EmptyDashboard: React.FC = () => {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.header}>
-        <button className={styles.logoutBtn} onClick={handleLogout} aria-label="Выйти из аккаунта">
+    <div className={styles['empty-dashboard']}>
+      <div className={styles['empty-dashboard__header']}>
+        <Button variant="ghost" size="small" onClick={handleLogout}>
           Выйти
-        </button>
+        </Button>
       </div>
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>
+      <div className={styles['empty-dashboard__content']}>
+        <h1 className={styles['empty-dashboard__title']}>
           Добро пожаловать, {user?.username || user?.email?.split('@')[0] || 'Пользователь'}!
         </h1>
-        <p className={styles.subtitle}>Вы ещё не состоите ни в одной организации.</p>
+        <p className={styles['empty-dashboard__subtitle']}>
+          Вы ещё не состоите ни в одной организации.
+        </p>
 
-        <div className={styles.actions}>
-          <button className={styles.primary} onClick={handleCreateOrgClick}>
+        <div className={styles['empty-dashboard__actions']}>
+          <Button variant="primary" size="large" onClick={handleCreateOrgClick}>
             Создать организацию
-          </button>
+          </Button>
         </div>
 
-        <p className={styles.tip}>
+        <p className={styles['empty-dashboard__tip']}>
           Создайте организацию, чтобы начать работу с проектами и командой.
         </p>
       </div>

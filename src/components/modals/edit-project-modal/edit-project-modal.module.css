@@ -1,0 +1,136 @@
+.edit-project-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 360px;
+  padding: 16px;
+}
+
+.edit-project-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-project-modal__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.edit-project-modal__input {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.edit-project-modal__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.edit-project-modal__input::placeholder {
+  color: var(--color-text-light);
+}
+
+.edit-project-modal__error-message {
+  color: var(--color-error);
+  font-size: 13px;
+  margin-top: -4px;
+  padding: 4px 8px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--color-error);
+}
+
+.edit-project-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.edit-project-modal__members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+}
+
+.edit-project-modal__member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: var(--color-background);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.edit-project-modal__remove-button,
+.edit-project-modal__add-button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-project-modal__remove-button {
+  background-color: var(--color-danger);
+  color: white;
+  border: none;
+}
+
+.edit-project-modal__remove-button:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.edit-project-modal__add-button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.edit-project-modal__add-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.edit-project-modal__creating-feedback {
+  text-align: center;
+  margin-top: 12px;
+  color: var(--color-text-secondary);
+}
+
+.edit-project-modal__danger-zone {
+  margin-top: 32px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+}
+
+.edit-project-modal__danger-zone h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.edit-project-modal__danger-zone p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

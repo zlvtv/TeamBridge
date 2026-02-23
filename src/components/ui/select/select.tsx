@@ -15,10 +15,16 @@ interface SelectProps {
   placeholder?: string;
   isMulti?: boolean;
   isDisabled?: boolean;
+  isClearable?: boolean; 
+  isLoading?: boolean;
   className?: string;
   error?: string;
+  name?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
   showAvatar?: boolean;
   hasSearch?: boolean;
+  size?: 'small' | 'medium';
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -28,6 +34,7 @@ const Select: React.FC<SelectProps> = ({
   placeholder = 'Выберите...',
   isMulti = false,
   isDisabled = false,
+  isClearable = false, // ✅ Добавлено с дефолтом
   className = '',
   error,
   showAvatar = false,
@@ -142,6 +149,22 @@ const Select: React.FC<SelectProps> = ({
           <ChevronDown size={16} className={`${styles.chevron} ${isOpen ? styles.rotate : ''}`} />
         </div>
       </div>
+
+      {/* ✅ Теперь isClearable доступен */}
+      {isClearable && !isMulti && selectedValues.length > 0 && (
+        <button
+          type="button"
+          className={styles.clearButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onChange('');
+            setSearch('');
+          }}
+          aria-label="Очистить"
+        >
+          <X size={14} />
+        </button>
+      )}
 
       {isOpen && !isDisabled && (
         <div className={styles.menu}>

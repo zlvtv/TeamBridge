@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Modal from '../../ui/modal/modal';
+import Modal from '../../ui/modal/Modal';
 import Input from '../../ui/input/input';
 import Button from '../../ui/button/button';
 import styles from './create-organization-modal.module.css';
 import { useOrganization } from '../../../contexts/OrganizationContext';
+
+interface Role {
+  name: string;
+  color: string;
+}
 
 interface CreateOrganizationModalProps {
   isOpen: boolean;
@@ -14,6 +19,9 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
   const { createOrganization } = useOrganization();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [roles, setRoles] = useState<Role[]>([
+
+  ]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,10 +45,30 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
     }
   }, [isOpen, setFocus]);
 
+  const addRole = () => {
+    setRoles([...roles, { name: '', color: '#6366f1' }]);
+  };
+
+  const removeRole = (index: number) => {
+    setRoles(roles.filter((_, i) => i !== index));
+  };
+
+  const updateRole = (index: number, field: keyof Role, value: string) => {
+    const newRoles = [...roles];
+    newRoles[index][field] = value;
+    setRoles(newRoles);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Введите название организации');
+      return;
+    }
+
+    const roleNames = roles.map(r => r.name.trim()).filter(n => n);
+    if (new Set(roleNames).size !== roleNames.length) {
+      setError('Названия ролей должны быть уникальными');
       return;
     }
 
@@ -51,6 +79,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       await createOrganization({
         name: name.trim(),
         description: description.trim(),
+        roles: roles.filter(r => r.name.trim())
       });
 
       onClose();
@@ -88,6 +117,50 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             textarea
             disabled={isCreating}
           />
+        </div>
+
+        <div className={styles.roleFields}>
+          <label className={styles.label}>Роли организации</label>
+          {roles.map((role, index) => (
+            <div key={index} className={styles.roleField}>
+              <Input
+                className={styles.roleName}
+                placeholder="Название роли"
+                value={role.name}
+                onChange={(e) => updateRole(index, 'name', e.target.value)}
+                disabled={isCreating}
+              />
+              <div className={styles.colorPicker}>
+                <span style={{ backgroundColor: role.color }}></span>
+                <input
+                  type="color"
+                  value={role.color}
+                  onChange={(e) => updateRole(index, 'color', e.target.value)}
+                  disabled={isCreating}
+                />
+              </div>
+              {roles.length > 1 && (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => removeRole(index)}
+                  disabled={isCreating}
+                  type="button"
+                >
+                  Удалить
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            className={styles.addRoleButton}
+            onClick={addRole}
+            disabled={isCreating}
+            type="button"
+          >
+            + Добавить роль
+          </Button>
         </div>
 
         <div className={styles.actions}>

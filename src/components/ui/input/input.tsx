@@ -3,6 +3,7 @@ import styles from './input.module.css';
 
 type InputType = 'text' | 'email' | 'password' | 'number';
 type InputSize = 'small' | 'medium';
+type InputVariant = 'outlined' | 'filled';
 
 interface InputProps {
   type?: InputType;
@@ -18,11 +19,14 @@ interface InputProps {
   autoFocus?: boolean;
   error?: string;
   size?: InputSize;
+  variant?: InputVariant;
   'aria-label'?: string;
   'aria-describedby'?: string;
 
   textarea?: boolean;
-  rows?: number; 
+  rows?: number;
+  cols?: number;
+  resize?: 'none' | 'vertical' | 'horizontal' | 'both';
 }
 
 const Input: React.FC<InputProps> = ({
@@ -39,41 +43,61 @@ const Input: React.FC<InputProps> = ({
   autoFocus = false,
   error,
   size = 'medium',
+  variant = 'outlined',
   textarea = false,
-  rows,
+  rows = 3,
+  cols = 30,
+  resize = 'vertical',
   ...props
 }) => {
-  const commonProps = {
-    placeholder,
-    value,
-    onChange,
-    required,
-    disabled,
-    className: `${styles.input} 
-      ${size === 'small' ? styles['input--small'] : ''} 
-      ${error ? styles['input--error'] : ''}
-      ${fullWidth ? styles['input--full-width'] : ''}
-      ${className}`.trim(),
-    name,
-    autoComplete,
-    autoFocus,
-    'aria-invalid': !!error,
-    'aria-describedby': error ? `${name}-error` : undefined,
-    ...props,
+  const inputClass = [
+    styles.input,
+    styles[`input--${variant}`],
+    size === 'small' ? styles['input--small'] : '',
+    error ? styles['input--error'] : '',
+    fullWidth ? styles['input--full-width'] : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const textareaStyle: React.CSSProperties = {
+    resize,
   };
 
   return (
-    <>
+    <div className={styles['input-group']}>
       {textarea ? (
         <textarea
-          {...commonProps}
+          {...props}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          className={inputClass}
+          name={name}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
           rows={rows}
-          {...('type' in commonProps ? { type: undefined } : {})}
+          cols={cols}
+          style={textareaStyle}
         />
       ) : (
         <input
           type={type}
-          {...commonProps}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          className={inputClass}
+          name={name}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${name}-error` : undefined}
+          {...props}
         />
       )}
       {error && (
@@ -81,7 +105,7 @@ const Input: React.FC<InputProps> = ({
           {error}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import Modal from '../../ui/modal/modal';
+import Modal from '../../ui/modal/Modal';
+import Button from '../../ui/button/button';
 import styles from './confirm-modal.module.css';
 
 interface ConfirmModalProps {
@@ -7,7 +8,7 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title?: string;
-  message: string;
+  children: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
 }
@@ -17,30 +18,28 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onClose,
   onConfirm,
   title = 'Подтверждение',
-  message,
+  children,
   confirmText = 'Удалить',
-  cancelText = 'Отмена'
+  cancelText = 'Отмена',
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <div className={styles.content}>
-        <p className={styles.message}>{message}</p>
-        <div className={styles.actions}>
-          <button
-            className={styles.cancelButton}
-            onClick={onClose}
-          >
+      <div className={styles['confirm-modal__content']}>
+        {children}
+        <div className={styles['confirm-modal__actions']}>
+          <Button variant="secondary" size="medium" onClick={onClose}>
             {cancelText}
-          </button>
-          <button
-            className={styles.confirmButton}
+          </Button>
+          <Button
+            variant="danger"
+            size="medium"
             onClick={() => {
               onConfirm();
               onClose();
             }}
           >
             {confirmText}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

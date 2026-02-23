@@ -1,162 +1,88 @@
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+.create-project-modal__form {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 360px;
+  padding: 16px;
 }
 
-.modal {
-  background-color: white;
-  border-radius: 8px;
-  padding: 24px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+.create-project-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.modal h2 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  color: #333;
-  font-size: 1.5em;
-}
-
-.formGroup {
-  margin-bottom: 16px;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 8px;
+.create-project-modal__label {
+  font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
 }
 
-.formGroup input[type="text"],
-.formGroup textarea,
-.formGroup select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.create-project-modal__input {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   font-size: 14px;
-  box-sizing: border-box;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
-.searchContainer {
-  margin-bottom: 8px;
+.create-project-modal__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.searchInput {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
+.create-project-modal__input::placeholder {
+  color: var(--color-text-light);
 }
 
-.leaderSelect {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
-  min-height: 200px;
-  resize: vertical;
+.create-project-modal__error-message {
+  color: var(--color-error);
+  font-size: 13px;
+  margin-top: -4px;
+  padding: 4px 8px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--color-error);
 }
 
-.formGroup textarea {
-  resize: vertical;
-}
-
-.checkboxGroup {
-  margin-bottom: 16px;
-}
-
-.checkboxGroup label {
+.create-project-modal__actions {
   display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.create-project-modal__tag {
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--color-text);
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #333;
+  gap: 4px;
 }
 
-.checkboxGroup input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+.create-project-modal__tag.selected {
+  background: var(--color-primary);
+  color: white;
 }
 
-.tagsContainer {
+.create-project-modal__tags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
 
-.tag {
-  padding: 6px 12px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tag:hover {
-  background-color: #e0e0e0;
-}
-
-.tag.selected {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.buttonGroup {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.cancelButton,
-.createButton {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.cancelButton {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.cancelButton:hover {
-  background-color: #e0e0e0;
-}
-
-.createButton {
-  background-color: #007bff;
-  color: white;
-}
-
-.createButton:hover {
-  background-color: #0056b3;
-}
-
-.createButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.create-project-modal__creating-feedback {
+  text-align: center;
+  margin-top: 12px;
+  color: var(--color-text-secondary);
 }

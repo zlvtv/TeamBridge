@@ -3,133 +3,158 @@ import {
   collection,
   query,
   where,
-  getDocs,
   onSnapshot,
   serverTimestamp,
   addDoc,
+  doc,
+  getDocs,
 } from 'firebase/firestore';
-import { decryptMessage } from '../lib/crypto';
+import { createDoc } from './firestore/firestoreService';
+import { encryptMessage, decryptMessage } from '../lib/crypto'; // ← добавлен decryptMessage
+
+export interface Poll {
+  question: string;
+  options: string[];
+  multiple: boolean;
+  expiresAt?: number | null;
+}
 
 export interface Message {
   id: string;
   project_id: string;
   sender_id: string;
   text: string;
-  created_at: any; // Firestore timestamp
+  created_at: any;
+  type?: 'text' | 'photo' | 'poll';
+  photo_url?: string;
+  poll?: Poll;
   sender_profile?: any;
+  parent_id?: string | null;
+  replies_count?: number;
 }
 
 export const messageService = {
-  // Get messages for a project
-  async getMessages(projectId: string): Promise<Message[]> {
-    const q = query(
-      collection(db, 'messages'),
-      where('project_id', '==', projectId)
-    );
-    
-    try {
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Message[];
-    } catch (error) {
-      console.error('Error getting messages:', error);
-      return [];
+  /**
+   * Отправка сообщения с шифрованием
+   */
+  async sendMessage(
+    projectId: string,
+    text: string,
+    senderId: string,
+    type: 'text' | 'photo' | 'poll' = 'text',
+    photo_url?: string,
+    poll?: Poll,
+    parent_id?: string | null
+  ) {
+    const encryptedText = encryptMessage(text, projectId);
+
+    const messageData: any = {
+      project_id: projectId,
+      text: encryptedText,
+      sender_id: senderId,
+      created_at: serverTimestamp(),
+      type,
+      parent_id: parent_id || null,
+    };
+
+    if (type === 'photo' && photo_url) {
+      messageData.photo_url = photo_url;
     }
+
+    if (type === 'poll' && poll) {
+      messageData.poll = {
+        ...poll,
+        options: poll.options.map(option => ({ text: option, votes: [] })),
+      };
+    }
+
+    const docRef = await createDoc('messages', messageData);
+
+    return {
+      id: docRef.id,
+      project_id: projectId,
+      text,
+      sender_id: senderId,
+      created_at: new Date().toISOString(),
+      type,
+      parent_id,
+      ...(photo_url && { photo_url }),
+      ...(poll && { poll: { ...poll, options: poll.options.map(o => ({ text: o, votes: [] })) } }),
+    };
   },
 
-  // Subscribe to real-time message updates
+  /**
+   * Подписка на сообщения проекта
+   */
   subscribeToMessages(projectId: string, callback: (messages: Message[]) => void) {
-    const q = query(
-      collection(db, 'messages'),
-      where('project_id', '==', projectId)
-    );
-    
-    return onSnapshot(q, (snapshot) => {
-      const messages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Message[];
-      
-      // Sort messages by creation date
-      messages.sort((a, b) => {
-        const aTime = a.created_at?.seconds || 0;
-        const bTime = b.created_at?.seconds || 0;
-        return aTime - bTime;
-      });
-      
+    const q = query(collection(db, 'messages'), where('project_id', '==', projectId));
+
+    return onSnapshot(q, snapshot => {
+      const messages = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            text: data.text ? decryptMessage(data.text, projectId) : '',
+          };
+        })
+        .sort((a, b) => (a.created_at?.seconds || 0) - (b.created_at?.seconds || 0));
+
       callback(messages);
     });
   },
 
-  // Send a new message
-  async sendMessage(projectId: string, text: string, senderId: string) {
-    try {
-      const docRef = await addDoc(collection(db, 'messages'), {
-        project_id: projectId,
-        text: text,
-        sender_id: senderId,
-        created_at: serverTimestamp(),
-      });
-      
-      return {
-        id: docRef.id,
-        project_id: projectId,
-        text: text,
-        sender_id: senderId,
-        created_at: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
-    }
+  /**
+   * Проверка наличия непрочитанных сообщений
+   */
+  async sendSystemMessage(projectId: string, text: string): Promise<void> {
+    const encryptedText = encryptMessage(text, projectId);
+
+    await createDoc('messages', {
+      project_id: projectId,
+      text: encryptedText,
+      sender_id: 'system',
+      type: 'system',
+      created_at: new Date(),
+    });
   },
 
-  // Check if organization has unread messages
   async hasUnreadMessages(organizationId: string, userId: string): Promise<boolean> {
-    // Get all projects for the organization
     const projectsQuery = query(
       collection(db, 'projects'),
       where('organization_id', '==', organizationId)
     );
-    
+
     try {
       const projectsSnapshot = await getDocs(projectsQuery);
-      const projectIds = projectsSnapshot.docs.map(doc => doc.id);
-      
+      const projectIds = projectsSnapshot.docs.map(d => d.id);
       if (projectIds.length === 0) return false;
-      
-      // Get the last read timestamp for the user in this organization
-      // For now, we'll use a simple approach - check if there are any messages 
-      // created after the user's last visit to any project in this organization
+
       const lastVisit = localStorage.getItem(`lastVisit_org_${organizationId}`);
       const lastVisitTime = lastVisit ? new Date(lastVisit).getTime() : 0;
-      
-      // Check messages in all projects
+
       const messagesQuery = query(
         collection(db, 'messages'),
         where('project_id', 'in', projectIds)
       );
-      
+
       const messagesSnapshot = await getDocs(messagesQuery);
-      
       return messagesSnapshot.docs.some(doc => {
-        const messageData = doc.data();
-        // Skip messages from the current user
-        if (messageData.sender_id === userId) return false;
-        
-        const messageTime = messageData.created_at?.seconds * 1000 || 0;
+        const data = doc.data();
+        if (data.sender_id === userId) return false;
+        const messageTime = data.created_at?.seconds * 1000 || 0;
         return messageTime > lastVisitTime;
       });
-    } catch (error) {
-      console.error('Error checking unread messages:', error);
+    } catch {
       return false;
     }
   },
 
-  // Mark all messages in organization as read
+  /**
+   * Отметить все сообщения как прочитанные
+   */
   markAsRead(organizationId: string) {
     localStorage.setItem(`lastVisit_org_${organizationId}`, new Date().toISOString());
-  }
+  },
 };

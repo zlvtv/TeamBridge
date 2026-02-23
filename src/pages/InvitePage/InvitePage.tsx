@@ -3,10 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { organizationService } from '../../services/organizationService';
-import { getDocById } from '../../lib/firestore';
+import { getDocById } from '../../services/firestore/firestoreService';
 import Button from '../../components/ui/button/button';
-import styles from './InvitePage.module.css';
 import LoadingState from '../../components/ui/loading/LoadingState';
+import styles from './InvitePage.module.css';
 
 const InvitePage = () => {
   const { token } = useParams<{ token: string }>();
@@ -114,24 +114,26 @@ const InvitePage = () => {
   return (
     <div className={styles.container}>
       {loading ? (
-        <p>Проверка приглашения...</p>
+        <LoadingState message="Проверка приглашения..." />
       ) : status === 'already-member' ? (
-        <>
+        <div className={styles.content}>
           <h2>Вы уже состоите в «{orgName}»</h2>
           <p>Переадресация на дашборд...</p>
-        </>
+        </div>
       ) : status === 'joined' ? (
-        <>
+        <div className={styles.content}>
           <h2>Добро пожаловать в «{orgName}»!</h2>
           <p>Вы успешно присоединились.</p>
           <p>Переадресация на дашборд...</p>
-        </>
+        </div>
       ) : error ? (
-        <>
+        <div className={styles.content}>
           <h2>Не удалось присоединиться</h2>
-          <p className={styles.errorMessage}>{error}</p>
+          <div className={styles.errorBox}>
+            <p className={styles.errorMessage}>{error}</p>
+          </div>
           <Button onClick={() => navigate('/dashboard')}>На главную</Button>
-        </>
+        </div>
       ) : null}
     </div>
   );

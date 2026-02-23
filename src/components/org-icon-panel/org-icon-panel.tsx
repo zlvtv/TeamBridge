@@ -3,8 +3,13 @@ import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';
 import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
 import CreateProjectModal from '../../components/modals/create-project-modal/create-project-modal';
+import CreateTaskModal from '../../components/modals/create-task-modal/create-task-modal';
 import styles from './org-icon-panel.module.css';
 import { useUI } from '../../contexts/UIContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useProject } from '../../contexts/ProjectContext';
+import { useNavigate } from 'react-router-dom';
+import ProjectSelector from '../../components/project-selector/project-selector';
 
 const OrgIconPanel: React.FC = () => {
   const {
@@ -12,15 +17,22 @@ const OrgIconPanel: React.FC = () => {
     currentOrganization,
     setCurrentOrganization,
   } = useOrganization();
-  const { 
-    isCreateModalOpen, 
-    openCreateModal, 
+  const {
+    isCreateModalOpen,
+    openCreateModal,
     closeCreateModal,
     isCreateProjectOpen,
     openCreateProject,
+    closeCreateProject,
     isCreateOrgModalOpen,
-    openCreateOrgModal
+    openCreateOrgModal,
+    isCreateTaskOpen,
+    openCreateTask,
+    closeCreateTask,
   } = useUI();
+
+  const [isEditOrgModalOpen, setIsEditOrgModalOpen] = useState(false);
+  const { user: currentUser } = useAuth();
 
   const [searchAnchor, setSearchAnchor] = useState<HTMLElement | null>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -37,7 +49,8 @@ const OrgIconPanel: React.FC = () => {
       const bottomOffset = 20;
       const settingsHeight = 120;
       const gap = 16;
-      const availableHeight = totalHeight - topOffset - settingsHeight - gap - bottomOffset;
+      const availableHeight =
+        totalHeight - topOffset - settingsHeight - gap - bottomOffset;
       const clampedHeight = Math.max(120, availableHeight);
       setMaxHeight(clampedHeight);
     };
@@ -57,9 +70,15 @@ const OrgIconPanel: React.FC = () => {
     setSearchAnchor(null);
   };
 
-  const handleOrgClick = (org: (typeof organizations)[0]) => {
-    setCurrentOrganization(org);
-    localStorage.setItem('currentOrgId', org.id);
+  const { currentProject, projects } = useProject();
+  const navigate = useNavigate();
+
+  const [projectSelectorAnchor, setProjectSelectorAnchor] = useState<HTMLElement | null>(null);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  const handleProjectSelectorClose = () => {
+    setProjectSelectorAnchor(null);
+    setSelectedOrgId(null);
   };
 
   const handleWheel = (e: WheelEvent) => {
@@ -91,6 +110,11 @@ const OrgIconPanel: React.FC = () => {
     openCreateOrgModal();
   };
 
+  const handleCreateTask = () => {
+    closeCreateModal();
+    openCreateTask();
+  };
+
   return (
     <>
       <CreateOrganizationModal
@@ -102,6 +126,12 @@ const OrgIconPanel: React.FC = () => {
       <CreateProjectModal
         isOpen={isCreateProjectOpen}
         onClose={closeCreateModal}
+        onOverlayClick={closeCreateModal}
+      />
+      <CreateTaskModal
+        isOpen={isCreateTaskOpen}
+        onClose={closeCreateTask}
+        onOverlayClick={closeCreateTask}
       />
 
       {isSearchModalOpen && searchAnchor && (
@@ -118,13 +148,20 @@ const OrgIconPanel: React.FC = () => {
           className={styles['create-dropdown']}
           style={{
             position: 'absolute',
-            top: `${createBtnRef.current.getBoundingClientRect().bottom + 8}px`,
-            left: `${createBtnRef.current.getBoundingClientRect().left}px`,
+            top: `${createBtnRef.current.getBoundingClientRect().top}px`,
+            left: `${createBtnRef.current.getBoundingClientRect().left + 8}px`,
             zIndex: 10000,
           }}
         >
-          <button onClick={handleCreateProject} className={styles['create-dropdown-item']}>Создать проект</button>
-          <button onClick={handleCreateOrganization} className={styles['create-dropdown-item']}>Создать организацию</button>
+          <button onClick={handleCreateProject} className={styles['create-dropdown-item']}>
+            Создать проект
+          </button>
+          <button onClick={handleCreateOrganization} className={styles['create-dropdown-item']}>
+            Создать организацию
+          </button>
+          <button onClick={handleCreateTask} className={styles['create-dropdown-item']}>
+            Создать задачу
+          </button>
         </div>
       )}
 
@@ -165,9 +202,16 @@ const OrgIconPanel: React.FC = () => {
               <button
                 key={org.id}
                 className={`${styles['org-icon-panel__org-btn']} ${
-                  currentOrganization?.id === org.id ? styles['org-icon-panel__org-btn--active'] : ''
+                  currentOrganization?.id === org.id
+                    ? styles['org-icon-panel__org-btn--active']
+                    : ''
                 } ${org.hasUnreadMessages ? 'unread' : ''}`}
-                onClick={() => handleOrgClick(org)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setProjectSelectorAnchor(e.currentTarget);
+                  setSelectedOrgId(org.id);
+                }}
                 aria-label={org.name}
                 title={org.name}
               >
@@ -177,6 +221,14 @@ const OrgIconPanel: React.FC = () => {
           })}
         </div>
       </div>
+
+      {projectSelectorAnchor && selectedOrgId && (
+        <ProjectSelector
+          organizationId={selectedOrgId}
+          onClose={handleProjectSelectorClose}
+          anchorEl={projectSelectorAnchor}
+        />
+      )}
     </>
   );
 };

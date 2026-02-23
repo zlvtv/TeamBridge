@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import OrgIconPanel from '../../components/org-icon-panel/org-icon-panel';
 import SettingsPanel from '../../components/settings-panel/settings-panel';
 import MainHeader from '../../components/main-header/main-header';
-import ChatHeader from '../../components/chat-header/chat-header';
+
 import ProjectChat from '../../components/project-chat/project-chat';
 import TaskBoard from '../../components/task-board/task-board';
 import ResizableSplitter from '../../components/resizable-splitter/resizable-splitter';
@@ -48,7 +48,6 @@ const Dashboard: React.FC = () => {
 
       <main className={styles['dashboard__main']}>
         <MainHeader />
-        <ChatHeader />
 
         {organizations.length === 0 ? (
           <EmptyDashboard />

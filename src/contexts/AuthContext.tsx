@@ -15,6 +15,13 @@ import { setDoc, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { UserProfile, AuthContextType } from '../types/auth.types';
 
+interface AuthState {
+  user: UserProfile | null;
+  isLoading: boolean;
+  isInitialized: boolean;
+  isEmailVerified: boolean;
+}
+
 const translateAuthError = (message: string): string => {
   const map: Record<string, string> = {
     'auth/user-not-found': 'Пользователь с таким email не найден',
@@ -43,12 +50,7 @@ const profileFromUser = (user: FirebaseUser, username: string): UserProfile => (
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<{
-    user: UserProfile | null;
-    isLoading: boolean;
-    isInitialized: boolean;
-    isEmailVerified: boolean;
-  }>({
+  const [state, setState] = useState<AuthState>({
     user: null,
     isLoading: true,
     isInitialized: false,
@@ -57,7 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
-
       if (user) {
         const isVerified = user.emailVerified;
 
@@ -142,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await firebaseSignOut(auth);
     localStorage.removeItem('currentProjectId');
     localStorage.removeItem('emailVerificationSent');
-    window.location.href = '/login'; 
+    window.location.href = '/login';
   };
 
   const resetPassword = async (email: string): Promise<{ success: boolean; message: string }> => {

@@ -1,48 +1,49 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from 'react';
+
+type ModalKey =
+  | 'search'
+  | 'profile'
+  | 'orgInfo'
+  | 'createProject'
+  | 'createOrg'
+  | 'createTask';
 
 type UIContextType = {
   theme: 'light' | 'dark';
-  isSearchOpen: boolean;
-  isProfileOpen: boolean;
-  isOrgInfoOpen: boolean;
-  isCreateProjectOpen: boolean;
-  isCreateOrgModalOpen: boolean;
-  isCreateModalOpen: boolean; 
+  isModalOpen: (modal: ModalKey) => boolean;
+  openModal: (modal: ModalKey) => void;
+  closeModal: (modal: ModalKey) => void;
+  closeAllModals: () => void;
   chatWidth: number;
   isBoardFullscreen: boolean;
-  selectedOrgId: string | null;
-  selectedProjectId: string | null;
-  toggleTheme: () => void;
-  openSearch: () => void;
-  closeSearch: () => void;
-  openProfile: () => void;
-  closeProfile: () => void;
-  openOrgInfo: () => void;
-  closeOrgInfo: () => void;
-  openCreateProject: () => void;
-  closeCreateProject: () => void;
-  openCreateOrgModal: () => void; 
-  closeCreateOrgModal: () => void; 
   setChatWidth: (width: number) => void;
+  toggleTheme: () => void;
   toggleFullscreen: () => void;
-  selectOrg: (id: string) => void;
-  selectProject: (id: string) => void;
 };
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
-export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isOrgInfoOpen, setIsOrgInfoOpen] = useState(false);
-  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
-  const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [modals, setModals] = useState<Record<ModalKey, boolean>>({
+    search: false,
+    profile: false,
+    orgInfo: false,
+    createProject: false,
+    createOrg: false,
+    createTask: false,
+  });
   const [chatWidth, setChatWidthState] = useState(400);
   const [isBoardFullscreen, setIsBoardFullscreen] = useState(false);
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -70,104 +71,74 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const openModal = useCallback((modal: ModalKey) => {
+    setModals((prev) => ({ ...prev, [modal]: true }));
   }, []);
+
+  const closeModal = useCallback((modal: ModalKey) => {
+    setModals((prev) => ({ ...prev, [modal]: false }));
+  }, []);
+
+  const closeAllModals = useCallback(() => {
+    setModals({
+      search: false,
+      profile: false,
+      orgInfo: false,
+      createProject: false,
+      createOrg: false,
+      createTask: false,
+    });
+  }, []);
+
+  const isModalOpen = useCallback(
+    (modal: ModalKey) => modals[modal],
+    [modals]
+  );
 
   const setChatWidth = useCallback((width: number) => {
     setChatWidthState(Math.max(300, Math.min(width, 800)));
   }, []);
 
-  const openSearch = useCallback(() => setIsSearchOpen(true), []);
-  const closeSearch = useCallback(() => setIsSearchOpen(false), []);
-  const openProfile = useCallback(() => setIsProfileOpen(true), []);
-  const closeProfile = useCallback(() => setIsProfileOpen(false), []);
-  const openOrgInfo = useCallback(() => setIsOrgInfoOpen(true), []);
-  const closeOrgInfo = useCallback(() => setIsOrgInfoOpen(false), []);
-  const openCreateProject = useCallback(() => setIsCreateProjectOpen(true), []);
-  const closeCreateProject = useCallback(() => setIsCreateProjectOpen(false), []);
-  const openCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
-  const closeCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
-  const openCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(true), []);
-  const closeCreateOrgModal = useCallback(() => setIsCreateOrgModalOpen(false), []);
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  }, []);
+
   const toggleFullscreen = useCallback(() => {
     setIsBoardFullscreen((prev) => !prev);
   }, []);
 
-  const selectOrg = useCallback((id: string) => {
-    setSelectedOrgId(id);
-  }, []);
-
-  const selectProject = useCallback((id: string) => {
-    setSelectedProjectId(id);
-  }, []);
-
-  const value = useMemo<UIContextType>(
-    () => ({
+  const value = useMemo(
+    (): UIContextType => ({
       theme,
-      isSearchOpen,
-      isProfileOpen,
-      isOrgInfoOpen,
-      isCreateProjectOpen,
-      isCreateOrgModalOpen, 
-      isCreateModalOpen, 
+      isModalOpen,
+      openModal,
+      closeModal,
+      closeAllModals,
       chatWidth,
       isBoardFullscreen,
-      selectedOrgId,
-      selectedProjectId,
-      toggleTheme,
-      openSearch,
-      closeSearch,
-      openProfile,
-      closeProfile,
-      openOrgInfo,
-      closeOrgInfo,
-      openCreateProject,
-      closeCreateProject,
-      openCreateModal,
-      closeCreateModal,
-      openCreateOrgModal, 
-      closeCreateOrgModal, 
       setChatWidth,
+      toggleTheme,
       toggleFullscreen,
-      selectOrg,
-      selectProject,
     }),
     [
       theme,
-      isSearchOpen,
-      isProfileOpen,
-      isOrgInfoOpen,
-      isCreateProjectOpen,
-      isCreateOrgModalOpen, 
-      isCreateModalOpen, 
+      modals,
       chatWidth,
       isBoardFullscreen,
-      selectedOrgId,
-      selectedProjectId,
-      toggleTheme,
-      openSearch,
-      closeSearch,
-      openProfile,
-      closeProfile,
-      openOrgInfo,
-      closeOrgInfo,
-      openCreateProject,
-      closeCreateProject,
-      openCreateOrgModal,
-      closeCreateOrgModal,
       setChatWidth,
+      toggleTheme,
       toggleFullscreen,
-      selectOrg,
-      selectProject,
+      isModalOpen,
     ]
   );
 
   return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 };
 
-export const useUI = () => {
+export const useUI = (): UIContextType => {
   const context = useContext(UIContext);
-  if (!context) throw new Error('useUI must be used within UIProvider');
+  if (!context) {
+    throw new Error('useUI must be used within UIProvider');
+  }
   return context;
 };

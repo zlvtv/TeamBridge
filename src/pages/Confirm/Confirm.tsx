@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { auth } from '../../lib/firebase';
 import { applyActionCode } from 'firebase/auth';
+import Button from '../../components/ui/button/button';
+import LoadingState from '../../components/ui/loading/LoadingState';
 import styles from './Confirm.module.css';
 
 const Confirm: React.FC = () => {
@@ -26,14 +28,8 @@ const Confirm: React.FC = () => {
         if (auth.currentUser) {
           await auth.currentUser.reload();
         }
-
         setStatus('success');
-
-        const timer = setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 2000);
-
-        return () => clearTimeout(timer);
+        setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
       })
       .catch((err) => {
         setStatus('error');
@@ -67,30 +63,35 @@ const Confirm: React.FC = () => {
 
   if (oobCode) {
     return (
-      <div className={styles.container}>
-        <div className={styles.formWrapper}>
-          <h1 className={styles.title}>Подтверждение email</h1>
+      <div className={styles.auth}>
+        <div className={styles['auth__wrapper']}>
+          <h1 className={styles['auth__title']}>Подтверждение email</h1>
 
-          {status === 'loading' && (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Подтверждаем ваш email...</p>
-            </div>
-          )}
+          {status === 'loading' && <LoadingState message="Подтверждаем ваш email..." />}
 
           {status === 'success' && (
-            <div className={styles.success}>
-              <h2>Успешно!</h2>
-              <p>Ваш email подтверждён. Через несколько секунд вы будете перенаправлены в приложение...</p>
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ color: '#065f46', margin: '0 0 8px 0' }}>✅ Успешно!</h2>
+              <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+                Ваш email подтверждён. Через несколько секунд вы будете перенаправлены...
+              </p>
             </div>
           )}
 
           {status === 'error' && (
-            <div className={styles.errorBox}>
-              <p>{error}</p>
-              <button className={styles.submit} onClick={handleResend}>
+            <div>
+              <div className={styles['auth__error']} style={{ textAlign: 'center' }}>
+                {error}
+              </div>
+              <Button
+                variant="secondary"
+                size="medium"
+                onClick={handleResend}
+                fullWidth
+                style={{ marginTop: '16px' }}
+              >
                 Отправить повторно
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -99,21 +100,37 @@ const Confirm: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formWrapper}>
-        <h1 className={styles.title}>Подтвердите email</h1>
-        <p className={styles.subtitle}>
+    <div className={styles.auth}>
+      <div className={styles['auth__wrapper']}>
+        <h1 className={styles['auth__title']}>Подтвердите email</h1>
+        <p className={styles['auth__subtitle']}>
           Мы отправили письмо на <strong>{currentUser?.email}</strong>. Перейдите по ссылке.
         </p>
-        <button className={styles.submit} onClick={handleGoToLogin}>
-          Войти
-        </button>
-        <p className={styles.hint}>
-          <small>Проверьте папку «Спам», если письма нет.</small>
-        </p>
-        <button type="button" className={styles.link} onClick={handleResend}>
-          Отправить письмо повторно
-        </button>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <Button
+            variant="primary"
+            size="large"
+            onClick={handleGoToLogin}
+            fullWidth
+            style={{ maxWidth: '280px' }}
+          >
+            Войти
+          </Button>
+
+          <p style={{ margin: '12px 0 0 0', fontSize: '0.875rem', color: 'var(--color-text-light)', textAlign: 'center' }}>
+            <small>Проверьте папку «Спам», если письма нет.</small>
+          </p>
+
+          <button
+            type="button"
+            className={styles['auth__link']}
+            onClick={handleResend}
+            style={{ marginTop: '8px', textAlign: 'center' }}
+          >
+            Отправить письмо повторно
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import { useProject } from '../../contexts/ProjectContext';
 import { useUI } from '../../contexts/UIContext';
 import OrgInfoModal from '../../components/modals/org-info-modal/org-info-modal';
 import styles from './main-header.module.css';
-import { createPortal } from 'react-dom';
 
 const MainHeader: React.FC = () => {
   const { currentOrganization } = useOrganization();
@@ -42,11 +41,10 @@ const MainHeader: React.FC = () => {
   return (
     <>
       <header className={styles['main-header']}>
-        <h1 
+        <h1
           ref={setTitleEl}
           className={styles['main-header__title']}
           onClick={handleTitleClick}
-          style={{ cursor: 'pointer' }}
         >
           {currentOrganization ? currentOrganization.name : 'Выберите организацию'}
         </h1>
@@ -61,18 +59,11 @@ const MainHeader: React.FC = () => {
             ℹ️
           </button>
         )}
-
       </header>
 
-      {isOrgInfoOpen && infoBtnEl &&
-        createPortal(
-         <OrgInfoModal
-  key={`org-info-modal-${currentOrganization?.id}`}
-  anchorEl={infoBtnEl}
-  onClose={closeOrgInfo}
-/>,
-          document.body
-        )}
+      {isOrgInfoOpen && infoBtnEl && (
+        <OrgInfoModal anchorEl={infoBtnEl} onClose={closeOrgInfo} />
+      )}
     </>
   );
 };

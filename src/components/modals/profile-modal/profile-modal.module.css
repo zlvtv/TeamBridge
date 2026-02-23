@@ -31,8 +31,39 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   background: var(--color-surface);
+}
+
+.profile-modal__notifications {
+  margin-top: 8px;
+}
+
+.profile-modal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.profile-modal__checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.profile-modal__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 8px;
 }
 
 .profile-modal__body p {
@@ -46,13 +77,11 @@
   font-weight: 500;
 }
 
-.profile-modal__footer {
-  padding: 12px 16px;
+.profile-modal__actions {
   display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid var(--border-color);
-  background: var(--color-surface);
+  flex-direction: column;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .profile-modal__btn {
@@ -65,6 +94,33 @@
   border: none;
 }
 
+.profile-modal__btn_edit {
+  background: var(--color-primary);
+  color: white;
+}
+
+.profile-modal__btn_edit:hover {
+  background: #0056b3;
+}
+
+.profile-modal__btn_delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.profile-modal__btn_delete:hover {
+  background: #fecaca;
+}
+
+.profile-modal__footer {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--border-color);
+  background: var(--color-surface);
+  gap: 8px;
+}
+
 .profile-modal__btn_logout {
   background: #fee2e2;
   color: #dc2626;
@@ -73,3 +129,4 @@
 .profile-modal__btn_logout:hover {
   background: #fecaca;
 }
+

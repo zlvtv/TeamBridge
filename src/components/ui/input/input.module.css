@@ -77,3 +77,16 @@
 .input::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary-hover);
 }
+
+.input--filled {
+  background-color: var(--color-background);
+}
+
+.input--filled:focus {
+  background-color: var(--color-surface);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}

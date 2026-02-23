@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 
-const getEncryptionKey = (projectId: string): string => {
-  return projectId;
+const getEncryptionKey = (projectId: string): CryptoJS.lib.WordArray => {
+  return CryptoJS.SHA256(projectId);
 };
 
 export const encryptMessage = (text: string, projectId: string): string => {
@@ -10,15 +10,13 @@ export const encryptMessage = (text: string, projectId: string): string => {
 };
 
 export const decryptMessage = (ciphertext: string, projectId: string): string => {
-  if (!ciphertext) {
-    return '';
-  }
+  if (!ciphertext) return '';
+
   try {
     const key = getEncryptionKey(projectId);
     const bytes = CryptoJS.AES.decrypt(ciphertext, key);
-    const plaintext = bytes.toString(CryptoJS.enc.Utf8);
-    return plaintext;
-  } catch (err) {
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } catch {
     return '';
   }
 };

@@ -1,139 +1,143 @@
-.board {
+.task-board__board {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #f9f9fb;
-  border-left: 1px solid #e0e0e0;
+  background-color: var(--color-background);
+  border-left: 1px solid var(--border-color);
   overflow: hidden;
 }
 
-.header {
+.task-board__header {
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--color-surface);
 }
 
-.header h3 {
+.task-board__title {
   margin: 0 0 16px;
   font-size: 18px;
-  color: #1a1a1a;
+  color: var(--color-text);
+  font-weight: 600;
 }
 
-.tabs {
+.task-board__tabs {
   display: flex;
   gap: 4px;
   margin-bottom: 12px;
 }
 
-.tab {
+.task-board__tab {
   padding: 6px 12px;
   border: none;
-  background: #f0f0f0;
-  border-radius: 6px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
   font-size: 14px;
   cursor: pointer;
-  color: #555;
+  color: var(--color-text-secondary);
   min-width: 80px;
   text-align: center;
+  transition: all 0.2s ease;
 }
 
-.tab.active {
-  background: #5a67d8;
+.task-board__tab:hover {
+  background: var(--hover-bg);
+}
+
+.task-board__tab--active {
+  background: var(--color-primary);
   color: white;
 }
 
-.viewButton {
-  padding: 6px 12px;
-  border: none;
-  background: #f0f0f0;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  color: #555;
-  min-width: 80px;
-  text-align: center;
-}
-
-.viewButton.active {
-  background: #5a67d8;
-  color: white;
-}
-
-.controls {
+.task-board__controls {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-.viewControls {
+.task-board__search {
+  flex: 1;
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.task-board__filter {
+  min-width: 140px;
+}
+
+.task-board__sort-order-button {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 40px;
+  text-align: center;
+  color: var(--color-text);
+  transition: all 0.2s;
+}
+
+.task-board__sort-order-button:hover {
+  background: var(--hover-bg);
+}
+
+.task-board__view-controls {
   display: flex;
   gap: 4px;
   margin: 16px 16px 0;
 }
 
-.search {
-  flex: 1;
-  min-width: 150px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+.task-board__view-button {
+  padding: 6px 12px;
+  border: none;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
   font-size: 14px;
-}
-
-.filter {
-  min-width: 140px;
-}
-
-.taskList {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.noTasks {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  min-width: 80px;
   text-align: center;
-  color: #888;
+  transition: all 0.2s ease;
+}
+
+.task-board__view-button:hover {
+  background: var(--hover-bg);
+}
+
+.task-board__view-button--active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.task-board__no-tasks {
+  text-align: center;
+  color: var(--color-text-light);
   font-style: italic;
   margin-top: 20px;
 }
 
-.loading,
-.error {
+.task-board__error {
   text-align: center;
   padding: 20px;
   font-size: 14px;
-}
-
-.error {
-  color: #e53e3e;
-  background-color: #fed7d7;
-  border-radius: 4px;
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
+  border-radius: var(--border-radius);
   margin: 16px;
 }
 
-.board.dark {
-  background-color: #1e1e1e;
-  border-left-color: #333;
+.task-board__reset-button {
+  color: var(--color-text-light);
+  font-size: 13px;
 }
 
-.header.dark {
-  border-bottom-color: #333;
-  background-color: #2d2d2d;
-}
-
-.header h3.dark {
-  color: #f0f0f0;
-}
-
-.tab.dark {
-  background: #3a3a3a;
-  color: #ccc;
-}
-
-.tab.active.dark {
-  background: #7f86d8;
-  color: white;
+.task-board__reset-button:hover:not(:disabled) {
+  color: var(--color-danger);
+  background: transparent;
 }

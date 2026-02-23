@@ -1,190 +1,193 @@
-.calendar {
+.calendar-view__calendar {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
   overflow: hidden;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
   margin-top: 8px;
   margin-left: 8px;
 }
 
-.navigation {
+.calendar-view__navigation {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
   padding: 8px;
-  background: #f7fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.navButton {
+.calendar-view__nav-button {
   background: none;
   border: none;
   font-size: 18px;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   transition: background-color 0.2s;
 }
 
-.navButton:hover {
-  background-color: #edf2f7;
+.calendar-view__nav-button:hover {
+  background-color: var(--hover-bg);
 }
 
-.viewToggle {
+.calendar-view__view-toggle {
   display: flex;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   overflow: hidden;
 }
 
-.viewButton {
-  background: #f7fafc;
+.calendar-view__view-button {
+  background: var(--color-background);
   border: none;
   padding: 6px 12px;
   font-size: 14px;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   transition: all 0.2s;
 }
 
-.viewButton.active, .viewButton:hover {
-  background: #e2e8f0;
+.calendar-view__view-button:hover,
+.calendar-view__view-button--active {
+  background: var(--hover-bg);
 }
 
-.viewButton.active {
+.calendar-view__view-button--active {
+  background: var(--color-primary);
+  color: white;
   font-weight: 600;
 }
 
-.weekRange {
+.calendar-view__week-range {
   font-weight: 600;
-  color: #2d3748;
+  color: var(--color-text);
   min-width: 150px;
   text-align: center;
 }
 
-.header {
+.calendar-view__header {
   display: flex;
-  background: #f7fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.dayHeader {
+.calendar-view__day-header {
   flex: 1;
   padding: 12px;
   text-align: center;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--border-color);
 }
 
-.dayHeader:last-child {
+.calendar-view__day-header:last-child {
   border-right: none;
 }
 
-.dayName {
+.calendar-view__day-name {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
-.dayNumber {
+.calendar-view__day-number {
   font-size: 16px;
   font-weight: 700;
-  color: #2d3748;
+  color: var(--color-text);
 }
 
-.dayNumber.outside {
-  color: #a0aec0;
+.calendar-view__day-number--outside {
+  color: var(--color-text-light);
   opacity: 0.6;
 }
 
-.dayColumn.outside {
-  background-color: #f7fafc;
+.calendar-view__day-column--outside {
+  background-color: var(--color-background);
 }
 
-.body {
+.calendar-view__body {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
 }
 
-.monthGrid {
+.calendar-view__month-grid {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.weekRow {
+.calendar-view__week-row {
   display: flex;
   height: 100%;
 }
 
-.dayColumn {
+.calendar-view__day-column {
   flex: 1;
   padding: 12px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--border-color);
   overflow-y: auto;
   min-height: 80px;
 }
 
-.dayColumn:last-child {
+.calendar-view__day-column:last-child {
   border-right: none;
 }
 
-.empty {
+.calendar-view__empty {
   text-align: center;
-  color: #718096;
+  color: var(--color-text-light);
   font-size: 14px;
   margin: 12px 0;
   font-style: italic;
 }
 
-.task {
+.calendar-view__task {
   background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 6px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
   padding: 8px 12px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-small);
 }
 
-.task:hover {
+.calendar-view__task:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-medium);
 }
 
-.task.done {
+.calendar-view__task--done {
   opacity: 0.6;
   text-decoration: line-through;
-  color: #718096;
+  color: var(--color-text-light);
 }
 
-.taskTitle {
+.calendar-view__task-title {
   font-size: 14px;
   font-weight: 500;
-  color: #2d3748;
+  color: var(--color-text);
   margin-bottom: 6px;
   line-height: 1.3;
 }
 
-.taskAssignees {
+.calendar-view__task-assignees {
   display: flex;
   gap: 4px;
 }
 
-.avatar {
+.calendar-view__avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -195,15 +198,15 @@
   justify-content: center;
   font-size: 12px;
   color: white;
-  background-color: #4a5568;
+  background-color: var(--color-text-light);
   font-weight: 500;
 }
 
-.avatarMore {
+.calendar-view__avatar-more {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #718096;
+  background-color: var(--color-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,30 +215,30 @@
   font-weight: 500;
 }
 
-.noTasksContainer {
+.calendar-view__no-tasks-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 32px;
   text-align: center;
-  color: #718096;
+  color: var(--color-text-light);
   min-height: 300px;
 }
 
-.noTasksIcon {
+.calendar-view__no-tasks-icon {
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.noTasksTitle {
+.calendar-view__no-tasks-title {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #2d3748;
+  color: var(--color-text);
 }
 
-.noTasksSubtitle {
+.calendar-view__no-tasks-subtitle {
   font-size: 14px;
   max-width: 300px;
   line-height: 1.5;

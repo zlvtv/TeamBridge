@@ -1,43 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../lib/firebase';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-
-interface Task {
-  id: string;
-  project_id: string;
-  title: string;
-  description: string | null;
-  status: 'todo' | 'in_progress' | 'done';
-  priority: 'low' | 'medium' | 'high';
-  due_date: string | null;
-  created_by: string;
-  created_at: string;
-  assignees: string[];
-}
-
-interface Project {
-  id: string;
-  organization_id: string;
-  name: string;
-  description: string | null;
-  created_at: string;
-  created_by: string;
-  tasks: Task[];
-}
+import { getCollection } from '../services/firestore/firestoreService';
 
 export const useAllUserProjects = () => {
   const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAllUserProjects = async () => {
+    const fetchAll = async () => {
       if (!user) {
         setProjects([]);
         setLoading(false);
@@ -46,63 +17,37 @@ export const useAllUserProjects = () => {
 
       try {
         setLoading(true);
+        const members = await getCollection('organization_members', {
+          whereClauses: [{ field: 'user_id', operator: '==', value: user.id }]
+        });
 
-        const memberQuery = query(
-          collection(db, 'organization_members'),
-          where('user_id', '==', user.id)
-        );
-        const memberSnap = await getDocs(memberQuery);
-
-        if (memberSnap.size === 0) {
-          setProjects([]);
-          setLoading(false);
-          return;
-        }
-
-        const orgIds = Array.from(new Set(memberSnap.docs.map(doc => doc.data().organization_id)));
-
+        const orgIds = [...new Set(members.map(m => m.organization_id))].slice(0, 10);
         if (orgIds.length === 0) {
           setProjects([]);
-          setLoading(false);
           return;
         }
 
-        const limitedOrgIds = orgIds.slice(0, 10);
+        const projs = await getCollection('projects', {
+          whereClauses: [{ field: 'organization_id', operator: 'in', value: orgIds }]
+        });
 
-        const projectsQuery = query(
-          collection(db, 'projects'),
-          where('organization_id', 'in', limitedOrgIds)
-        );
-        const projectsSnap = await getDocs(projectsQuery);
-
-        const fetchedProjects: Project[] = [];
-
-        for (const pDoc of projectsSnap.docs) {
-          const projData = { id: pDoc.id, ...pDoc.data() } as Omit<Project, 'tasks'>;
-
-          const tasksQuery = query(
-            collection(db, 'tasks'),
-            where('project_id', '==', pDoc.id)
-          );
-          const tasksSnap = await getDocs(tasksQuery);
-          const tasks = tasksSnap.docs.map(t => ({ id: t.id, ...t.data() })) as Task[];
-
-          fetchedProjects.push({
-            ...projData,
-            tasks,
+        const projectsWithTasks = await Promise.all(projs.map(async (p: any) => {
+          const tasks = await getCollection('tasks', {
+            whereClauses: [{ field: 'project_id', operator: '==', value: p.id }]
           });
-        }
+          return { ...p, tasks };
+        }));
 
-        setProjects(fetchedProjects);
+        setProjects(projectsWithTasks);
       } catch (err) {
-        console.error('Ошибка загрузки всех проектов пользователя:', err);
+        console.error('Error fetching user projects:', err);
         setProjects([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAllUserProjects();
+    fetchAll();
   }, [user?.id]);
 
   return { projects, loading };

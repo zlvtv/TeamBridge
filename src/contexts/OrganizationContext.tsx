@@ -9,6 +9,7 @@ import {
   organizationService,
   type OrganizationWithMembers,
   type CreateOrganizationData,
+  type UpdateOrganizationData,
 } from '../services/organizationService';
 import { messageService } from '../services/messageService';
 import { useAuth } from './AuthContext';
@@ -26,9 +27,8 @@ interface OrganizationContextType {
   leaveOrganization: (organizationId: string) => Promise<void>;
   deleteOrganization: (organizationId: string) => Promise<void>;
   createOrganizationInvite: (organizationId: string) => Promise<any>;
-  regenerateInviteCode: (organizationId: string) => Promise<void>;
-  deactivateInviteCode: (organizationId: string) => Promise<void>;
   markOrganizationAsRead: (organizationId: string) => void;
+  updateOrganization: (id: string, data: UpdateOrganizationData) => Promise<void>;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
@@ -42,102 +42,88 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useAuth();
 
   const refreshOrganizations = useCallback(async (): Promise<OrganizationWithMembers[]> => {
-  try {
-    const orgs = await organizationService.getUserOrganizations();
-    setOrganizations(orgs);
-    return orgs;
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Ошибка');
-    return [];
-  }
-}, []);
-
-  const refreshCurrentOrganization = useCallback(async () => {
-  if (!currentOrganization) return;
-
-  try {
-    const orgs = await organizationService.getUserOrganizations(true);
-
-    const updatedOrg = orgs.find(o => o.id === currentOrganization.id);
-    
-    if (updatedOrg && user) {
-      const hasUnread = await messageService.hasUnreadMessages(updatedOrg.id, user.id);
-      const orgWithUnread = { ...updatedOrg, hasUnreadMessages: hasUnread };
-      setCurrentOrganization(orgWithUnread);
-      
-      // Update in the organizations list
-      setOrganizations(prev => prev.map(org => 
-        org.id === orgWithUnread.id ? orgWithUnread : org
-      ));
-    } else {
-      setCurrentOrganization(null);
-    }
-  } catch (err) {
-    console.error('Ошибка при обновлении текущей организации:', err);
-  }
-}, [currentOrganization?.id, user?.id]);
-
-  useEffect(() => {
-  const initialize = async () => {
-    if (!user) {
-      setOrganizations([]);
-      setCurrentOrganization(null);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
+    if (!user) return [];
 
     try {
       const orgs = await organizationService.getUserOrganizations();
       
-      // Check for unread messages in each organization
       const orgsWithUnread = await Promise.all(
         orgs.map(async (org) => {
           const hasUnread = await messageService.hasUnreadMessages(org.id, user.id);
-          return {
-            ...org,
-            hasUnreadMessages: hasUnread
-          };
+          return { ...org, hasUnreadMessages: hasUnread };
         })
       );
-      
+
       setOrganizations(orgsWithUnread);
-
-      let targetOrg: OrganizationWithMembers | null = null;
-      const savedOrgId = localStorage.getItem('currentOrgId');
-
-      if (savedOrgId) {
-        targetOrg = orgsWithUnread.find(o => o.id === savedOrgId) || null;
-      }
-
-      if (!targetOrg && orgsWithUnread.length > 0) {
-        targetOrg = orgsWithUnread[0];
-        localStorage.setItem('currentOrgId', targetOrg.id);
-      }
-
-      setCurrentOrganization(targetOrg);
+      return orgsWithUnread;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
-      setCurrentOrganization(null);
-    } finally {
-      setIsLoading(false);
+      return [];
     }
-  };
+  }, [user?.id]);
 
-  initialize();
-}, [user?.id]);
+  const refreshCurrentOrganization = useCallback(async () => {
+    if (!currentOrganization || !user) return;
+
+    try {
+      const orgs = await refreshOrganizations();
+      const updatedOrg = orgs.find(o => o.id === currentOrganization.id);
+      
+      if (updatedOrg) {
+        setCurrentOrganization(updatedOrg);
+      } else {
+        setCurrentOrganization(null);
+      }
+    } catch (err) {
+      console.error('Ошибка при обновлении текущей организации:', err);
+    }
+  }, [currentOrganization?.id, user?.id, refreshOrganizations]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      if (!user) {
+        setOrganizations([]);
+        setCurrentOrganization(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const orgs = await refreshOrganizations();
+        
+        let targetOrg: OrganizationWithMembers | null = null;
+        const savedOrgId = localStorage.getItem('currentOrgId');
+
+        if (savedOrgId) {
+          targetOrg = orgs.find(o => o.id === savedOrgId) || null;
+        }
+
+        if (!targetOrg && orgs.length > 0) {
+          targetOrg = orgs[0];
+          localStorage.setItem('currentOrgId', targetOrg.id);
+        }
+
+        setCurrentOrganization(targetOrg);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ошибка');
+        setCurrentOrganization(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
+  }, [user?.id, refreshOrganizations]);
 
   const createOrganization = async (data: CreateOrganizationData): Promise<OrganizationWithMembers> => {
     setError(null);
     try {
-      await organizationService.createOrganization(data);
-      const orgs = await refreshOrganizations();
-      const newOrg = orgs[0];
-      if (newOrg) {
-        setCurrentOrganization(newOrg);
-        localStorage.setItem('currentOrgId', newOrg.id);
-      }
+      const newOrg = await organizationService.createOrganization(data);
+      await refreshOrganizations();
+      setCurrentOrganization(newOrg);
+      localStorage.setItem('currentOrgId', newOrg.id);
       return newOrg;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка создания');
@@ -165,6 +151,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       await refreshOrganizations();
       if (currentOrganization?.id === organizationId) {
         setCurrentOrganization(null);
+        localStorage.removeItem('currentOrgId');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
@@ -196,27 +183,27 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const regenerateInviteCode = async (organizationId: string) => {
+  const updateOrganization = async (id: string, data: UpdateOrganizationData) => {
     setError(null);
     try {
-      await organizationService.regenerateInviteCode(organizationId);
+      await organizationService.updateOrganization(id, data);
       await refreshCurrentOrganization();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
+      setError(err instanceof Error ? err.message : 'Не удалось обновить организацию');
       throw err;
     }
   };
 
-  const deactivateInviteCode = async (organizationId: string) => {
-    setError(null);
-    try {
-      await organizationService.deactivateInviteCode(organizationId);
-      await refreshCurrentOrganization();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
-      throw err;
-    }
-  };
+  const markOrganizationAsRead = useCallback((organizationId: string) => {
+    messageService.markAsRead(organizationId);
+    setOrganizations(prev =>
+      prev.map(org =>
+        org.id === organizationId 
+          ? { ...org, hasUnreadMessages: false } 
+          : org
+      )
+    );
+  }, []);
 
   const value = {
     organizations,
@@ -231,16 +218,8 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     leaveOrganization,
     deleteOrganization,
     createOrganizationInvite,
-    regenerateInviteCode,
-    deactivateInviteCode,
-    markOrganizationAsRead: (organizationId: string) => {
-      messageService.markAsRead(organizationId);
-      setOrganizations(prev => prev.map(org => 
-        org.id === organizationId 
-          ? { ...org, hasUnreadMessages: false } 
-          : org
-      ));
-    },
+    markOrganizationAsRead,
+    updateOrganization,
   };
 
   return (

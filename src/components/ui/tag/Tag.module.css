@@ -1,0 +1,44 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.tag--small {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.tag--default {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+}
+
+.tag--primary {
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary);
+}
+
+.tag--success {
+  background-color: var(--color-success-lighter);
+  color: var(--color-success);
+}
+
+.tag--warning {
+  background-color: var(--color-warning-lighter);
+  color: var(--color-warning);
+}
+
+.tag--danger {
+  background-color: var(--color-danger-lighter);
+  color: var(--color-danger);
+}

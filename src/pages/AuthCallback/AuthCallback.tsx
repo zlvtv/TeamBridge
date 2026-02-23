@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AuthLoadingPage from '../../components/ui/loading/AuthLoadingPage';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const AuthCallback: React.FC = () => {
     }
   }, [navigate]);
 
-  return null;
+  return <AuthLoadingPage message="Проверка ссылки подтверждения..." />;
 };
 
 export default AuthCallback;

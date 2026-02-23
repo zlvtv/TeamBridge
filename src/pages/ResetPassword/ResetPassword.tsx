@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, confirmPasswordReset } from 'firebase/auth';
+import Input from '../../components/ui/input/input';
+import Button from '../../components/ui/button/button';
 import styles from './ResetPassword.module.css';
 
 const ResetPassword: React.FC = () => {
@@ -77,28 +79,28 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formWrapper}>
-        <h1 className={styles.title}>Новый пароль</h1>
+    <div className={styles.auth}>
+      <div className={styles['auth__wrapper']}>
+        <h1 className={styles['auth__title']}>Новый пароль</h1>
 
         {isSuccess ? (
-          <div className={styles.successContainer}>
-            <h2 className={styles.successTitle}>Пароль изменён.</h2>
-            <p className={styles.successText}>Теперь вы можете войти с новым паролем.</p>
-            <button className={styles.submit} onClick={() => navigate('/login')}>
+          <div className={styles['auth__success-container']}>
+            <h2 className={styles['auth__success-title']}>Пароль изменён.</h2>
+            <p className={styles['auth__success-text']}>Теперь вы можете войти с новым паролем.</p>
+            <Button variant="primary" size="large" fullWidth onClick={() => navigate('/login')}>
               Войти
-            </button>
+            </Button>
           </div>
         ) : (
           <>
-            <p className={styles.subtitle}>Введите и подтвердите новый пароль</p>
-            {error && <div className={styles.error}>{error}</div>}
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.field}>
-                <label htmlFor="password" className={styles.label}>
+            <p className={styles['auth__subtitle']}>Введите и подтвердите новый пароль</p>
+            {error && <div className={styles['auth__error']}>{error}</div>}
+            <form onSubmit={handleSubmit} className={styles['auth__form']}>
+              <div className={styles['auth__field']}>
+                <label htmlFor="password" className={styles['auth__label']}>
                   Новый пароль
                 </label>
-                <input
+                <Input
                   id="password"
                   type="password"
                   value={password}
@@ -106,15 +108,14 @@ const ResetPassword: React.FC = () => {
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
-                  className={styles.input}
-                  autoComplete="new-password"
+                  error={password.length < 6 ? 'Минимум 6 символов' : undefined}
                 />
               </div>
-              <div className={styles.field}>
-                <label htmlFor="confirmPassword" className={styles.label}>
+              <div className={styles['auth__field']}>
+                <label htmlFor="confirmPassword" className={styles['auth__label']}>
                   Подтвердите
                 </label>
-                <input
+                <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
@@ -122,16 +123,15 @@ const ResetPassword: React.FC = () => {
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
-                  className={styles.input}
-                  autoComplete="new-password"
+                  error={password !== confirmPassword ? 'Пароли не совпадают' : undefined}
                 />
               </div>
-              <button type="submit" className={styles.submit} disabled={isLoading}>
-                {isLoading ? 'Сохранение...' : 'Сменить пароль'}
-              </button>
+              <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
+                Сменить пароль
+              </Button>
             </form>
-            <p className={styles.footer}>
-              <button type="button" className={styles.link} onClick={handleBack} disabled={isLoading}>
+            <p className={styles['auth__footer']}>
+              <button type="button" className={styles['auth__link']} onClick={handleBack} disabled={isLoading}>
                 ← Назад ко входу
               </button>
             </p>

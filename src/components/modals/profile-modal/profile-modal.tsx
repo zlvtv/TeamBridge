@@ -1,107 +1,135 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import Modal from '../../ui/modal/Modal';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUI } from '../../../contexts/UIContext';
+import Button from '../../ui/button/button';
+import Input from '../../ui/input/input';
 import styles from './profile-modal.module.css';
+import EditProfileModal from '../edit-profile-modal/edit-profile-modal';
+import DeleteAccountModal from '../delete-account-modal/delete-account-modal';
+import { useModalPosition } from '../../../hooks/useModalPosition';
 
 const ProfileModal: React.FC = () => {
   const { closeProfile } = useUI();
   const { user, signOut } = useAuth();
-  const modalRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
 
-  useEffect(() => {
-    const updatePosition = () => {
-      const button = document.querySelector('[data-profile-button]') as HTMLButtonElement;
-      if (button) {
-        const rect = button.getBoundingClientRect();
-        const top = rect.bottom - 200;
-        const left = rect.right + 8;
-        setPosition({ top, left });
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const { position, isVisible } = useModalPosition({
+    referenceRef: buttonRef,
+    modalWidth: 240,
+  });
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleNotificationToggle = () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+    } else {
+      if (Notification.permission === 'granted') {
+        setNotificationsEnabled(true);
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            setNotificationsEnabled(true);
+          }
+        });
       }
-    };
-
-    updatePosition();
-    const timer = setTimeout(updatePosition, 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const button = document.querySelector('[data-profile-button]');
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(e.target as Node) &&
-        !button?.contains(e.target as Node)
-      ) {
-        closeProfile();
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeProfile();
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [closeProfile]);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (err) {
-      window.location.href = '/login';
     } finally {
       closeProfile();
     }
   };
 
-  if (!position) return null;
+  if (!isVisible) return null;
 
   return (
-    <div
-      ref={modalRef}
-      className={styles['profile-modal']}
-      style={{
-        position: 'fixed',
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        minWidth: '240px',
-        zIndex: 1000,
-      }}
-      role="dialog"
-      aria-label="Профиль пользователя"
-    >
-      <div className={styles['profile-modal__content']}>
-        <div className={styles['profile-modal__header']}>
-          <h3>Профиль</h3>
-        </div>
+    <>
+      <Modal
+        isOpen={true}
+        onClose={closeProfile}
+        style={{ ...position, minWidth: '240px' }}
+        showCloseButton={false}
+        usePortal={true}
+      >
+        <div className={styles['profile-modal__content']}>
+          <div className={styles['profile-modal__header']}>
+            <h3>Профиль</h3>
+          </div>
 
-        <div className={styles['profile-modal__body']}>
-          <p>
-            <strong>Имя:</strong>{' '}
-            {user?.full_name || user?.username || user?.email?.split('@')[0] || 'Аноним'}
-          </p>
-          <p>
-            <strong>Email:</strong> {user?.email || '—'}
-          </p>
-        </div>
+          <div className={styles['profile-modal__body']}>
+            <div className={styles['profile-modal__avatar']}>👤</div>
+            <p>
+              <strong>Имя пользователя:</strong> {user?.username || '—'}
+            </p>
+            <p>
+              <strong>Полное имя:</strong> {user?.full_name || '—'}
+            </p>
+            <p>
+              <strong>Email:</strong> {user?.email || '—'}
+            </p>
+            <p>
+              <strong>Уведомления:</strong>
+            </p>
+            <div className={styles['profile-modal__notifications']}>
+              <label className={styles['profile-modal__checkbox']}>
+                <Input
+                  type="checkbox"
+                  checked={notificationsEnabled}
+                  onChange={handleNotificationToggle}
+                  style={{ marginRight: '8px' }}
+                />
+                Разрешить браузерные уведомления
+              </label>
+            </div>
+            <div className={styles['profile-modal__actions']}>
+              <Button
+                variant="primary"
+                size="small"
+                fullWidth
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                Редактировать
+              </Button>
+              <Button
+                variant="danger"
+                size="small"
+                fullWidth
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                Удалить
+              </Button>
+            </div>
+          </div>
 
-        <div className={styles['profile-modal__footer']}>
-          <button
-            className={`${styles['profile-modal__btn']} ${styles['profile-modal__btn_logout']}`}
-            onClick={handleSignOut}
-            aria-label="Выйти из аккаунта"
-          >
-            Выйти
-          </button>
+          <div className={styles['profile-modal__footer']}>
+            <Button variant="danger" size="small" fullWidth onClick={handleSignOut}>
+              Выйти
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </Modal>
+
+      {isEditModalOpen && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteAccountModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import styles from './modal.module.css';
+import styles from './Modal.module.css';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,9 +9,9 @@ interface ModalProps {
   title?: string;
   disableEscape?: boolean;
   disableOutsideClick?: boolean;
-  disableBlur?: boolean;
   showCloseButton?: boolean;
   className?: string;
+  overlayClassName?: string;
   role?: string;
 }
 
@@ -23,39 +23,45 @@ const Modal: React.FC<ModalProps> = ({
   title,
   disableEscape = false,
   disableOutsideClick = false,
+  showCloseButton = true,
   className = '',
+  overlayClassName = '',
   role = 'dialog',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && !disableEscape) {
-          onClose();
-        }
-      };
+    if (!isOpen) return;
 
-      // handleFocus полностью отключен для предотвращения рекурсии
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !disableEscape) {
+        onClose();
+      }
+    };
 
-      document.addEventListener('keydown', handleEsc);
-      // document.addEventListener('focus', handleFocus, true); // Не используется
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node) && !disableOutsideClick) {
+        onClose();
+      }
+    };
 
-      document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleEsc);
+    document.addEventListener('mousedown', handleOutsideClick);
 
-      return () => {
-        document.removeEventListener('keydown', handleEsc);
-        // document.removeEventListener('focus', handleFocus, true); // Не используется
-        document.body.style.overflow = '';
-      };
-    }
-  }, [isOpen, onClose, disableEscape]);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose, disableEscape, disableOutsideClick]);
 
   if (!isOpen) return null;
 
   return (
     <div
-      className={`${styles.overlay} ${(function() { try { return disableBlur; } catch(e) { return false; } })() ? styles['overlay-no-blur'] : ''}`.trim()}
+      className={`${styles['modal__overlay']} ${overlayClassName}`}
       onClick={disableOutsideClick ? undefined : onClose}
       role="button"
       tabIndex={-1}
@@ -63,25 +69,25 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div
         ref={modalRef}
-        className={`${styles.modal} ${className}`.trim()}
-        style={{ maxWidth }}
+        className={`${styles.modal} ${className}`}
+        style={{ '--modal-width': `${maxWidth}px` } as React.CSSProperties}
         onClick={(e) => e.stopPropagation()}
         role={role}
         aria-modal="true"
         aria-label={title || 'Модальное окно'}
         tabIndex={-1}
       >
-        {typeof showCloseButton !== 'undefined' && showCloseButton !== false && (
+        {showCloseButton && (
           <button
-            className={styles.close}
+            className={styles['modal__close']}
             onClick={onClose}
             aria-label="Закрыть"
           >
             ×
           </button>
         )}
-        {title && <h2 className={styles.title}>{title}</h2>}
-        <div className={styles.content}>{children}</div>
+        {title && <h2 className={styles['modal__title']}>{title}</h2>}
+        <div className={styles['modal__content']}>{children}</div>
       </div>
     </div>
   );

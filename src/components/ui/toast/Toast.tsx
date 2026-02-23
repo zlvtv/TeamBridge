@@ -2,13 +2,14 @@ import React from 'react';
 import styles from './Toast.module.css';
 
 interface ToastProps {
+  id: string;
   message: string;
   type: 'success' | 'error';
   onClose: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
-  React.useEffect(() => {
+const Toast: React.FC<ToastProps> = ({ id, message, type, onClose }) => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
     }, 3000);
@@ -17,9 +18,18 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className={`${styles.toast} ${styles[type]}`}>
+    <div
+      key={id}
+      className={`${styles.toast} ${styles[type]}`}
+      role="alert"
+      aria-live="polite"
+    >
       {message}
-      <button className={styles.close} onClick={onClose}>
+      <button
+        className={styles['toast__close']}
+        onClick={onClose}
+        aria-label="Закрыть"
+      >
         ✕
       </button>
     </div>

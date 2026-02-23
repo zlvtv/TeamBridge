@@ -1,44 +1,11 @@
-.content {
+.confirm-modal__content {
   padding: 20px;
   text-align: center;
 }
 
-.message {
-  margin-bottom: 20px;
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.actions {
+.confirm-modal__actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 10px;
-}
-
-.cancelButton,
-.confirmButton {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.cancelButton {
-  background-color: var(--button-secondary-bg);
-  color: var(--button-secondary-text);
-}
-
-.confirmButton {
-  background-color: var(--error-bg);
-  color: white;
-}
-
-.confirmButton:hover {
-  background-color: #d32f2f;
-}
-
-.cancelButton:hover {
-  background-color: var(--button-secondary-hover);
+  margin-top: 16px;
 }
