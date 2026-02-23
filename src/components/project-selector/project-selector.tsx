@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styles from './project-selector.module.css';
-import '@/components/ui/modal/Modal.module.css';
+import '@/components/ui/modal/modal.module.css';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { createPortal } from 'react-dom';
