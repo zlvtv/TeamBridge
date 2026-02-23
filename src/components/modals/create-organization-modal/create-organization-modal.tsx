@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Modal from '../../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import Input from '../../ui/input/input';
 import Button from '../../ui/button/button';
 import styles from './create-organization-modal.module.css';
@@ -19,9 +19,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
   const { createOrganization } = useOrganization();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [roles, setRoles] = useState<Role[]>([
-
-  ]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +35,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       setName('');
       setDescription('');
       setError(null);
-      setIsCreating(false); 
+      setIsCreating(false);
       setTimeout(setFocus, 0);
     } else {
       setIsCreating(false);
@@ -85,7 +83,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать организацию');
-      setIsCreating(false); 
+      setIsCreating(false);
     }
   };
 

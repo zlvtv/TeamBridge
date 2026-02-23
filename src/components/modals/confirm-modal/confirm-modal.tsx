@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '../../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import Button from '../../ui/button/button';
 import styles from './confirm-modal.module.css';
 

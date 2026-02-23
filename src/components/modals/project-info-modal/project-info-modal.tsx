@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import Modal from '../../ui/modal/modal';
+import Modal from '@/components/ui/modal/modal'; 
 import Button from '../../ui/button/button';
 import styles from './project-info-modal.module.css';
 import { useOrganization } from '../../../contexts/OrganizationContext';

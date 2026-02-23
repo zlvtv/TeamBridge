@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUI } from '../../../contexts/UIContext';
 import Button from '../../ui/button/button';

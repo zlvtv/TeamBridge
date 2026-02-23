@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import Modal from '../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import styles from './user-info-modal.module.css';
 
 interface UserInfoModalProps {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { formatCount } from '../../../utils/formatCount';
 import styles from './search-modal.module.css';

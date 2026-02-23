@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../../ui/modal/Modal';
+import Modal from '@/components/ui/modal/modal'; 
 import Input from '../../ui/input/input';
 import Button from '../../ui/button/button';
 import styles from './edit-profile-modal.module.css';
