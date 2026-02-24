@@ -23,12 +23,10 @@ const OrgIconPanel: React.FC = () => {
   } = useUI();
 
   const organizations = rawOrganizations.slice().sort((a, b) => {
-  // 1. Непрочитанные — вверх
   if (a.hasUnreadMessages !== b.hasUnreadMessages) {
     return a.hasUnreadMessages ? -1 : 1;
   }
 
-  // 2. По updated_at (уже Date)
   const timeA = a.updated_at?.getTime() ?? 0;
   const timeB = b.updated_at?.getTime() ?? 0;
 
@@ -36,7 +34,6 @@ const OrgIconPanel: React.FC = () => {
     return timeB - timeA;
   }
 
-  // 3. Резерв — по имени
   return a.name.localeCompare(b.name, 'ru');
 });
 

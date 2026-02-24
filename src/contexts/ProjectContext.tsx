@@ -28,6 +28,7 @@ interface ProjectMember {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
+    description: string | null;
   };
 }
 

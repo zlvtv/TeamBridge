@@ -46,6 +46,10 @@
   --transition: 0.2s ease-in-out;
 
   --max-content-width: 1200px;
+
+  --owner-badge-color: #7c3aed; 
+  --admin-badge-color: #ea580c; 
+  --member-badge-color: #059669;
 }
 
 .dark {

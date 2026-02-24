@@ -116,30 +116,18 @@ export const taskService = {
     await updateDocById('tasks', taskId, updateData);
   },
 
-  /**
-   * Удаление задачи
-   */
   async deleteTask(taskId: string): Promise<void> {
     await deleteDocById('tasks', taskId);
   },
 
-  /**
-   * Изменение статуса задачи
-   */
   async updateTaskStatus(taskId: string, status: 'todo' | 'in_progress' | 'done'): Promise<void> {
     await updateDocById('tasks', taskId, { status });
   },
 
-  /**
-   * Назначение исполнителей
-   */
   async assignTask(taskId: string, userIds: string[]): Promise<void> {
     await updateDocById('tasks', taskId, { assignees: userIds });
   },
 
-  /**
-   * Подписка на задачи проекта в реальном времени
-   */
   subscribeToProjectTasks(
     projectId: string,
     onNext: (tasks: Task[]) => void,

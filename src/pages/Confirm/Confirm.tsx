@@ -1,48 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { auth } from '../../lib/firebase';
-import { 
-  applyActionCode,
-  sendEmailVerification 
-} from 'firebase/auth';
+import { auth, db } from '../../lib/firebase';
+import { applyActionCode, sendEmailVerification } from 'firebase/auth';
 import Button from '../../components/ui/button/button';
 import LoadingState from '../../components/ui/loading/LoadingState';
 import styles from './Confirm.module.css';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Confirm: React.FC = () => {
   const navigate = useNavigate();
-  const { isInitialized } = useAuth();
+  const { user, isInitialized } = useAuth();
   const currentUser = auth.currentUser;
 
   const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
   const oobCode = urlParams.get('oobCode');
 
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
-    oobCode ? 'loading' : 'idle'
-  );
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
 
+  // Обработка действия подтверждения email
   useEffect(() => {
-    if (!isInitialized || !oobCode || status !== 'loading') return;
+    if (!isInitialized || !currentUser) return;
 
-    applyActionCode(auth, oobCode)
-      .then(async () => {
-        if (auth.currentUser) {
-          await auth.currentUser.reload();
-        }
-        setStatus('success');
-        setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
-      })
-      .catch((err) => {
-        setStatus('error');
-        setError(
-          err.code === 'auth/expired-action-code'
-            ? 'Ссылка устарела. Запросите новое письмо.'
-            : 'Неверная или уже использованная ссылка.'
-        );
-      });
-  }, [isInitialized, oobCode, status, navigate]);
+    // Если есть oobCode — обрабатываем подтверждение
+    if (oobCode && mode === 'verifyEmail') {
+      setStatus('loading');
+
+      applyActionCode(auth, oobCode)
+        .then(async () => {
+          await currentUser.reload(); // Обновляем статус
+          setStatus('success');
+          localStorage.removeItem('emailVerificationSent');
+          setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
+        })
+        .catch((err) => {
+          console.error('Ошибка подтверждения email:', err);
+          setStatus('error');
+          setError(
+            err.code === 'auth/expired-action-code'
+              ? 'Ссылка устарела. Запросите новое письмо.'
+              : err.code === 'auth/invalid-action-code'
+              ? 'Ссылка недействительна или уже использована.'
+              : 'Не удалось подтвердить email. Попробуйте снова.'
+          );
+        });
+    }
+  }, [isInitialized, oobCode, mode, navigate]);
 
   const handleResend = async () => {
     if (!currentUser) {
@@ -52,7 +56,7 @@ const Confirm: React.FC = () => {
     }
 
     const actionCodeSettings = {
-      url: 'https://teambridge-c991.onrender.com/confirm',
+      url: window.location.origin + '/confirm',
       handleCodeInApp: true,
     };
 
@@ -61,15 +65,12 @@ const Confirm: React.FC = () => {
       alert('Письмо отправлено! Проверьте спам.');
     } catch (err: any) {
       console.error('Ошибка отправки письма:', err);
-      alert('Ошибка при отправке: ' + (err.message || 'Неизвестная ошибка'));
+      alert('Ошибка: ' + (err.message || 'Неизвестная ошибка'));
     }
   };
 
-  const handleGoToLogin = () => {
-    navigate('/login');
-  };
-
-  if (oobCode) {
+  // Если идёт обработка подтверждения
+  if (oobCode && mode === 'verifyEmail') {
     return (
       <div className={styles.auth}>
         <div className={styles['auth__wrapper']}>
@@ -107,6 +108,7 @@ const Confirm: React.FC = () => {
     );
   }
 
+  // Если нет oobCode — просто показываем напоминание
   return (
     <div className={styles.auth}>
       <div className={styles['auth__wrapper']}>
@@ -119,11 +121,19 @@ const Confirm: React.FC = () => {
           <Button
             variant="primary"
             size="large"
-            onClick={handleGoToLogin}
+            onClick={async () => {
+              if (!currentUser) return navigate('/login');
+              await currentUser.reload();
+              if (currentUser.emailVerified) {
+                navigate('/dashboard', { replace: true });
+              } else {
+                alert('Email ещё не подтверждён. Перейдите по ссылке из письма.');
+              }
+            }}
             fullWidth
             style={{ maxWidth: '280px' }}
           >
-            Войти
+            Продолжить в приложение
           </Button>
 
           <p style={{ margin: '12px 0 0 0', fontSize: '0.875rem', color: 'var(--color-text-light)', textAlign: 'center' }}>

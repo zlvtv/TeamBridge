@@ -4,6 +4,7 @@ export interface UserProfile {
   username: string;
   full_name: string | null;
   avatar_url: string | null;
+  description: string | null;
 }
 
 export interface AuthContextType {
@@ -16,7 +17,8 @@ export interface AuthContextType {
   signUp: (
     email: string,
     password: string,
-    username: string
+    username: string,
+    fullName: string
   ) => Promise<{
     data: { user: UserProfile } | null;
     error: { message: string } | null;
@@ -25,5 +27,5 @@ export interface AuthContextType {
     success: boolean;
     message: string;
   }>;
-  signInAnonymously: () => Promise<void>; 
+  signInAnonymously: () => Promise<void>;
 }

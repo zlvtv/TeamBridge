@@ -1,6 +1,5 @@
 import { Omit } from 'react';
 
-// Тип уведомления
 export interface Notification {
   id: string;
   type: 'reply' | 'mention' | 'task_reminder' | 'system';
@@ -14,7 +13,6 @@ export interface Notification {
   taskId: string | null;
 }
 
-// Хранилище уведомлений (в реальности — лучше использовать Firebase)
 let notifications: Notification[] = [
 ];
 
@@ -25,16 +23,10 @@ let notificationUpdater: ((notifications: Notification[]) => void) | null = null
   updater([...notifications]); 
 };
 
-/**
- * Получение всех уведомлений
- */
 export const getNotifications = (): Notification[] => {
   return [...notifications];
 };
 
-/**
- * Отметка уведомления как прочитанного
- */
 export const markAsRead = (id: string): void => {
   const index = notifications.findIndex(n => n.id === id);
   if (index !== -1) {
@@ -45,9 +37,6 @@ export const markAsRead = (id: string): void => {
   }
 };
 
-/**
- * Добавление нового уведомления
- */
 export const addNotification = (
   title: string,
   message: string,
@@ -76,7 +65,6 @@ export const addNotification = (
     notificationUpdater([...notifications]);
   }
 
-  // Показываем браузерное уведомление
   if (Notification.permission === 'granted') {
     new Notification(title, {
       body: message,
@@ -85,9 +73,6 @@ export const addNotification = (
   }
 };
 
-/**
- * @deprecated Use addNotification instead
- */
 export const sendTaskReminderNotification = (
   userId: string,
   taskId: string,

@@ -23,13 +23,6 @@ import RecoveryCallback from './pages/RecoveryCallback/RecoveryCallback';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isEmailVerified, isInitialized } = useAuth();
-  const searchParams = new URLSearchParams(window.location.search);
-  const oobCode = searchParams.get('oobCode');
-  const mode = searchParams.get('mode');
-
-  if (oobCode && mode === 'resetPassword') {
-    return <Navigate to={`/reset-password?oobCode=${oobCode}`} replace />;
-  }
 
   if (!isInitialized) return <LoadingState />;
   if (!user) return <Navigate to="/login" replace />;
@@ -48,23 +41,20 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const ConfirmRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isEmailVerified, isInitialized } = useAuth();
+  const { user, isInitialized } = useAuth();
 
   if (!isInitialized) return <LoadingState />;
   if (!user) return <Navigate to="/login" replace />;
-  if (isEmailVerified) return <Navigate to="/dashboard" replace />;
-
+  // isEmailVerified проверяется внутри Confirm.tsx
   return <>{children}</>;
 };
 
 const ResetPasswordRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isInitialized } = useAuth();
   const searchParams = new URLSearchParams(window.location.search);
   const oobCodeFromUrl = searchParams.get('oobCode');
   const oobCodeFromStorage = localStorage.getItem('reset_password_oobCode');
   const hasOobCode = oobCodeFromUrl || oobCodeFromStorage;
 
-  if (!isInitialized && !hasOobCode) return <LoadingState />;
   if (!hasOobCode) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
@@ -110,23 +100,9 @@ const App: React.FC = () => {
 
                     <Route path="/confirm" element={<ConfirmRoute><Confirm /></ConfirmRoute>} />
 
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <PrivateRoute>
-                          <Dashboard />
-                        </PrivateRoute>
-                      }
-                    />
+                    <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
-                    <Route
-                      path="/invite/:token"
-                      element={
-                        <InviteRoute>
-                          <InvitePage />
-                        </InviteRoute>
-                      }
-                    />
+                    <Route path="/invite/:token" element={<InviteRoute><InvitePage /></InviteRoute>} />
 
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

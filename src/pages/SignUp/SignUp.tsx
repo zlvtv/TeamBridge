@@ -9,6 +9,7 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +18,7 @@ const SignUp: React.FC = () => {
     username: false,
     email: false,
     password: false,
+    fullName: false,
   });
 
   const navigate = useNavigate();
@@ -47,50 +49,53 @@ const SignUp: React.FC = () => {
     return null;
   };
 
-  const handleBlur = (field: 'username' | 'email' | 'password') => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
+  const validateFullName = (name: string): string | null => {
+    const trimmed = name.trim();
+    if (trimmed.length === 0) return 'Полное имя обязательно';
+    if (trimmed.length < 2) return 'Слишком короткое имя';
+    if (trimmed.length > 50) return 'Слишком длинное имя';
+    return null;
   };
 
-  const isFieldInvalid = (field: 'username' | 'email' | 'password'): boolean => {
-    if (!touched[field]) return false;
-
-    switch (field) {
-      case 'username':
-        return !!validateUsername(username);
-      case 'email':
-        return !!validateEmail(email);
-      case 'password':
-        return !!validatePassword(password);
-      default:
-        return false;
-    }
+  const handleBlur = (field: 'username' | 'email' | 'password' | 'fullName') => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    setTouched({ username: true, email: true, password: true });
+    setTouched({
+      username: true,
+      email: true,
+      password: true,
+      fullName: true,
+    });
 
     const usernameError = validateUsername(username);
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
+    const fullNameError = validateFullName(fullName);
 
-    if (usernameError || emailError || passwordError) {
-      return; 
+    if (usernameError || emailError || passwordError || fullNameError) {
+      return;
     }
 
     setIsLoading(true);
 
     try {
-      const result = await signUp(email.trim(), password, username.trim());
+      const result = await signUp(
+        email.trim(),
+        password,
+        username.trim(),
+        fullName.trim()
+      );
 
-      if (result.error) {
-        setError(result.error.message);
-      } else {
+      if (result.data?.user) {
         navigate('/confirm', { replace: true });
+      } else if (result.error) {
+        setError(result.error.message);
       }
-    } catch {
+    } catch (err) {
       setError('Не удалось зарегистрироваться. Попробуйте позже.');
     } finally {
       setIsLoading(false);
@@ -106,25 +111,49 @@ const SignUp: React.FC = () => {
         {error && <div className={styles['auth__error']}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles['auth__form']}>
+            <div className={styles['auth__field']}>
+  <label htmlFor="username" className={styles['auth__label']}>
+    Имя пользователя
+  </label>
+  <Input
+    id="username"
+    type="text"
+    value={username}
+    onChange={(e) => {
+      const value = e.target.value;
+      const filtered = value.replace(/[^a-zA-Z0-9_-]/g, '');
+      setUsername(filtered);
+    }}
+    onBlur={() => handleBlur('username')}
+    placeholder="ваше_имя"
+    required
+    minLength={3}
+    maxLength={15}
+    disabled={isLoading}
+    error={touched.username ? validateUsername(username) : undefined}
+  />
+  {touched.username && !validateUsername(username) && (
+    <small>3–15 символов. Только a–z, 0–9, _, -</small>
+  )}
+</div>
+
           <div className={styles['auth__field']}>
-            <label htmlFor="username" className={styles['auth__label']}>
-              Имя пользователя
+            <label htmlFor="fullName" className={styles['auth__label']}>
+              Полное имя
             </label>
             <Input
-              id="username"
+              id="fullName"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onBlur={() => handleBlur('username')}
-              placeholder="ваше_имя"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              onBlur={() => handleBlur('fullName')}
+              placeholder="Иван Иванов"
               required
-              minLength={3}
-              maxLength={15}
               disabled={isLoading}
-              error={touched.username ? validateUsername(username) : undefined}
+              error={touched.fullName ? validateFullName(fullName) : undefined}
             />
-            {touched.username && !validateUsername(username) && (
-              <small>3–15 символов. Только a–z, 0–9, _, -</small>
+            {touched.fullName && !validateFullName(fullName) && (
+              <small>Введите ваше настоящее имя</small>
             )}
           </div>
 

@@ -1,5 +1,3 @@
-// src/components/task-board/task-board.tsx
-
 import React, { useState, useMemo, useEffect } from 'react';
 import styles from './task-board.module.css';
 import { useProject } from '../../contexts/ProjectContext';
@@ -14,7 +12,7 @@ import Select from '../ui/select/select';
 import CalendarView from '../calendar-view/calendar-view';
 import EditTaskModal from '../modals/edit-task-modal/edit-task-modal';
 import { Task } from '../../types/task.types';
-import { taskService } from '../../services/taskService'; // ✅ Добавлен импорт
+import { taskService } from '../../services/taskService'; 
 
 interface EditTaskData {
   title: string;
@@ -26,7 +24,6 @@ interface EditTaskData {
   status: 'todo' | 'in_progress' | 'done';
 }
 
-// Дефолтные фильтры
 const DEFAULT_FILTERS = {
   search: '',
   status: '',
@@ -50,8 +47,6 @@ const TaskBoard: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const hasProject = !!currentProject && !!currentOrganization;
-
-  // --- Переместите зависимости ВЫШЕ их использования ---
 
   const currentProjectTasks = useMemo(() => {
     if (!currentProject) return [];
@@ -92,8 +87,6 @@ const TaskBoard: React.FC = () => {
     return tasks;
   }, [allUserProjects]);
 
-  // --- Теперь можно использовать в allTags ---
-
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
     let tasksToScan: Task[] = [];
@@ -115,8 +108,6 @@ const TaskBoard: React.FC = () => {
       .sort()
       .map(tag => ({ value: tag, label: tag }));
   }, [activeTab, currentProject, currentProjectTasks, allOrganizationTasks, allUserTasks]);
-
-  // --- Фильтрация и сортировка ---
 
   const filteredTasks = useMemo(() => {
     let filtered: Task[] = [];
@@ -187,8 +178,6 @@ const TaskBoard: React.FC = () => {
     { id: 'user', label: 'Все задачи' },
   ];
 
-  // --- Обработчики ---
-
   const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'done') => {
     try {
       await taskService.updateTaskStatus(taskId, newStatus);
@@ -217,8 +206,6 @@ const TaskBoard: React.FC = () => {
       setActiveTab('user');
     }
   }, [hasProject, activeTab]);
-
-  // --- Рендеринг вида ---
 
   const renderTaskView = () => {
     if (viewMode === 'calendar') {
@@ -275,7 +262,6 @@ const TaskBoard: React.FC = () => {
   return (
     <div className={styles['task-board__board']}>
       <div className={styles['task-board__header']}>
-        <h3 className={styles['task-board__title']}>Задачи</h3>
 
         <div className={styles['task-board__tabs']}>
           {tabs.map(tab => (

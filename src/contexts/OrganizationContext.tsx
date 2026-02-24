@@ -160,19 +160,19 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const deleteOrganization = async (organizationId: string) => {
-    setError(null);
-    try {
-      await organizationService.deleteOrganization(organizationId);
-      await refreshOrganizations();
-      if (currentOrganization?.id === organizationId) {
-        setCurrentOrganization(null);
-        localStorage.removeItem('currentOrgId');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
-      throw err;
+  setError(null);
+  try {
+    await organizationService.deleteOrganization(organizationId);
+    await refreshOrganizations();
+    if (currentOrganization?.id === organizationId) {
+      setCurrentOrganization(null);
+      localStorage.removeItem('currentOrgId');
     }
-  };
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Ошибка');
+    throw err;
+  }
+};
 
   const createOrganizationInvite = async (organizationId: string) => {
     try {

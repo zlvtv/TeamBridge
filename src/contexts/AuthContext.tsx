@@ -11,7 +11,15 @@ import {
   User as FirebaseUser,
   signInAnonymously as firebaseSignInAnonymously,
 } from 'firebase/auth';
-import { setDoc, doc, getDoc } from 'firebase/firestore';
+import {
+  setDoc,
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { UserProfile, AuthContextType } from '../types/auth.types';
 
@@ -30,6 +38,7 @@ const translateAuthError = (message: string): string => {
     'auth/email-already-in-use': 'Пользователь с таким email уже существует',
     'auth/weak-password': 'Пароль должен быть не менее 6 символов',
     'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже',
+    'auth/email-not-verified': 'Требуется подтверждение email',
   };
 
   for (const [key, value] of Object.entries(map)) {
@@ -45,6 +54,7 @@ const profileFromUser = (user: FirebaseUser, username: string): UserProfile => (
   username,
   full_name: username,
   avatar_url: null,
+  description: null,
 });
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
       if (user) {
+        await user.reload();
         const isVerified = user.emailVerified;
 
         const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -71,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: userData?.username || user.email?.split('@')[0] || 'user',
           full_name: userData?.full_name || user.displayName || userData?.username || 'User',
           avatar_url: user.photoURL || userData?.avatar_url || null,
+          description: userData?.description || null,
         };
 
         setState({
@@ -94,37 +106,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      const user = result.user;
-
-      if (!user.emailVerified) {
-        throw new Error('email not confirmed');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       throw new Error(translateAuthError(error.message));
     }
   };
 
-  const signUp = async (email: string, password: string, username: string) => {
+  const signUp = async (email: string, password: string, username: string, fullName: string) => {
     try {
+      // Проверка уникальности username через запрос
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('username', '==', username.trim()));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        return {
+          data: null,
+          error: { message: 'Имя пользователя уже занято' },
+        };
+      }
+
       const result = await createUserWithEmailAndPassword(auth, email, password);
       const user = result.user;
 
       const actionCodeSettings = {
-        url: 'https://teambridge-c991.onrender.com/confirm',
+        url: window.location.origin + '/confirm',
         handleCodeInApp: true,
       };
 
-      await updateProfile(user, { displayName: username });
+      await updateProfile(user, { displayName: fullName.trim() || username });
 
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
-        username,
-        full_name: username,
+        username: username.trim(),
+        full_name: fullName.trim() || username,
         avatar_url: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        description: null,
       });
 
       await sendEmailVerification(user, actionCodeSettings);

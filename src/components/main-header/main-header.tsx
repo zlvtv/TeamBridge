@@ -1,4 +1,4 @@
-import React from 'react';
+import { useRef, useState } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useProject } from '../../contexts/ProjectContext';
 import { useUI } from '../../contexts/UIContext';
@@ -8,21 +8,25 @@ import styles from './main-header.module.css';
 const MainHeader: React.FC = () => {
   const { currentOrganization } = useOrganization();
   const { currentProject } = useProject();
-  const { isOrgInfoOpen, openOrgInfo, closeOrgInfo } = useUI();
-  const [infoBtnEl, setInfoBtnEl] = React.useState<HTMLButtonElement | null>(null);
-  const [titleEl, setTitleEl] = React.useState<HTMLHeadingElement | null>(null);
+  const { isModalOpen, openModal, closeModal } = useUI();
+
+  const isOrgInfoOpen = isModalOpen('orgInfo');
+  const openOrgInfo = () => openModal('orgInfo');
+  const closeOrgInfo = () => closeModal('orgInfo');
+
+  const infoBtnElRef = useRef<HTMLButtonElement | null>(null);
+  const [titleEl, setTitleEl] = useState<HTMLHeadingElement | null>(null);
+
 
   const handleInfoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.currentTarget;
-
+    console.log('Info btn clicked', e.currentTarget);
     if (isOrgInfoOpen) {
       closeOrgInfo();
-      setInfoBtnEl(null);
-      return;
+      infoBtnElRef.current = null;
+    } else {
+      infoBtnElRef.current = e.currentTarget;
+      openOrgInfo(); 
     }
-
-    setInfoBtnEl(target);
-    openOrgInfo();
   };
 
   const handleTitleClick = (e: React.MouseEvent<HTMLHeadingElement>) => {
@@ -44,13 +48,16 @@ const MainHeader: React.FC = () => {
         <h1
           ref={setTitleEl}
           className={styles['main-header__title']}
+          onClick={handleTitleClick}
         >
           {currentOrganization ? currentOrganization.name : 'Выберите организацию'}
         </h1>
 
         {currentOrganization && (
           <button
-            ref={setInfoBtnEl}
+            ref={(el) => {
+              infoBtnElRef.current = el;
+            }}
             className={styles['main-header__info-btn']}
             onClick={handleInfoClick}
             aria-label="Информация об организации"
@@ -60,8 +67,11 @@ const MainHeader: React.FC = () => {
         )}
       </header>
 
-      {isOrgInfoOpen && infoBtnEl && (
-        <OrgInfoModal anchorEl={infoBtnEl} onClose={closeOrgInfo} />
+      {isOrgInfoOpen && infoBtnElRef.current && (
+        <OrgInfoModal
+          anchorEl={infoBtnElRef.current}
+          onClose={closeOrgInfo}
+        />
       )}
     </>
   );

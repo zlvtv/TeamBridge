@@ -10,7 +10,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { createDoc } from './firestore/firestoreService';
-import { encryptMessage, decryptMessage } from '../lib/crypto'; // ← добавлен decryptMessage
+import { encryptMessage, decryptMessage } from '../lib/crypto';
 
 export interface Poll {
   question: string;

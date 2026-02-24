@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../ui/button/button';
@@ -7,6 +8,7 @@ import Toast from '../../ui/toast/Toast';
 import styles from './org-info-modal.module.css';
 import EditOrganizationModal from '../../modals/edit-organization-modal/edit-organization-modal';
 import UserInfoModal from '../../user-info-modal/user-info-modal';
+import ConfirmationModal from '../../ui/confirmation-modal/confirmation-modal';
 
 interface ToastState {
   message: string;
@@ -21,7 +23,13 @@ interface OrgInfoModalProps {
 
 const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const { currentOrganization, leaveOrganization, deleteOrganization, createOrganizationInvite, refreshCurrentOrganization } = useOrganization();
+  const {
+    currentOrganization,
+    leaveOrganization,
+    deleteOrganization,
+    createOrganizationInvite,
+    refreshOrganizations,
+  } = useOrganization();
   const { user } = useAuth();
 
   const [isLeaving, setIsLeaving] = useState(false);
@@ -39,36 +47,43 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const toastId = useRef(0);
 
   const isOwner = currentOrganization?.created_by === user?.id;
-  const currentUserMember = currentOrganization?.organization_members?.find(m => m.user_id === user?.id);
-  const isModerator = isOwner || (currentUserMember?.status === 'admin');
+  const currentUserMember = currentOrganization?.organization_members?.find(
+    (m) => m.user_id === user?.id
+  );
+  const isModerator = isOwner || !!currentUserMember?.status === 'admin';
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredMembers = useMemo(() => {
     if (!currentOrganization?.organization_members) return [];
-    
+
     const term = searchTerm.toLowerCase().trim();
     if (!term) return currentOrganization.organization_members;
-    
-    return currentOrganization.organization_members.filter(member => {
-      const displayName = (member.user?.full_name || "").toLowerCase();
-      const username = (member.user?.username || "").toLowerCase();
-      const email = (member.user?.email || "").toLowerCase();
-      const systemRole = (member.status === 'owner' ? 'владелец' :
-                         member.status === 'admin' ? 'модератор' :
-                         'участник') || '';
-      const memberStatus = (member.status === 'pending' ? 'ожидание' : 'активен') || '';
-      
-      const customRoles = Array.isArray(member.roles) 
-        ? member.roles.map(r => r.toLowerCase())
-        : (typeof member.roles === 'string' ? [member.roles.toLowerCase()] : []);
-      
+
+    return currentOrganization.organization_members.filter((member) => {
+      const displayName = (member.user?.full_name || '').toLowerCase();
+      const username = (member.user?.username || '').toLowerCase();
+      const email = (member.user?.email || '').toLowerCase();
+      const systemRole =
+        member.status === 'owner'
+          ? 'владелец'
+          : member.status === 'admin'
+          ? 'модератор'
+          : 'участник';
+      const memberStatus = member.status === 'pending' ? 'ожидание' : 'активен';
+
+      const customRoles = Array.isArray(member.roles)
+        ? member.roles.map((r) => r.toLowerCase())
+        : typeof member.roles === 'string'
+        ? [member.roles.toLowerCase()]
+        : [];
+
       return (
         displayName.includes(term) ||
         username.includes(term) ||
         email.includes(term) ||
         systemRole.includes(term) ||
         memberStatus.includes(term) ||
-        customRoles.some(role => role.includes(term))
+        customRoles.some((role) => role.includes(term))
       );
     });
   }, [currentOrganization?.organization_members, searchTerm]);
@@ -110,11 +125,13 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const confirmDelete = async () => {
     setIsDeleting(true);
     try {
-      onClose();
       await deleteOrganization(currentOrganization.id);
+      await refreshOrganizations();
       showToast('Организация удалена', 'success');
+      onClose();
     } catch (err: any) {
-      showToast('Ошибка удаления: ' + err.message, 'error');
+      console.error('Ошибка удаления:', err);
+      showToast('Ошибка: ' + (err.message || 'Не удалось удалить'), 'error');
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -129,27 +146,28 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
     try {
       const data = await createOrganizationInvite(currentOrganization.id);
-      if (data && data.invite_link) {
+
+      if (data?.invite_link) {
         setInviteLink(data.invite_link);
         setExpiresAt(data.expires_at);
-        showToast('Ссылка создана', 'success');
+
+        navigator.clipboard
+          .writeText(data.invite_link)
+          .then(() => {
+            showToast('Ссылка создана и скопирована!', 'success');
+          })
+          .catch(() => {
+            showToast('Ссылка создана. Нажмите, чтобы скопировать.', 'success');
+          });
       } else {
-        setError('Не удалось получить ссылку');
+        setError('Нет ссылки в ответе');
         showToast('Не удалось создать приглашение', 'error');
       }
     } catch (err: any) {
-      const message = err.message || 'Не удалось создать приглашение';
-      setError(message);
-      showToast(message, 'error');
+      setError(err.message);
+      showToast('Ошибка: ' + err.message, 'error');
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const handleCopyLink = () => {
-    if (inviteLink) {
-      navigator.clipboard.writeText(inviteLink);
-      showToast('Ссылка скопирована в буфер обмена', 'success');
     }
   };
 
@@ -168,15 +186,21 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setUserInfoPosition({
       x: rect.left + rect.width / 2,
-      y: rect.bottom + window.scrollY
+      y: rect.bottom + window.scrollY,
     });
+
     setSelectedUser({
       id: member.user.id,
       email: member.user.email,
       username: member.user.username,
       full_name: member.user.full_name || member.user.username || 'Пользователь',
       avatar_url: member.user.avatar_url,
-      roles: Array.isArray(member.roles) ? member.roles : (typeof member.roles === 'string' ? [member.roles] : [])
+      roles: Array.isArray(member.roles)
+        ? member.roles.filter(Boolean)
+        : typeof member.roles === 'string' && member.roles.trim() !== ''
+        ? [member.roles]
+        : [],
+      description: member.user.description || null,
     });
   };
 
@@ -186,8 +210,16 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   if (!currentOrganization) return null;
 
-  return (
-    <>
+  return createPortal(
+    <div
+      className={styles['org-info-modal__overlay']}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      style={{ position: 'fixed', inset: 0, zIndex: 1000 }}
+    >
       {isEditOrgModalOpen && (
         <EditOrganizationModal
           isOpen={isEditOrgModalOpen}
@@ -211,6 +243,34 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
         />
       )}
 
+      {showDeleteConfirm && (
+        <ConfirmationModal
+          isOpen={showDeleteConfirm}
+          title="Удалить организацию?"
+          description="Это действие нельзя отменить. Все проекты, задачи и сообщения будут безвозвратно удалены."
+          confirmText="Удалить"
+          cancelText="Отмена"
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+          isDanger
+          isLoading={isDeleting}
+        />
+      )}
+
+      {showLeaveConfirm && (
+        <ConfirmationModal
+          isOpen={showLeaveConfirm}
+          title="Покинуть организацию?"
+          description="Вы больше не сможете получать сообщения и доступ к проектам этой организации."
+          confirmText="Покинуть"
+          cancelText="Отмена"
+          onConfirm={confirmLeave}
+          onCancel={() => setShowLeaveConfirm(false)}
+          isDanger
+          isLoading={isLeaving}
+        />
+      )}
+
       <div
         ref={modalRef}
         className={styles['org-info-modal']}
@@ -226,7 +286,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
               onClick={() => setIsEditOrgModalOpen(true)}
               aria-label="Редактировать организацию"
             >
-              ✏️
+              🔧
             </button>
           )}
         </h3>
@@ -248,17 +308,22 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
           <strong>Участники ({filteredMembers.length}):</strong>
           <div className={styles['org-info-modal__members']}>
             {filteredMembers.map((member) => {
-              const displayName = member.user?.full_name ||
+              const displayName =
+                member.user?.full_name ||
                 (member.user?.username ? `@${member.user.username}` : `Пользователь ${member.id.slice(-5)}`);
 
               const systemRoleLabel =
-                member.status === 'owner' ? 'Владелец' :
-                member.status === 'admin' ? 'Модератор' :
-                'Участник';
+                member.status === 'owner'
+                  ? 'Владелец'
+                  : member.status === 'admin'
+                  ? 'Модератор'
+                  : 'Участник';
 
               const customRoles = Array.isArray(member.roles)
                 ? member.roles.filter(Boolean)
-                : (typeof member.roles === 'string' && member.roles.trim() !== '' ? [member.roles] : []);
+                : typeof member.roles === 'string' && member.roles.trim() !== ''
+                ? [member.roles]
+                : [];
 
               return (
                 <div
@@ -271,11 +336,23 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
                   </div>
                   <div className={styles['org-info-modal__member-info']}>
                     <span className={styles['org-info-modal__member-name']}>{displayName}</span>
-                    <span className={styles['org-info-modal__member-status']}> ({systemRoleLabel})</span>
+                    <span
+                      className={`${styles['org-info-modal__status-badge']} ${
+                        styles[
+                          member.status === 'owner'
+                            ? 'org-info-modal__status-badge--owner'
+                            : member.status === 'admin'
+                            ? 'org-info-modal__status-badge--admin'
+                            : 'org-info-modal__status-badge--member'
+                        ]
+                      }`}
+                    >
+                      {systemRoleLabel}
+                    </span>
                   </div>
                   <div className={styles['org-info-modal__member-roles']}>
-                    {customRoles.map(roleName => {
-                      const role = currentOrganization.roles?.find(r => r.name === roleName);
+                    {customRoles.map((roleName) => {
+                      const role = currentOrganization.roles?.find((r) => r.name === roleName);
                       return (
                         <span
                           key={roleName}
@@ -295,45 +372,57 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
         {isOwner && (
           <div className={styles['org-info-modal__section']}>
-            <strong>Пригласить участников:</strong>
             {inviteLink ? (
-              <div>
-                <Input value={inviteLink} readOnly fullWidth size="small" style={{ marginBottom: '8px' }} />
-                <Button variant="secondary" size="small" onClick={handleCopyLink}>
-                  Скопировать ссылку
-                </Button>
+              <div className={styles['org-info-modal__link-container']}>
+                <Input
+                  value={inviteLink}
+                  readOnly
+                  fullWidth
+                  size="small"
+                  style={{ marginBottom: '8px' }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteLink).then(
+                      () => showToast('Скопировано!', 'success'),
+                      () => showToast('Не удалось скопировать', 'error')
+                    );
+                  }}
+                  title="Нажмите, чтобы скопировать"
+                />
                 {expiresAt && <small>Ссылка действительна 1 час.</small>}
               </div>
             ) : (
-              <Button
-                variant="primary"
-                size="small"
-                onClick={handleGenerateInvite}
-                disabled={isGenerating}
-              >
-                {isGenerating ? 'Создание...' : 'Создать ссылку'}
-              </Button>
+              <div className={styles['org-info-modal__actions']}>
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={handleGenerateInvite}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? 'Создание...' : 'Создать ссылку-приглашение'}
+                </Button>
+              </div>
             )}
             {error && <div style={{ color: 'var(--color-danger)', fontSize: '12px' }}>{error}</div>}
+
+            <div className={styles['org-info-modal__actions']}>
+              {!isOwner && (
+                <Button variant="danger" size="small" onClick={handleLeaveOrg}>
+                  Покинуть организацию
+                </Button>
+              )}
+              {isOwner && (
+                <Button variant="danger" size="small" onClick={handleDeleteOrg}>
+                  Удалить организацию
+                </Button>
+              )}
+            </div>
           </div>
         )}
-
-        <div className={styles['org-info-modal__actions']}>
-          {!isOwner && (
-            <Button variant="danger" size="small" onClick={handleLeaveOrg}>
-              Покинуть организацию
-            </Button>
-          )}
-          {isOwner && (
-            <Button variant="danger" size="small" onClick={handleDeleteOrg}>
-              Удалить организацию
-            </Button>
-          )}
-        </div>
       </div>
 
+      {/* Toast */}
       <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10010 }}>
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <Toast
             key={toast.id}
             message={toast.message}
@@ -342,7 +431,8 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
           />
         ))}
       </div>
-    </>
+    </div>,
+    document.body
   );
 };
 

@@ -180,7 +180,6 @@ const ProjectChat: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    // ✅ Используем messageService.subscribeToMessages
     const unsubscribe = messageService.subscribeToMessages(currentProject.id, (fetchedMessages) => {
       const sortedMessages = [...fetchedMessages].sort((a, b) => {
         const aTime = a.created_at?.seconds || 0;

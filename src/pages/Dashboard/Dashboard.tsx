@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
                   <LoadingState message="Загрузка чата..." />
                 )
               ) : (
-                <div className={styles.placeholder}>Выберите проект</div>
+                <div className={styles.placeholder}></div>
               )}
             </div>
             <ResizableSplitter />

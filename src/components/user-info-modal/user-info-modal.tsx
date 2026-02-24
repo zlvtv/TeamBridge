@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import Modal from '@/components/ui/modal/modal'; 
 import styles from './user-info-modal.module.css';
 
 interface UserInfoModalProps {
   user: {
     full_name?: string;
+    username?: string;
     email: string;
     avatar_url?: string | null;
     description?: string;
@@ -29,7 +29,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, position, onClose }
   }, [onClose]);
 
   const getInitials = () => {
-    return user.full_name?.charAt(0).toUpperCase() || 'U';
+    return user.full_name?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase() || 'U';
   };
 
   return (
@@ -55,17 +55,30 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, position, onClose }
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
+          
         ) : (
           <span className={styles['user-info-modal__fallback']}>{getInitials()}</span>
         )}
+        <div className={styles['user-info-modal__info']}>
+          <h3 className={styles['user-info-modal__name']}>{user.full_name || 'Пользователь'}</h3>
+          {user.username && (
+            <p className={styles['user-info-modal__email']}>@{user.username}</p>
+          )}
+        </div>
       </div>
 
       <div className={styles['user-info-modal__body']}>
-        <h3 className={styles['user-info-modal__name']}>{user.full_name}</h3>
-        <p className={styles['user-info-modal__email']}>{user.email}</p>
-        {user.description && (
+                {user.description && (
           <p className={styles['user-info-modal__description']}>{user.description}</p>
         )}
+
+        <a
+            href={`mailto:${user.email}`}
+            className={styles['user-info-modal__email']}
+          >
+            {user.email}
+          </a>
+
         {user.roles && user.roles.length > 0 && (
           <div className={styles['user-info-modal__roles']}>
             <strong>Роли:</strong>
