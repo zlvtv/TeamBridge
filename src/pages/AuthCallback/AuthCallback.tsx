@@ -5,7 +5,7 @@ import AuthLoadingPage from '../../components/ui/loading/AuthLoadingPage';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const auth = getAuth();
+  const auth = getAuth(); // ✅ Прямой доступ
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -21,7 +21,6 @@ const AuthCallback: React.FC = () => {
       case 'verifyEmail':
         applyActionCode(auth, oobCode)
           .then(() => {
-            // Успешное подтверждение
             navigate('/confirm?verified=true', { replace: true });
           })
           .catch((error) => {

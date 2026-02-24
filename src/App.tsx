@@ -95,15 +95,13 @@ const App: React.FC = () => {
                     <Route path="/password-recovery" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
                     <Route path="/reset-password" element={<ResetPasswordRoute><ResetPassword /></ResetPasswordRoute>} />
 
-                    <Route path="/recovery/callback" element={<AuthCallbackRoute><RecoveryCallback /></AuthCallbackRoute>} />
-                    <Route path="/auth/callback" element={<AuthCallbackRoute><AuthCallback /></AuthCallbackRoute>} />
+                    {/* Убрали AuthCallbackRoute */}
+                    <Route path="/recovery/callback" element={<RecoveryCallback />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
                     <Route path="/confirm" element={<ConfirmRoute><Confirm /></ConfirmRoute>} />
-
                     <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-
                     <Route path="/invite/:token" element={<InviteRoute><InvitePage /></InviteRoute>} />
-
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                   <ToastContainer />
