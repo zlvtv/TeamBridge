@@ -131,7 +131,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const actionCodeSettings = {
         url: window.location.origin + '/confirm',
-        handleCodeInApp: true,
       };
 
       await updateProfile(user, { displayName: fullName.trim() || username });

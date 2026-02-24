@@ -21,32 +21,19 @@ const Confirm: React.FC = () => {
 
   // Обработка действия подтверждения email
   useEffect(() => {
-    if (!isInitialized || !currentUser) return;
+  if (!isInitialized || !currentUser) return;
 
-    // Если есть oobCode — обрабатываем подтверждение
-    if (oobCode && mode === 'verifyEmail') {
-      setStatus('loading');
-
-      applyActionCode(auth, oobCode)
-        .then(async () => {
-          await currentUser.reload(); // Обновляем статус
-          setStatus('success');
-          localStorage.removeItem('emailVerificationSent');
-          setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
-        })
-        .catch((err) => {
-          console.error('Ошибка подтверждения email:', err);
-          setStatus('error');
-          setError(
-            err.code === 'auth/expired-action-code'
-              ? 'Ссылка устарела. Запросите новое письмо.'
-              : err.code === 'auth/invalid-action-code'
-              ? 'Ссылка недействительна или уже использована.'
-              : 'Не удалось подтвердить email. Попробуйте снова.'
-          );
-        });
+  // Не пытаемся обработать oobCode — он уже обработан Firebase
+  const checkVerified = async () => {
+    await currentUser.reload();
+    if (currentUser.emailVerified) {
+      navigate('/dashboard', { replace: true });
     }
-  }, [isInitialized, oobCode, mode, navigate]);
+  };
+
+  checkVerified();
+
+}, [isInitialized, currentUser, navigate]);
 
   const handleResend = async () => {
     if (!currentUser) {
