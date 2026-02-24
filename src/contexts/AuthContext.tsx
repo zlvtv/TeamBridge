@@ -114,7 +114,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, username: string, fullName: string) => {
     try {
-      // Проверка уникальности username через запрос
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('username', '==', username.trim()));
       const querySnapshot = await getDocs(q);
@@ -130,8 +129,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = result.user;
 
       const actionCodeSettings = {
-        url: window.location.origin + '/auth/callback', // ✅ Обработка в AuthCallback
-        handleCodeInApp: true, // Оставляем — мы сами обрабатываем
+        url: window.location.origin + '/auth/callback', 
+        handleCodeInApp: true, 
       };
 
       await updateProfile(user, { displayName: fullName.trim() || username });

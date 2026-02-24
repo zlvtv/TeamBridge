@@ -45,7 +45,6 @@ const ConfirmRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   if (!isInitialized) return <LoadingState />;
   if (!user) return <Navigate to="/login" replace />;
-  // isEmailVerified проверяется внутри Confirm.tsx
   return <>{children}</>;
 };
 
@@ -95,7 +94,6 @@ const App: React.FC = () => {
                     <Route path="/password-recovery" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
                     <Route path="/reset-password" element={<ResetPasswordRoute><ResetPassword /></ResetPasswordRoute>} />
 
-                    {/* Убрали AuthCallbackRoute */}
                     <Route path="/recovery/callback" element={<RecoveryCallback />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
 

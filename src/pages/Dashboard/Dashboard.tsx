@@ -17,9 +17,10 @@ import { useProject } from '../../contexts/ProjectContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
-  const { isBoardFullscreen, theme, chatWidth, isCreateOrgModalOpen, openCreateOrgModal, closeCreateOrgModal } = useUI();
+  const { isBoardFullscreen, theme, chatWidth, isModalOpen, openModal, closeModal } = useUI();
   const { organizations, isLoading: orgLoading, refreshOrganizations, currentOrganization } = useOrganization();
   const { currentProject, isLoading: projectLoading } = useProject();
+  const isCreateOrgModalOpen = isModalOpen('createOrg');
   const { user } = useAuth();
   const location = useLocation();
 
@@ -27,13 +28,11 @@ const Dashboard: React.FC = () => {
     refreshOrganizations();
   }, [refreshOrganizations]);
 
-  useEffect(() => {
-    const state = location.state as { openCreateOrgModal?: boolean } | null;
-    if (state?.openCreateOrgModal && !isCreateOrgModalOpen) {
-      openCreateOrgModal();
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }, [isCreateOrgModalOpen, openCreateOrgModal, location.state]);
+useEffect(() => {
+  if (organizations.length > 0 && isCreateOrgModalOpen) {
+    closeModal('createOrg'); 
+  }
+}, [organizations.length, isCreateOrgModalOpen, closeModal]);
 
   if (orgLoading) {
     return <LoadingState message="Загрузка организаций..." />;
@@ -85,8 +84,8 @@ const Dashboard: React.FC = () => {
       </main>
 
       <CreateOrganizationModal
-        isOpen={isCreateOrgModalOpen}
-        onClose={closeCreateOrgModal}
+        isOpen={isModalOpen('createOrg')}
+        onClose={() => closeModal('createOrg')}
       />
     </div>
   );

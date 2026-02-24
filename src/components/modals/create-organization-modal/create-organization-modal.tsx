@@ -85,8 +85,6 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       return;
     }
 
-
-
     setIsCreating(true);
     setError(null);
 
@@ -105,7 +103,14 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isCreating ? "Создание организации..." : "Создать организацию"}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isCreating ? "Создание организации..." : "Создать организацию"}
+      disableOutsideClick={true} 
+      disableEscape={false}       
+      showCloseButton={true}
+    >
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.field}>
           <label htmlFor="org-name" className={styles.label}>Название организации</label>

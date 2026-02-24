@@ -6,6 +6,9 @@ import styles from './edit-organization-modal.module.css';
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { organizationService } from '../../../services/organizationService';
 import { useUI } from '../../../contexts/UIContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../../lib/firebase';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Role {
   name: string;
@@ -33,7 +36,7 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
 }) => {
   const { currentOrganization, updateOrganization: contextUpdateOrg, refreshCurrentOrganization } = useOrganization();
   const { showToast } = useUI();
-
+  const { user } = useAuth();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
   const [roles, setRoles] = useState<Role[]>(initialRoles);
@@ -53,7 +56,29 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
       inputRef.current.focus();
     }
   }, []);
+const handleToggleAdmin = async (memberId: string) => {
+  try {
+    const member = currentOrganization.organization_members.find(m => m.id === memberId);
+    if (!member) return;
 
+    const newStatus = member.status === 'admin' ? 'member' : 'admin';
+    
+    const memberDocRef = doc(db, 'organization_members', memberId);
+    await updateDoc(memberDocRef, { status: newStatus });
+
+    await refreshCurrentOrganization();
+    showToast(
+      newStatus === 'admin'
+        ? 'Пользователь стал модератором'
+        : 'Пользователь теперь участник',
+      'success'
+    );
+  } catch (err) {
+    showToast('Не удалось изменить статус', 'error');
+  } finally {
+    setActiveDropdown(null);
+  }
+};
    useEffect(() => {
     if (isOpen) {
       setName(initialName);
@@ -134,8 +159,8 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
       const displayName = (member.user?.full_name || "").toLowerCase();
       const username = (member.user?.username || "").toLowerCase();
       const email = (member.user?.email || "").toLowerCase();
-      const systemRole = (member.status === 'owner' ? 'создатель' :
-                         member.status === 'admin' ? 'модератор' :
+      const systemRole = (member.status === 'owner' ? 'Создатель' :
+                         member.status === 'admin' ? 'Модератор' :
                          'участник') || '';
 
       const customRoles = Array.isArray(member.roles)
@@ -217,19 +242,18 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
   };
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (activeDropdown && !e.target.closest(`[data-dropdown-id="${activeDropdown}"]`)) {
-        setActiveDropdown(null);
-      }
-      if (showRoleEditPanel && !e.target.closest(`[data-role-panel-id="${showRoleEditPanel}"]`)) {
-        setShowRoleEditPanel(null);
-      }
-    };
+  const handleClickOutside = (e: MouseEvent) => {
+    if (activeDropdown && !e.target.closest(`[data-dropdown-id="${activeDropdown}"]`)) {
+      setActiveDropdown(null);
+    }
+    if (showRoleEditPanel && !e.target.closest(`[data-role-panel-id="${showRoleEditPanel}"]`)) {
+      setShowRoleEditPanel(null);
+    }
+  };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [activeDropdown, showRoleEditPanel]);
-
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, [activeDropdown, showRoleEditPanel]);
   return (
     <Modal
       isOpen={isOpen}
@@ -369,152 +393,158 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
       )}
 
       {activeTab === 'members' && (
-        <div className={styles['edit-org-modal__members-tab']}>
-          <div className={styles['edit-org-modal__search-container']}>
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Поиск участников, статусов, ролей..."
-              size="small"
-              fullWidth
-            />
-          </div>
+  <div className={styles['edit-org-modal__members-tab']}>
+    <div className={styles['edit-org-modal__search-container']}>
+      <Input
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Поиск участников..."
+        size="small"
+        fullWidth
+      />
+    </div>
 
-          {filteredMembers.length === 0 ? (
-            <div className={styles['no-members']}>
-              <small>{searchTerm ? 'Ничего не найдено' : 'Нет участников'}</small>
-            </div>
-          ) : (
-            <div className={styles['edit-org-modal__members-list']}>
-              {filteredMembers.map((member) => {
-                const displayName = member.user?.full_name ||
-                  (member.user?.username ? `@${member.user.username}` : `Пользователь ${member.id.slice(-5)}`);
+    {filteredMembers.length === 0 ? (
+      <div style={{ textAlign: 'center', padding: '16px', color: 'var(--color-text-light)' }}>
+        <small>{searchTerm ? 'Ничего не найдено' : 'Нет участников'}</small>
+      </div>
+    ) : (
+      <div className={styles['edit-org-modal__members-list']}>
+        {filteredMembers.map((member) => {
+          const displayName =
+            member.user?.full_name ||
+            (member.user?.username ? `@${member.user.username}` : `Пользователь ${member.id.slice(-5)}`);
 
-                const systemRoleLabel =
-                  member.status === 'owner' ? 'создатель' :
-                  member.status === 'admin' ? 'модератор' :
-                  'участник';
+          const isCurrentUser = member.user_id === user?.id;
+          const isOwner = currentOrganization.created_by === member.user_id;
+          const isAdmin = !isOwner && member.status === 'admin';
 
-                const memberRoles = Array.isArray(member.roles)
-                  ? member.roles.filter(Boolean)
-                  : (typeof member.roles === 'string' && member.roles.trim() !== '' ? [member.roles] : []);
+          return (
+            <div key={member.id} className={styles['edit-org-modal__member-item']}>
+              <div className={styles['edit-org-modal__member-info']}>
+                <div className={styles['edit-org-modal__avatar']} title={displayName}>
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className={styles['edit-org-modal__member-details']}>
+                  <span className={styles['edit-org-modal__member-name']}>{displayName}</span>
+                  <div className={styles['edit-org-modal__member-roles']}>
+                    <span
+                      className={`${styles['edit-org-modal__status-badge']} ${
+                        isOwner
+                          ? styles['edit-org-modal__status-badge--owner']
+                          : isAdmin
+                          ? styles['edit-org-modal__status-badge--admin']
+                          : styles['edit-org-modal__status-badge--member']
+                      }`}
+                    >
+                      {isOwner ? 'Владелец' : isAdmin ? 'Модератор' : 'Участник'}
+                    </span>
+                    {Array.isArray(member.roles) &&
+                      member.roles
+                        .filter(Boolean)
+                        .map((roleName) => {
+                          const role = roles.find((r) => r.name === roleName);
+                          return (
+                            <span
+                              key={roleName}
+                              className={styles['edit-org-modal__role-badge']}
+                              style={{ backgroundColor: role?.color || 'var(--color-primary)' }}
+                            >
+                              {roleName}
+                            </span>
+                          );
+                        })}
+                  </div>
+                </div>
+              </div>
+              
+              {!isOwner && !isCurrentUser && (
+                <div className={styles['edit-org-modal__member-actions']}>
+                  <button
+                    className={styles['edit-org-modal__dots-btn']}
+                    onClick={(e) => handleDotsClick(member.id, e)}
+                    aria-label="Действия с участником"
+                    type="button"
+                  >
+                    ⋮
+                  </button>
 
-                return (
-                  <div key={member.id} className={styles['edit-org-modal__member-item']}>
-                    <div className={styles['edit-org-modal__member-info']}>
-                      <div className={styles['edit-org-modal__avatar']} title={displayName}>
-                        {displayName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className={styles['edit-org-modal__member-details']}>
-                        <span className={styles['edit-org-modal__member-name']}>{displayName}</span>
-                        <div className={styles['edit-org-modal__member-roles']}>
-                          <span
-                            className={styles['edit-org-modal__role-badge']}
-                            style={{ backgroundColor: 'var(--color-primary)' }}
-                          >
-                            {systemRoleLabel}
-                          </span>
-                          {memberRoles.map(roleName => {
-                            const role = roles.find(r => r.name === roleName);
-                            return (
-                              <span
-                                key={roleName}
-                                className={styles['edit-org-modal__role-badge']}
-                                style={{ backgroundColor: role?.color || 'var(--color-primary)' }}
-                              >
-                                {roleName}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles['edit-org-modal__member-actions']}>
+                  {activeDropdown === member.id && (
+                    <div
+                      className={styles['edit-org-modal__dropdown-menu']}
+                      data-dropdown-id={member.id}
+                    >
                       <button
-                        className={styles['edit-org-modal__dots-btn']}
-                        onClick={(e) => handleDotsClick(member.id, e)}
-                        aria-label="Действия с участником"
+                        className={styles['edit-org-modal__dropdown-item']}
+                        onClick={() => handleToggleAdmin(member.id)}
                         type="button"
                       >
-                        ⋮
+                        {isAdmin ? 'Сделать участником' : 'Сделать модератором'}
                       </button>
 
-                      {activeDropdown === member.id && (
-                        <div
-                          className={styles['edit-org-modal__dropdown-menu']}
-                          data-dropdown-id={member.id}
-                        >
-                          <button
-                            className={styles['edit-org-modal__dropdown-item']}
-                            onClick={() => handleMakeModerator(member.id)}
-                            disabled={member.status === 'owner' || member.status === 'admin'}
-                            type="button"
-                          >
-                            Сделать модератором
-                          </button>
-                          <button
-                            className={styles['edit-org-modal__dropdown-item']}
-                            onClick={(e) => handleEditRolesClick(member.id, e)}
-                            type="button"
-                          >
-                            Изменить роли
-                          </button>
-                          <button
-                            className={`${styles['edit-org-modal__dropdown-item']} button--danger`}
-                            onClick={() => handleRemoveMember(member.id)}
-                            disabled={member.status === 'owner'}
-                            type="button"
-                          >
-                            Удалить участника
-                          </button>
-                        </div>
-                      )}
+                      <button
+                        className={styles['edit-org-modal__dropdown-item']}
+                        onClick={() => setShowRoleEditPanel(showRoleEditPanel === member.id ? null : member.id)}
+                        type="button"
+                      >
+                        Добавить роль
+                      </button>
 
-                                            {showRoleEditPanel === member.id && (
-                        <div
-                          className={styles['edit-org-modal__role-edit-panel']}
-                          data-role-panel-id={member.id}
-                        >
-                          <div className={styles['edit-org-modal__role-edit-header']}>
-                            <h4>Изменить роли</h4>
-                          </div>
-                          <div className={styles['edit-org-modal__role-edit-content']}>
-                            {roles.map((role) => (
-                              <Button
-                                key={role.name}
-                                variant="secondary"
-                                size="small"
-                                onClick={() => handleRoleToggle(member.id, role.name)}
-                                className={`${styles['edit-org-modal__role-badge']} ${
-                                  selectedRoles[member.id]?.includes(role.name)
-                                    ? styles['edit-org-modal__role--highlighted']
-                                    : ''
-                                }`}
-                                style={{ backgroundColor: role.color }}
-                              >
-                                {role.name}
-                              </Button>
-                            ))}
-                          </div>
-                          <div className={styles['edit-org-modal__role-actions']}>
-                            <Button variant="secondary" size="small" onClick={() => setShowRoleEditPanel(null)}>
-                              Отмена
-                            </Button>
-                            <Button variant="primary" size="small" onClick={() => handleSaveRoles(member.id)}>
-                              Сохранить
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                      <button
+                        className={`${styles['edit-org-modal__dropdown-item']} button--danger`}
+                        onClick={() => handleRemoveMember(member.id)}
+                        type="button"
+                      >
+                        Удалить участника
+                      </button>
                     </div>
-                  </div>
-                );
-              })}
+                  )}
+
+                  {showRoleEditPanel === member.id && (
+                    <div
+                      className={styles['edit-org-modal__role-edit-panel']}
+                      data-role-panel-id={member.id}
+                    >
+                      <div className={styles['edit-org-modal__role-edit-header']}>
+                        <h4>Выберите роли</h4>
+                      </div>
+                      <div className={styles['edit-org-modal__role-edit-content']}>
+                        {roles.map((role) => (
+                          <Button
+                            key={role.name}
+                            variant="secondary"
+                            size="small"
+                            onClick={() => handleRoleToggle(member.id, role.name)}
+                            className={`${styles['edit-org-modal__role-badge']} ${
+                              selectedRoles[member.id]?.includes(role.name)
+                                ? styles['edit-org-modal__role--highlighted']
+                                : ''
+                            }`}
+                            style={{ backgroundColor: role.color }}
+                          >
+                            {role.name}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className={styles['edit-org-modal__role-actions']}>
+                        <Button variant="secondary" size="small" onClick={() => setShowRoleEditPanel(null)}>
+                          Отмена
+                        </Button>
+                        <Button variant="primary" size="small" onClick={() => handleSaveRoles(member.id)}>
+                          Сохранить
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
     </Modal>
   );
 };

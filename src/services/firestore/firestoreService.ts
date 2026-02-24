@@ -12,7 +12,8 @@ export interface FirestoreDocument {
 
 type CollectionName = 
   | 'organizations' | 'projects' | 'messages' | 'tasks' 
-  | 'users' | 'invitations' | 'files' | 'polls';
+  | 'users' | 'invitations' | 'files' | 'polls'
+  | 'organization_invites';
 
 interface QueryOptions {
   whereClauses?: Array<{ field: string; operator: any; value: any }>;
@@ -22,15 +23,18 @@ interface QueryOptions {
 
 const convertTimestamps = (data: any): any => {
   if (!data || typeof data !== 'object') return data;
-  if (data instanceof Timestamp) return data.toDate();
   if (Array.isArray(data)) return data.map(convertTimestamps);
-  
+
   const result: any = {};
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      result[key] = key === 'created_at' || key === 'updated_at'
-        ? (data[key] instanceof Timestamp ? data[key].toDate() : data[key])
-        : convertTimestamps(data[key]);
+      const value = data[key];
+
+      if ((key === 'created_at' || key === 'updated_at') && value instanceof Timestamp) {
+        result[key] = value.toDate();
+      } else {
+        result[key] = value;
+      }
     }
   }
   return result;
@@ -90,10 +94,12 @@ export const createDoc = async <T extends FirestoreDocument>(
 ): Promise<{ id: string } & T> => {
   try {
     const docRef = await addDoc(collection(db, collectionName), withTimestamps(data));
-    return {
-      id: docRef.id,
-      ...data as any
-    };
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) throw new Error('Document not created');
+    
+    const result = snap.data();
+    result.id = snap.id;
+    return convertTimestamps(result) as { id: string } & T;
   } catch (error) {
     console.error(`Error creating in ${collectionName}:`, error);
     throw error;

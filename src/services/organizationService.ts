@@ -16,7 +16,8 @@ import {
   serverTimestamp,
   updateDoc,
   arrayRemove,
-} from 'firebase/firestore';
+  Timestamp,
+} from 'firebase/firestore'; 
 import { buildUserFromSnapshot } from '../utils/user.utils';
 
 const getCurrentUserId = (): string | null => {
@@ -45,17 +46,11 @@ const getOrganizationMembers = async (organizationId: string): Promise<any[]> =>
   return memberDocs;
 };
 
-/**
- * Получение профиля пользователя с fallback
- */
 const getUserProfile = async (userId: string) => {
   const userSnap = await getDocById('users', userId);
   return buildUserFromSnapshot(userSnap, userId);
 };
 
-/**
- * Формирование данных об участниках с профилями
- */
 const buildMembersWithProfiles = async (members: any[]): Promise<OrganizationWithMembers['organization_members']> => {
   return await Promise.all(
     members.map(async (member) => {
@@ -70,9 +65,6 @@ const buildMembersWithProfiles = async (members: any[]): Promise<OrganizationWit
 };
 
 export const organizationService = {
-  /**
-   * Обновление организации
-   */
   async updateOrganization(id: string, data: UpdateOrganizationData): Promise<void> {
     const orgRef = doc(db, 'organizations', id);
     await updateDoc(orgRef, {
@@ -84,9 +76,6 @@ export const organizationService = {
     });
   },
 
-  /**
-   * Получение организаций пользователя
-   */
   async getUserOrganizations(): Promise<OrganizationWithMembers[]> {
     const userId = getCurrentUserId();
     if (!userId) return [];
@@ -141,9 +130,6 @@ export const organizationService = {
     }
   },
 
-  /**
-   * Создание новой организации
-   */
   async createOrganization(data: CreateOrganizationData): Promise<OrganizationWithMembers> {
     const userId = getCurrentUserId();
     if (!userId) throw new Error('Пользователь не авторизован');
@@ -199,14 +185,18 @@ export const organizationService = {
   },
 
   async joinOrganization(inviteToken: string): Promise<{ organizationId: string; orgName: string }> {
-    const invite = await getDocById('organization_invites', inviteToken);
-    if (!invite) throw new Error('Приглашение не найдено');
-    if (!invite.active) throw new Error('Приглашение отозвано');
+  const invite = await getDocById('organization_invites', inviteToken);
+  if (!invite) throw new Error('Приглашение не найдено');
+  if (!invite.active) throw new Error('Приглашение отозвано');
 
-    const expiresAt = invite.expires_at?.toDate ? invite.expires_at.toDate() : null;
-    if (!expiresAt || new Date() > expiresAt) {
-      throw new Error('Приглашение истекло');
-    }
+  console.log('Invite expires_at:', invite.expires_at?.toDate());
+  console.log('Current time:', new Date());
+  console.log('Is expired?', new Date() > invite.expires_at.toDate());
+
+  const expiresAt = invite.expires_at?.toDate ? invite.expires_at.toDate() : null;
+  if (!expiresAt || new Date() > expiresAt) {
+    throw new Error('Приглашение истекло');
+  }
 
     const organizationId = invite.organization_id;
     const userId = getCurrentUserId();
@@ -238,88 +228,89 @@ export const organizationService = {
   },
 
   async createOrganizationInvite(organizationId: string): Promise<OrganizationInvite> {
-    const userId = getCurrentUserId();
-    if (!userId) throw new Error('Не авторизован');
+  const userId = getCurrentUserId();
+  if (!userId) throw new Error('Не авторизован');
 
-    const inviteData = {
-      organization_id: organizationId,
-      created_by: userId,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      active: true,
-    };
+  const expiresAt = Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
-    const invite = await createDoc('organization_invites', inviteData);
-
-    return {
-      token: invite.id,
-      expires_at: invite.expires_at.toISOString(),
-      invite_link: `${window.location.origin}/invite/${invite.id}`,
-    };
-  },
-
-  async deleteOrganization(organizationId: string): Promise<void> {
-  const batch = writeBatch(db);
-
-  batch.delete(doc(db, 'organizations', organizationId));
-
-  const membersSnap = await getDocs(
-    query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
-  );
-  membersSnap.docs.forEach(doc => batch.delete(doc.ref));
-
-  const invitesSnap = await getDocs(
-    query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
-  );
-  invitesSnap.docs.forEach(doc => batch.delete(doc.ref));
-
-  const tasksSnap = await getDocs(
-    query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
-  );
-  tasksSnap.docs.forEach(doc => batch.delete(doc.ref));
-
-  await batch.commit();
-
-  const projectsSnap = await getDocs(
-    query(collection(db, 'projects'), where('organization_id', '==', organizationId))
-  );
-  const projectIds = projectsSnap.docs.map(d => d.id);
-
-  if (projectIds.length === 0) return;
-
-  const pmSnap = await getDocs(
-    query(collection(db, 'project_members'), where('project_id', 'in', projectIds))
-  );
-
-  const messagesSnap = await getDocs(
-    query(collection(db, 'messages'), where('project_id', 'in', projectIds))
-  );
-
-  const batch2 = writeBatch(db);
-  const MAX_BATCH_SIZE = 499;
-  let opCount = 0;
-
-  const addToBatch = (ref: any) => {
-    batch2.delete(ref);
-    opCount++;
+  const inviteData = {
+    organization_id: organizationId,
+    created_by: userId,
+    expires_at: expiresAt,
+    active: true,
   };
 
-  [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].forEach(doc => {
-    if (opCount < MAX_BATCH_SIZE) {
-      addToBatch(doc.ref);
-    }
-  });
+  const invite = await createDoc('organization_invites', inviteData);
 
-  if (opCount > 0) {
-    await batch2.commit();
-  }
-
-  if (opCount >= MAX_BATCH_SIZE) {
-    const remaining = [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].slice(MAX_BATCH_SIZE);
-    const finalBatch = writeBatch(db);
-    remaining.forEach(doc => finalBatch.delete(doc.ref));
-    await finalBatch.commit();
-  }
+  return {
+    token: invite.id,
+    expires_at: invite.expires_at.toDate().toISOString(), 
+    invite_link: `${window.location.origin}/invite/${invite.id}`,
+  };
 },
+  async deleteOrganization(organizationId: string): Promise<void> {
+    const batch = writeBatch(db);
+
+    batch.delete(doc(db, 'organizations', organizationId));
+
+    const membersSnap = await getDocs(
+      query(collection(db, 'organization_members'), where('organization_id', '==', organizationId))
+    );
+    membersSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+    const invitesSnap = await getDocs(
+      query(collection(db, 'organization_invites'), where('organization_id', '==', organizationId))
+    );
+    invitesSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+    const tasksSnap = await getDocs(
+      query(collection(db, 'tasks'), where('organization_id', '==', organizationId))
+    );
+    tasksSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+    await batch.commit();
+
+    const projectsSnap = await getDocs(
+      query(collection(db, 'projects'), where('organization_id', '==', organizationId))
+    );
+    const projectIds = projectsSnap.docs.map(d => d.id);
+
+    if (projectIds.length === 0) return;
+
+    const pmSnap = await getDocs(
+      query(collection(db, 'project_members'), where('project_id', 'in', projectIds))
+    );
+
+    const messagesSnap = await getDocs(
+      query(collection(db, 'messages'), where('project_id', 'in', projectIds))
+    );
+
+    const batch2 = writeBatch(db);
+    const MAX_BATCH_SIZE = 499;
+    let opCount = 0;
+
+    const addToBatch = (ref: any) => {
+      batch2.delete(ref);
+      opCount++;
+    };
+
+    [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].forEach(doc => {
+      if (opCount < MAX_BATCH_SIZE) {
+        addToBatch(doc.ref);
+      }
+    });
+
+    if (opCount > 0) {
+      await batch2.commit();
+    }
+
+    if (opCount >= MAX_BATCH_SIZE) {
+      const remaining = [...pmSnap.docs, ...messagesSnap.docs, ...projectsSnap.docs].slice(MAX_BATCH_SIZE);
+      const finalBatch = writeBatch(db);
+      remaining.forEach(doc => finalBatch.delete(doc.ref));
+      await finalBatch.commit();
+    }
+  },
 
   async isUserInOrganization(organizationId: string, userId: string): Promise<boolean> {
     const membersQuery = query(

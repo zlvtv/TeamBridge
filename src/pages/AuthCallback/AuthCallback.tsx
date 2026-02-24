@@ -5,7 +5,7 @@ import AuthLoadingPage from '../../components/ui/loading/AuthLoadingPage';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const auth = getAuth(); // ✅ Прямой доступ
+  const auth = getAuth(); 
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);

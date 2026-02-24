@@ -18,7 +18,6 @@ const Confirm: React.FC = () => {
 
   const [resendLoading, setResendLoading] = useState(false);
 
-  // Проверка статуса email
   useEffect(() => {
     if (!isInitialized || !currentUser) return;
 
@@ -51,13 +50,11 @@ const Confirm: React.FC = () => {
       setResendLoading(false);
     }
   };
-
-  // Если только что подтвердили
   if (hasVerified) {
     return (
       <div className={styles.auth}>
         <div className={styles['auth__wrapper']}>
-          <h1 className={styles['auth__title']}>✅ Успешно!</h1>
+          <h1 className={styles['auth__title']}>Успешно!</h1>
           <p style={{ color: '#065f46', fontSize: '1rem' }}>
             Ваш email подтверждён. Через несколько секунд вы будете перенаправлены...
           </p>
@@ -66,7 +63,6 @@ const Confirm: React.FC = () => {
     );
   }
 
-  // Если ошибка
   if (error) {
     return (
       <div className={styles.auth}>
@@ -88,7 +84,6 @@ const Confirm: React.FC = () => {
     );
   }
 
-  // Стандартное сообщение
   return (
     <div className={styles.auth}>
       <div className={styles['auth__wrapper']}>

@@ -420,7 +420,6 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
         )}
       </div>
 
-      {/* Toast */}
       <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10010 }}>
         {toasts.map((toast) => (
           <Toast

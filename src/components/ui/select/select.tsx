@@ -130,7 +130,6 @@ const Select: React.FC<SelectProps> = ({
         </div>
       </div>
 
-      {/* ✅ Теперь isClearable доступен */}
       {isClearable && !isMulti && selectedValues.length > 0 && (
         <button
           type="button"

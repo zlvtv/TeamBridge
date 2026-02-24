@@ -34,9 +34,6 @@ export interface Message {
 }
 
 export const messageService = {
-  /**
-   * Отправка сообщения с шифрованием
-   */
   async sendMessage(
     projectId: string,
     text: string,
@@ -83,9 +80,6 @@ export const messageService = {
     };
   },
 
-  /**
-   * Подписка на сообщения проекта
-   */
   subscribeToMessages(projectId: string, callback: (messages: Message[]) => void) {
     const q = query(collection(db, 'messages'), where('project_id', '==', projectId));
 
@@ -105,9 +99,6 @@ export const messageService = {
     });
   },
 
-  /**
-   * Проверка наличия непрочитанных сообщений
-   */
   async sendSystemMessage(projectId: string, text: string): Promise<void> {
     const encryptedText = encryptMessage(text, projectId);
 
@@ -151,9 +142,6 @@ export const messageService = {
     }
   },
 
-  /**
-   * Отметить все сообщения как прочитанные
-   */
   markAsRead(organizationId: string) {
     localStorage.setItem(`lastVisit_org_${organizationId}`, new Date().toISOString());
   },

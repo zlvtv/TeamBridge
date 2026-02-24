@@ -8,7 +8,7 @@ import styles from './EmptyDashboard.module.css';
 const EmptyDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { openCreateOrgModal } = useUI();
+  const { openModal } = useUI();
 
   const handleLogout = async () => {
     try {
@@ -19,8 +19,10 @@ const EmptyDashboard: React.FC = () => {
   };
 
   const handleCreateOrgClick = () => {
-    openCreateOrgModal();
+    openModal('createOrg');
   };
+
+
 
   return (
     <div className={styles['empty-dashboard']}>

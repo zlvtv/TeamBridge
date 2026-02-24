@@ -7,9 +7,6 @@ import {
 } from './firestore/firestoreService';
 import { Task } from '../types/task.types';
 
-/**
- * Интерфейс для создания задачи
- */
 export interface CreateTaskData {
   title: string;
   description?: string | null;
@@ -22,9 +19,6 @@ export interface CreateTaskData {
   tags?: string[];
 }
 
-/**
- * Интерфейс для обновления задачи
- */
 export interface UpdateTaskData {
   title?: string;
   description?: string | null;
@@ -35,13 +29,7 @@ export interface UpdateTaskData {
   tags?: string[];
 }
 
-/**
- * Сервис для работы с задачами
- */
 export const taskService = {
-  /**
-   * Получение всех задач проекта
-   */
   async getTasksByProject(projectId: string): Promise<Task[]> {
     return await getCollection<Task>('tasks', {
       whereClauses: [{ field: 'project_id', operator: '==', value: projectId }],
@@ -49,9 +37,6 @@ export const taskService = {
     });
   },
 
-  /**
-   * Получение задач пользователя (все проекты)
-   */
   async getUserTasks(userId: string, orgIds: string[]): Promise<Task[]> {
     try {
       const projects = await getCollection('projects', {
@@ -76,9 +61,6 @@ export const taskService = {
     }
   },
 
-  /**
-   * Создание новой задачи
-   */
   async createTask(data: CreateTaskData): Promise<string> {
     if (!data.title?.trim()) {
       throw new Error('Название задачи обязательно');
@@ -100,9 +82,6 @@ export const taskService = {
     return await createDoc<Task>('tasks', taskData);
   },
 
-  /**
-   * Обновление задачи
-   */
   async updateTask(taskId: string, data: UpdateTaskData): Promise<void> {
     if (data.title && !data.title.trim()) {
       throw new Error('Название задачи не может быть пустым');
@@ -144,9 +123,6 @@ export const taskService = {
     );
   },
 
-  /**
-   * Поиск задач по названию или тегам
-   */
   async searchTasks(projectId: string, query: string): Promise<Task[]> {
     const allTasks = await this.getTasksByProject(projectId);
     const q = query.toLowerCase();
@@ -158,9 +134,6 @@ export const taskService = {
     });
   },
 
-  /**
-   * Фильтрация задач
-   */
   filterTasks(tasks: Task[], filters: {
     status?: string;
     priority?: string;
@@ -182,9 +155,6 @@ export const taskService = {
     });
   },
 
-  /**
-   * Сортировка задач
-   */
   sortTasks(tasks: Task[], sortBy: 'date' | 'title' | 'priority', order: 'asc' | 'desc' = 'desc'): Task[] {
     const sorted = [...tasks];
     
