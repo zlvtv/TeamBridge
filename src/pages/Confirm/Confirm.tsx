@@ -21,19 +21,22 @@ const Confirm: React.FC = () => {
 
   // Обработка действия подтверждения email
   useEffect(() => {
-  if (!isInitialized || !currentUser) return;
+    if (!isInitialized || !currentUser) return;
 
-  // Не пытаемся обработать oobCode — он уже обработан Firebase
-  const checkVerified = async () => {
-    await currentUser.reload();
-    if (currentUser.emailVerified) {
-      navigate('/dashboard', { replace: true });
-    }
-  };
+    const checkVerified = async () => {
+      await currentUser.reload();
+      if (currentUser.emailVerified) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        // Если email не подтверждён, оставайтесь на /confirm
+        if (window.location.pathname !== '/confirm') {
+          navigate('/confirm', { replace: true });
+        }
+      }
+    };
 
-  checkVerified();
-
-}, [isInitialized, currentUser, navigate]);
+    checkVerified();
+  }, [isInitialized, currentUser, navigate]);
 
   const handleResend = async () => {
     if (!currentUser) {

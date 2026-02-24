@@ -21,7 +21,7 @@ const AuthCallback: React.FC = () => {
         break;
 
       case 'verifyEmail':
-        navigate(`/confirm?oobCode=${oobCode}`, { replace: true });
+        navigate(`/confirm?mode=verifyEmail&oobCode=${oobCode}`, { replace: true });
         break;
 
       case 'signIn':
