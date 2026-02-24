@@ -130,7 +130,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = result.user;
 
       const actionCodeSettings = {
-        url: window.location.origin + '/confirm',
+        url: window.location.origin + '/auth/callback', // ✅ Обработка в AuthCallback
+        handleCodeInApp: true, // Оставляем — мы сами обрабатываем
       };
 
       await updateProfile(user, { displayName: fullName.trim() || username });

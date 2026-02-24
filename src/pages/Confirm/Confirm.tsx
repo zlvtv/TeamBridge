@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../../lib/firebase';
-import { applyActionCode, sendEmailVerification } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { sendEmailVerification } from 'firebase/auth';
 import Button from '../../components/ui/button/button';
 import LoadingState from '../../components/ui/loading/LoadingState';
 import styles from './Confirm.module.css';
@@ -13,13 +13,12 @@ const Confirm: React.FC = () => {
   const currentUser = auth.currentUser;
 
   const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get('mode');
-  const oobCode = urlParams.get('oobCode');
+  const hasVerified = urlParams.get('verified') === 'true';
+  const error = urlParams.get('error');
 
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
 
-  // Обработка действия подтверждения email
+  // Проверка статуса email
   useEffect(() => {
     if (!isInitialized || !currentUser) return;
 
@@ -27,11 +26,6 @@ const Confirm: React.FC = () => {
       await currentUser.reload();
       if (currentUser.emailVerified) {
         navigate('/dashboard', { replace: true });
-      } else {
-        // Если email не подтверждён, оставайтесь на /confirm
-        if (window.location.pathname !== '/confirm') {
-          navigate('/confirm', { replace: true });
-        }
       }
     };
 
@@ -39,66 +33,62 @@ const Confirm: React.FC = () => {
   }, [isInitialized, currentUser, navigate]);
 
   const handleResend = async () => {
-    if (!currentUser) {
-      alert('Сессия истекла. Войдите снова.');
-      navigate('/login');
-      return;
-    }
+    if (!currentUser || resendLoading) return;
 
-    const actionCodeSettings = {
-      url: window.location.origin + '/confirm',
-      handleCodeInApp: true,
-    };
+    setResendLoading(true);
 
     try {
+      const actionCodeSettings = {
+        url: window.location.origin + '/auth/callback',
+        handleCodeInApp: true,
+      };
       await sendEmailVerification(currentUser, actionCodeSettings);
       alert('Письмо отправлено! Проверьте спам.');
     } catch (err: any) {
       console.error('Ошибка отправки письма:', err);
       alert('Ошибка: ' + (err.message || 'Неизвестная ошибка'));
+    } finally {
+      setResendLoading(false);
     }
   };
 
-  // Если идёт обработка подтверждения
-  if (oobCode && mode === 'verifyEmail') {
+  // Если только что подтвердили
+  if (hasVerified) {
     return (
       <div className={styles.auth}>
         <div className={styles['auth__wrapper']}>
-          <h1 className={styles['auth__title']}>Подтверждение email</h1>
-
-          {status === 'loading' && <LoadingState message="Подтверждаем ваш email..." />}
-
-          {status === 'success' && (
-            <div style={{ textAlign: 'center' }}>
-              <h2 style={{ color: '#065f46', margin: '0 0 8px 0' }}>✅ Успешно!</h2>
-              <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
-                Ваш email подтверждён. Через несколько секунд вы будете перенаправлены...
-              </p>
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div>
-              <div className={styles['auth__error']} style={{ textAlign: 'center' }}>
-                {error}
-              </div>
-              <Button
-                variant="secondary"
-                size="medium"
-                onClick={handleResend}
-                fullWidth
-                style={{ marginTop: '16px' }}
-              >
-                Отправить повторно
-              </Button>
-            </div>
-          )}
+          <h1 className={styles['auth__title']}>✅ Успешно!</h1>
+          <p style={{ color: '#065f46', fontSize: '1rem' }}>
+            Ваш email подтверждён. Через несколько секунд вы будете перенаправлены...
+          </p>
         </div>
       </div>
     );
   }
 
-  // Если нет oobCode — просто показываем напоминание
+  // Если ошибка
+  if (error) {
+    return (
+      <div className={styles.auth}>
+        <div className={styles['auth__wrapper']}>
+          <h1 className={styles['auth__title']}>❌ Ошибка</h1>
+          <div className={styles['auth__error']}>{decodeURIComponent(error)}</div>
+          <Button
+            variant="secondary"
+            size="medium"
+            onClick={handleResend}
+            fullWidth
+            style={{ marginTop: '16px' }}
+            disabled={resendLoading}
+          >
+            {resendLoading ? 'Отправка...' : 'Отправить повторно'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Стандартное сообщение
   return (
     <div className={styles.auth}>
       <div className={styles['auth__wrapper']}>
@@ -123,7 +113,7 @@ const Confirm: React.FC = () => {
             fullWidth
             style={{ maxWidth: '280px' }}
           >
-            Продолжить в приложение
+            Проверить статус
           </Button>
 
           <p style={{ margin: '12px 0 0 0', fontSize: '0.875rem', color: 'var(--color-text-light)', textAlign: 'center' }}>
@@ -134,9 +124,10 @@ const Confirm: React.FC = () => {
             type="button"
             className={styles['auth__link']}
             onClick={handleResend}
+            disabled={resendLoading}
             style={{ marginTop: '8px', textAlign: 'center' }}
           >
-            Отправить письмо повторно
+            {resendLoading ? 'Отправка...' : 'Отправить письмо повторно'}
           </button>
         </div>
       </div>
