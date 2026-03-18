@@ -7,6 +7,8 @@ import {
   getDocById
 } from './firestore/firestoreService';
 import { ProjectMember, Task } from '../types/project.types';
+import { messageService } from './messageService';
+import { touchOrganizationActivity, touchOrganizationActivityByProject } from './activityService';
 
 export interface CreateProjectData {
   name: string;
@@ -66,7 +68,9 @@ export const projectService = {
       created_by: data.created_by,
     };
 
-    return await createDoc('projects', projectData);
+    const createdProject = await createDoc('projects', projectData);
+    await touchOrganizationActivity(data.organization_id);
+    return createdProject.id;
   },
 
   async updateProject(projectId: string, data: UpdateProjectData): Promise<void> {
@@ -80,6 +84,8 @@ export const projectService = {
     };
 
     await updateDocById('projects', projectId, updateData);
+    await touchOrganizationActivityByProject(projectId);
+    await messageService.sendSystemMessage(projectId, 'Проект обновлён');
   },
 
   async deleteProject(projectId: string): Promise<void> {
@@ -125,10 +131,16 @@ export const projectService = {
       status,
       joined_at: new Date().toISOString()
     });
+    if (status !== 'owner') {
+      await messageService.sendSystemMessage(projectId, `В проект добавлен участник (${userId})`);
+    }
+    await touchOrganizationActivityByProject(projectId);
   },
 
   async removeMember(projectId: string, memberId: string): Promise<void> {
     await deleteDocById('project_members', memberId);
+    await messageService.sendSystemMessage(projectId, 'Участник удалён из проекта');
+    await touchOrganizationActivityByProject(projectId);
   },
 
   async getTasks(projectId: string): Promise<Task[]> {

@@ -21,27 +21,41 @@ const OrgIconPanel: React.FC = () => {
     closeModal,
   } = useUI();
 
+  const getActivityTime = (org: any): number => {
+    const candidates = [org?.updated_at, org?.lastActivityAt, org?.created_at];
+    for (const value of candidates) {
+      if (!value) continue;
+      if (typeof value === 'string') {
+        const parsed = new Date(value).getTime();
+        if (!Number.isNaN(parsed)) return parsed;
+      }
+      if (value instanceof Date) {
+        return value.getTime();
+      }
+      if (typeof value?.toDate === 'function') {
+        const parsed = value.toDate().getTime();
+        if (!Number.isNaN(parsed)) return parsed;
+      }
+    }
+    return 0;
+  };
+
   const organizations = rawOrganizations.slice().sort((a, b) => {
-  if (a.hasUnreadMessages !== b.hasUnreadMessages) {
-    return a.hasUnreadMessages ? -1 : 1;
-  }
+    const timeA = getActivityTime(a);
+    const timeB = getActivityTime(b);
 
-  const timeA = a.updated_at?.getTime() ?? 0;
-  const timeB = b.updated_at?.getTime() ?? 0;
+    if (timeA !== timeB) {
+      return timeB - timeA;
+    }
 
-  if (timeA !== timeB) {
-    return timeB - timeA;
-  }
-
-  return a.name.localeCompare(b.name, 'ru');
-});
+    return a.name.localeCompare(b.name, 'ru');
+  });
 
   const { currentProject } = useProject();
   const { refreshProjects } = useProject(); 
 
   const { user: currentUser } = useAuth();
 
-  const [searchAnchor, setSearchAnchor] = useState<HTMLElement | null>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const orgsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,25 +100,12 @@ const OrgIconPanel: React.FC = () => {
     };
   }, [isModalOpen, closeModal]);
 
-  useEffect(() => {
-  console.log('Sorted orgs:', organizations.map(o => ({
-    name: o.name,
-    updated_at: o.updated_at,
-    hasUnreadMessages: o.hasUnreadMessages,
-    dateValue: o.updated_at?.toDate 
-      ? o.updated_at.toDate().toISOString() 
-      : o.updated_at?.toISOString?.() || 'invalid'
-  })));
-}, [organizations]);
- 
-  const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setSearchAnchor(e.currentTarget);
+  const handleSearchClick = () => {
     setIsSearchModalOpen(true);
   };
 
   const handleSearchClose = () => {
     setIsSearchModalOpen(false);
-    setSearchAnchor(null);
   };
 
   const [projectSelectorAnchor, setProjectSelectorAnchor] = useState<HTMLElement | null>(null);

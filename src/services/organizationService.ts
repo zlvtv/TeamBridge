@@ -15,10 +15,11 @@ import {
   writeBatch,
   serverTimestamp,
   updateDoc,
-  arrayRemove,
   Timestamp,
 } from 'firebase/firestore'; 
 import { buildUserFromSnapshot } from '../utils/user.utils';
+import { messageService } from './messageService';
+import { touchOrganizationActivity } from './activityService';
 
 const getCurrentUserId = (): string | null => {
   return auth.currentUser?.uid || null;
@@ -74,6 +75,8 @@ export const organizationService = {
       autoRemoveMembers: data.autoRemoveMembers,
       updated_at: serverTimestamp(),
     });
+    await messageService.sendOrganizationSystemMessage(id, 'Обновлены настройки организации');
+    await touchOrganizationActivity(id);
   },
 
   async getUserOrganizations(): Promise<OrganizationWithMembers[]> {
@@ -101,8 +104,8 @@ export const organizationService = {
       const organizations = orgDocs.map(doc => ({
         id: doc.id,
         ...doc,
-        created_at: doc.created_at?.toDate ? doc.created_at.toDate().toISOString() : null,
-        updated_at: doc.updated_at?.toDate ? doc.updated_at.toDate().toISOString() : null,
+        created_at: doc.created_at instanceof Date ? doc.created_at.toISOString() : null,
+        updated_at: doc.updated_at instanceof Date ? doc.updated_at.toISOString() : null,
       })) as Organization[];
 
       const result: OrganizationWithMembers[] = [];
@@ -111,7 +114,9 @@ export const organizationService = {
         const members = await getOrganizationMembers(org.id);
         const membersWithUsers = await buildMembersWithProfiles(members);
 
-        const lastActivityAt = Math.max(...membersWithUsers.map(m => new Date(m.joined_at).getTime()));
+        const lastActivityAt = org.updated_at
+          ? new Date(org.updated_at).getTime()
+          : (org.created_at ? new Date(org.created_at).getTime() : Date.now());
 
         result.push({
           ...org,
@@ -166,6 +171,16 @@ export const organizationService = {
     };
 
     await createDoc('project_members', projMemberData);
+    try {
+      await messageService.sendSystemMessage(commonProject.id, `Организация **${data.name}** создана`);
+    } catch (error) {
+      console.error('Failed to send organization created system message:', error);
+    }
+    try {
+      await touchOrganizationActivity(newOrg.id);
+    } catch (error) {
+      console.error('Failed to touch organization activity after create:', error);
+    }
 
     const userObj = getCurrentUser();
 
@@ -218,6 +233,8 @@ export const organizationService = {
       status: 'member',
       joined_at: serverTimestamp(),
     });
+    await messageService.sendOrganizationSystemMessage(organizationId, 'Новый участник присоединился к организации');
+    await touchOrganizationActivity(organizationId);
 
     await deleteDocById('organization_invites', inviteToken);
 
@@ -336,20 +353,28 @@ export const organizationService = {
 
     if (member) {
       await deleteDocById('organization_members', member.id);
+      await messageService.sendOrganizationSystemMessage(organizationId, 'Участник покинул организацию');
+      await touchOrganizationActivity(organizationId);
     }
   },
 
   async updateMemberRoles(organizationId: string, memberId: string, roles: string[]): Promise<void> {
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { roles });
+    await messageService.sendOrganizationSystemMessage(organizationId, 'Обновлены роли участника');
+    await touchOrganizationActivity(organizationId);
   },
 
   async removeMember(organizationId: string, memberId: string): Promise<void> {
     await deleteDocById('organization_members', memberId);
+    await messageService.sendOrganizationSystemMessage(organizationId, 'Участник удалён из организации');
+    await touchOrganizationActivity(organizationId);
   },
 
   async makeModerator(organizationId: string, memberId: string): Promise<void> {
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { status: 'admin' });
+    await messageService.sendOrganizationSystemMessage(organizationId, 'Назначен модератор организации');
+    await touchOrganizationActivity(organizationId);
   },
 };

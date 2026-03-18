@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import {
   organizationService,
   type OrganizationWithMembers,
@@ -13,6 +14,7 @@ import {
 } from '../services/organizationService';
 import { messageService } from '../services/messageService';
 import { useAuth } from './AuthContext';
+import { db } from '../lib/firebase';
 
 interface OrganizationContextType {
   organizations: OrganizationWithMembers[];
@@ -115,6 +117,51 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
 
     initialize();
+  }, [user?.id, refreshOrganizations]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let orgUnsubs: Array<() => void> = [];
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleRefresh = () => {
+      if (refreshTimer) return;
+      refreshTimer = setTimeout(async () => {
+        refreshTimer = null;
+        await refreshOrganizations();
+      }, 80);
+    };
+
+    const syncOrganizationSubscriptions = (organizationIds: string[]) => {
+      orgUnsubs.forEach(unsub => unsub());
+      orgUnsubs = organizationIds.map(orgId =>
+        onSnapshot(doc(db, 'organizations', orgId), () => {
+          scheduleRefresh();
+        })
+      );
+    };
+
+    const membersQuery = query(
+      collection(db, 'organization_members'),
+      where('user_id', '==', user.id)
+    );
+
+    const unsubscribeMembers = onSnapshot(membersQuery, snapshot => {
+      const organizationIds = Array.from(
+        new Set(snapshot.docs.map(d => d.data()?.organization_id).filter(Boolean))
+      ) as string[];
+      syncOrganizationSubscriptions(organizationIds);
+      scheduleRefresh();
+    });
+
+    scheduleRefresh();
+
+    return () => {
+      unsubscribeMembers();
+      orgUnsubs.forEach(unsub => unsub());
+      if (refreshTimer) clearTimeout(refreshTimer);
+    };
   }, [user?.id, refreshOrganizations]);
 
   const createOrganization = async (data: CreateOrganizationData): Promise<OrganizationWithMembers> => {

@@ -5,12 +5,11 @@ import {
   where,
   onSnapshot,
   serverTimestamp,
-  addDoc,
-  doc,
   getDocs,
 } from 'firebase/firestore';
 import { createDoc } from './firestore/firestoreService';
 import { encryptMessage, decryptMessage } from '../lib/crypto';
+import { getCommonProjectId, touchOrganizationActivityByProject } from './activityService';
 
 export interface Poll {
   question: string;
@@ -66,6 +65,7 @@ export const messageService = {
     }
 
     const docRef = await createDoc('messages', messageData);
+    await touchOrganizationActivityByProject(projectId);
 
     return {
       id: docRef.id,
@@ -109,6 +109,13 @@ export const messageService = {
       type: 'system',
       created_at: new Date(),
     });
+    await touchOrganizationActivityByProject(projectId);
+  },
+
+  async sendOrganizationSystemMessage(organizationId: string, text: string): Promise<void> {
+    const commonProjectId = await getCommonProjectId(organizationId);
+    if (!commonProjectId) return;
+    await this.sendSystemMessage(commonProjectId, text);
   },
 
   async hasUnreadMessages(organizationId: string, userId: string): Promise<boolean> {

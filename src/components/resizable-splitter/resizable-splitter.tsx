@@ -2,41 +2,31 @@ import React, { useRef, useEffect } from 'react';
 import { useUI } from '../../contexts/UIContext';
 import styles from './resizable-splitter.module.css';
 
-const throttle = (fn: (width: number) => void, delay: number) => {
-  let inThrottle: boolean;
-  return (width: number) => {
-    if (!inThrottle) {
-      fn(width);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), delay);
-    }
-  };
-};
-
 const ResizableSplitter: React.FC = () => {
-  const { setChatWidth } = useUI();
+  const { chatWidth, setChatWidth } = useUI();
+  const splitterRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
-  const lastX = useRef(0); 
-
-  const throttledSetWidth = useRef(
-    throttle((width: number) => {
-      setChatWidth(width);
-    }, 16)
-  ).current;
+  const containerLeftRef = useRef(0);
+  const frameRef = useRef<number | null>(null);
+  const pendingWidthRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const flushWidth = () => {
+      frameRef.current = null;
+      if (pendingWidthRef.current !== null) {
+        setChatWidth(pendingWidthRef.current);
+      }
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
 
-      const mainRect = document.querySelector('.dashboard__main')?.getBoundingClientRect();
-      const leftOffset = mainRect?.left || 0;
-      const newWidth = e.clientX - leftOffset;
+      const newWidth = e.clientX - containerLeftRef.current;
+      const clampedWidth = Math.max(300, Math.min(newWidth, 800));
+      pendingWidthRef.current = clampedWidth;
 
-      if (Math.abs(newWidth - lastX.current) < 1) return;
-      lastX.current = newWidth;
-
-      if (newWidth >= 300 && newWidth <= 800) {
-        throttledSetWidth(newWidth);
+      if (frameRef.current === null) {
+        frameRef.current = requestAnimationFrame(flushWidth);
       }
     };
 
@@ -45,6 +35,15 @@ const ResizableSplitter: React.FC = () => {
         isDraggingRef.current = false;
         document.body.style.cursor = 'default';
         document.body.style.userSelect = 'auto';
+
+        if (frameRef.current !== null) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+        if (pendingWidthRef.current !== null) {
+          setChatWidth(pendingWidthRef.current);
+          pendingWidthRef.current = null;
+        }
       }
     };
 
@@ -54,10 +53,16 @@ const ResizableSplitter: React.FC = () => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
     };
   }, [setChatWidth]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    const container = splitterRef.current?.parentElement;
+    const rect = container?.getBoundingClientRect();
+    containerLeftRef.current = rect?.left || 0;
     isDraggingRef.current = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
@@ -66,6 +71,7 @@ const ResizableSplitter: React.FC = () => {
 
   return (
     <div
+      ref={splitterRef}
       className={styles['resizable-splitter']}
       onMouseDown={handleMouseDown}
       role="separator"
@@ -73,7 +79,14 @@ const ResizableSplitter: React.FC = () => {
       aria-label="Разделитель панелей"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') handleMouseDown(e as any);
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setChatWidth(chatWidth - 16);
+        }
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setChatWidth(chatWidth + 16);
+        }
       }}
     />
   );

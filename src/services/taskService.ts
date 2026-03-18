@@ -3,9 +3,11 @@ import {
   createDoc, 
   updateDocById, 
   deleteDocById,
-  subscribeToCollection 
+  subscribeToCollection,
+  getDocById,
 } from './firestore/firestoreService';
 import { Task } from '../types/task.types';
+import { touchOrganizationActivityByProject } from './activityService';
 
 export interface CreateTaskData {
   title: string;
@@ -30,6 +32,10 @@ export interface UpdateTaskData {
 }
 
 export const taskService = {
+  async getTaskById(taskId: string): Promise<Task | null> {
+    return getDocById<Task>('tasks', taskId);
+  },
+
   async getTasksByProject(projectId: string): Promise<Task[]> {
     return await getCollection<Task>('tasks', {
       whereClauses: [{ field: 'project_id', operator: '==', value: projectId }],
@@ -79,7 +85,9 @@ export const taskService = {
       created_by: '', 
     };
 
-    return await createDoc<Task>('tasks', taskData);
+    const created = await createDoc<Task>('tasks', taskData);
+    await touchOrganizationActivityByProject(data.project_id);
+    return created.id;
   },
 
   async updateTask(taskId: string, data: UpdateTaskData): Promise<void> {
@@ -93,18 +101,26 @@ export const taskService = {
     };
 
     await updateDocById('tasks', taskId, updateData);
+    const task = await this.getTaskById(taskId);
+    if (task?.project_id) await touchOrganizationActivityByProject(task.project_id);
   },
 
   async deleteTask(taskId: string): Promise<void> {
+    const task = await this.getTaskById(taskId);
     await deleteDocById('tasks', taskId);
+    if (task?.project_id) await touchOrganizationActivityByProject(task.project_id);
   },
 
   async updateTaskStatus(taskId: string, status: 'todo' | 'in_progress' | 'done'): Promise<void> {
     await updateDocById('tasks', taskId, { status });
+    const task = await this.getTaskById(taskId);
+    if (task?.project_id) await touchOrganizationActivityByProject(task.project_id);
   },
 
   async assignTask(taskId: string, userIds: string[]): Promise<void> {
     await updateDocById('tasks', taskId, { assignees: userIds });
+    const task = await this.getTaskById(taskId);
+    if (task?.project_id) await touchOrganizationActivityByProject(task.project_id);
   },
 
   subscribeToProjectTasks(
