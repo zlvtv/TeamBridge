@@ -17,27 +17,6 @@ body {
   transition: background-color 0.3s ease;
 }
 
-html.dark {
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-background: #111827;
-  --color-surface: #1f2937;
-  --color-text: #f1f5f9;
-  --color-text-light: #94a3b8;
-  --border-color: #334155;
-  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not(.manual-theme) {
-    --color-primary: #3b82f6;
-    --color-background: #111827;
-    --color-surface: #1f2937;
-    --color-text: #f1f5f9;
-    --border-color: #334155;
-  }
-}
-
 input:focus, button:focus, select:focus, textarea:focus {
   outline: none;
 }
@@ -45,4 +24,3 @@ input:focus, button:focus, select:focus, textarea:focus {
 button {
   cursor: pointer;
 }
-

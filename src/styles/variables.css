@@ -4,48 +4,43 @@
   --color-secondary: #64748b;
   --color-background: #f8fafc;
   --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
   --color-error: #ef4444;
   --color-success: #16a34a;
   --color-warning: #f59e0b;
   --color-text: #1e293b;
   --color-text-light: #64748b;
+  --color-text-secondary: #64748b;
   --color-danger: #ef4444;
+  --color-danger-light: #fef2f2;
+  --color-danger-lighter: #fee2e2;
+  --color-danger-bg: #fee2e2;
+  --color-error-light: #fef2f2;
+  --color-primary-light: #eff6ff;
+  --color-primary-lighter: #dbeafe;
+  --color-primary-bg: #eff6ff;
+  --color-success-lighter: #dcfce7;
+  --color-warning-lighter: #fef3c7;
+  --color-link: #2563eb;
+  --color-disabled: #cbd5e1;
   --border-color: #e2e8f0;
+  --color-border: #e2e8f0;
+  --color-hover: #f1f5f9;
+  --hover-bg: #f1f5f9;
 
-  --chat-bg: #f9f9fb;
-  --chat-border: #e0e0e0;
-  --message-bg: white;
-  --message-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --input-bg: white;
-  --input-border: #ddd;
-  --send-btn-bg: #5a67d8;
-  --send-btn-disabled: #cbd5e1;
-  --error-bg: #fed7d7;
-  --error-text: #e53e3e;
-  --menu-bg: white;
-  --menu-border: #e0e0e0;
-  --menu-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --menu-hover: #f0f0f0;
-  --avatar-bg: #5a67d8;
+  --panel-top-offset: 20px;
+  --panel-width: 64px;
+  --panel-gap: 16px;
 
-  --space-xs: 4px;
-  --space-s: 8px;
-  --space-m: 16px;
-  --space-l: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-
+  --border-radius-sm: 6px;
   --border-radius: 8px;
   --border-radius-md: 12px;
   --border-radius-lg: 16px;
 
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-small: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-large: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-
-  --transition: 0.2s ease-in-out;
-
-  --max-content-width: 1200px;
 
   --owner-badge-color: #7c3aed; 
   --admin-badge-color: #ea580c; 
@@ -57,28 +52,29 @@
   --color-primary-hover: #2563eb;
   --color-background: #111827;
   --color-surface: #1f2937;
+  --color-surface-hover: #334155;
   --color-error: #f87171;
   --color-success: #4ade80;
   --color-warning: #fbbf24;
   --color-text: #f1f5f9;
   --color-text-light: #94a3b8;
+  --color-text-secondary: #94a3b8;
   --border-color: #334155;
+  --color-border: #334155;
+  --color-hover: #334155;
+  --hover-bg: #334155;
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --color-danger: #f87171;
-
-  --chat-bg: #121212;         
-  --chat-border: #333;        
-  --message-bg: #1e1e1e;     
-  --message-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --input-bg: #2d2d2d;        
-  --input-border: #555;
-  --send-btn-bg: #667eea;       
-  --send-btn-disabled: #4a5568;
-  --error-bg: #4a1c1c;
-  --error-text: #fca5a5;
-  --menu-bg: #2d2d2d;
-  --menu-border: #555;
-  --menu-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --menu-hover: #3a3a3a;
-  --avatar-bg: #667eea;
+  --color-danger-light: #3f1d20;
+  --color-danger-lighter: #4b1f24;
+  --color-danger-bg: #4b1f24;
+  --color-error-light: #3f1d20;
+  --color-primary-light: #1e3a5f;
+  --color-primary-lighter: #1d4f8f;
+  --color-primary-bg: #1e3a5f;
+  --color-success-lighter: #153f2d;
+  --color-warning-lighter: #47361b;
+  --color-link: #60a5fa;
+  --color-disabled: #475569;
 }
