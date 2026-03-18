@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import OrgIconPanel from '../../components/org-icon-panel/org-icon-panel';
 import SettingsPanel from '../../components/settings-panel/settings-panel';
 import MainHeader from '../../components/main-header/main-header';
@@ -14,25 +13,15 @@ import styles from './Dashboard.module.css';
 import { useUI } from '../../contexts/UIContext';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useProject } from '../../contexts/ProjectContext';
-import { useAuth } from '../../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
-  const { isBoardFullscreen, theme, chatWidth, isModalOpen, openModal, closeModal } = useUI();
+  const { isBoardFullscreen, theme, chatWidth, isModalOpen, closeModal } = useUI();
   const { organizations, isLoading: orgLoading, refreshOrganizations, currentOrganization } = useOrganization();
   const { currentProject, isLoading: projectLoading } = useProject();
-  const isCreateOrgModalOpen = isModalOpen('createOrg');
-  const { user } = useAuth();
-  const location = useLocation();
 
   useEffect(() => {
     refreshOrganizations();
   }, [refreshOrganizations]);
-
-useEffect(() => {
-  if (organizations.length > 0 && isCreateOrgModalOpen) {
-    closeModal('createOrg'); 
-  }
-}, [organizations.length, isCreateOrgModalOpen, closeModal]);
 
   if (orgLoading) {
     return <LoadingState message="Загрузка организаций..." />;

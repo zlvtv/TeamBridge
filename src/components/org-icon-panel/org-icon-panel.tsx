@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';
-import CreateOrganizationModal from '../../components/modals/create-organization-modal/create-organization-modal';
 import CreateProjectModal from '../../components/modals/create-project-modal/create-project-modal';
 import CreateTaskModal from '../../components/modals/create-task-modal/create-task-modal';
 import styles from './org-icon-panel.module.css';
@@ -156,15 +155,10 @@ const OrgIconPanel: React.FC = () => {
 
   const isCreateModalOpen = isModalOpen('create');
   const isCreateProjectOpen = isModalOpen('createProject');
-  const isCreateOrgModalOpen = isModalOpen('createOrg');
   const isCreateTaskOpen = isModalOpen('createTask');
 
   return (
     <>
-      <CreateOrganizationModal
-        isOpen={isCreateOrgModalOpen}
-        onClose={() => closeModal('createOrg')}
-      />
       <CreateProjectModal
         isOpen={isCreateProjectOpen}
         onClose={() => closeModal('createProject')}
