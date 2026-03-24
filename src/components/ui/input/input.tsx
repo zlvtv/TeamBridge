@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './input.module.css';
 
-type InputType = 'text' | 'email' | 'password' | 'number';
+type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'datetime-local';
 type InputSize = 'small' | 'medium';
 type InputVariant = 'outlined' | 'filled';
 

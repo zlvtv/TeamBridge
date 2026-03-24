@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, confirmPasswordReset } from 'firebase/auth';
+import AuthShell from '../../components/auth/AuthShell';
 import Input from '../../components/ui/input/input';
 import Button from '../../components/ui/button/button';
 import styles from './ResetPassword.module.css';
@@ -79,21 +80,41 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className={styles.auth}>
-      <div className={styles['auth__wrapper']}>
-        <h1 className={styles['auth__title']}>Новый пароль</h1>
-
+    <AuthShell
+      badge="Новый пароль"
+      title={isSuccess ? 'Пароль обновлен' : 'Создайте новый пароль'}
+      subtitle={
+        isSuccess
+          ? 'Доступ восстановлен. Теперь можно снова войти и продолжить работу в TeamBridge.'
+          : 'Новый пароль откроет доступ к проектам, задачам, ролям и командной переписке из вашего рабочего пространства.'
+      }
+      showcaseLabel="Recovery complete"
+      showcaseTitle="Возвращение в командный поток должно быть быстрым и безопасным"
+      showcaseDescription="После смены пароля вы снова попадете в привычный рабочий контекст: проекты, kanban, календарь и notifications останутся на месте."
+      showcaseItems={[
+        'Смена пароля подтверждается только по безопасной recovery-ссылке',
+        'После входа останутся доступны проекты, участники и роли организации',
+        'Командные задачи, обсуждения и дедлайны никуда не теряются',
+      ]}
+      showcaseStats={['Secure reset', 'Projects intact', 'Ready to continue']}
+      footer={!isSuccess ? (
+        <p className={styles['auth__footer']}>
+          <button type="button" className={styles['auth__link']} onClick={handleBack} disabled={isLoading}>
+            ← Назад ко входу
+          </button>
+        </p>
+      ) : undefined}
+    >
         {isSuccess ? (
-          <div className={styles['auth__success-container']}>
-            <h2 className={styles['auth__success-title']}>Пароль изменён.</h2>
-            <p className={styles['auth__success-text']}>Теперь вы можете войти с новым паролем.</p>
+          <div className={styles['auth__successContainer']}>
+            <h2 className={styles['auth__successTitle']}>Пароль изменен.</h2>
+            <div className={styles['auth__successBox']}>Теперь вы можете войти с новым паролем и продолжить работу.</div>
             <Button variant="primary" size="large" fullWidth onClick={() => navigate('/login')}>
               Войти
             </Button>
           </div>
         ) : (
           <>
-            <p className={styles['auth__subtitle']}>Введите и подтвердите новый пароль</p>
             {error && <div className={styles['auth__error']}>{error}</div>}
             <form onSubmit={handleSubmit} className={styles['auth__form']}>
               <div className={styles['auth__field']}>
@@ -106,10 +127,13 @@ const ResetPassword: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  name="password"
+                  autoComplete="new-password"
                   required
                   disabled={isLoading}
-                  error={password.length < 6 ? 'Минимум 6 символов' : undefined}
+                  error={password.length > 0 && password.length < 6 ? 'Минимум 6 символов' : undefined}
                 />
+                <span className={styles['auth__helper']}>Используйте минимум 6 символов для нового пароля.</span>
               </div>
               <div className={styles['auth__field']}>
                 <label htmlFor="confirmPassword" className={styles['auth__label']}>
@@ -121,24 +145,20 @@ const ResetPassword: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
+                  name="confirmPassword"
+                  autoComplete="new-password"
                   required
                   disabled={isLoading}
-                  error={password !== confirmPassword ? 'Пароли не совпадают' : undefined}
+                  error={confirmPassword.length > 0 && password !== confirmPassword ? 'Пароли не совпадают' : undefined}
                 />
               </div>
               <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
                 Сменить пароль
               </Button>
             </form>
-            <p className={styles['auth__footer']}>
-              <button type="button" className={styles['auth__link']} onClick={handleBack} disabled={isLoading}>
-                ← Назад ко входу
-              </button>
-            </p>
           </>
         )}
-      </div>
-    </div>
+    </AuthShell>
   );
 };
 

@@ -11,6 +11,64 @@
   z-index: 101;
 }
 
+.settings-panel--compact-mobile-list {
+  width: 100%;
+  align-items: stretch;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-panel--compact-mobile-list .settings-panel__theme-btn,
+.settings-panel--compact-mobile-list .settings-panel__avatar-btn,
+.settings-panel--compact-mobile-list .settings-panel__notifications-btn {
+  width: 100%;
+  height: auto;
+  min-height: 52px;
+  border-radius: 16px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--color-background) 80%, var(--color-surface) 20%);
+  border: 1px solid var(--border-color);
+  font-size: 18px;
+}
+
+.settings-panel--compact-mobile-list .settings-panel__theme-btn:hover,
+.settings-panel--compact-mobile-list .settings-panel__avatar-btn:hover,
+.settings-panel--compact-mobile-list .settings-panel__notifications-btn:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface) 92%);
+  color: var(--color-text);
+}
+
+.settings-panel__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+@media (max-width: 760px) {
+  .settings-panel {
+    width: auto;
+    min-width: 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0;
+    gap: 12px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+  }
+
+  .settings-panel--compact-mobile-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
+
 .settings-panel__theme-btn,
 .settings-panel__avatar-btn,
 .settings-panel__notifications-btn {
@@ -25,6 +83,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: visible;
 }
 
 .settings-panel__theme-btn:hover,
@@ -37,17 +97,20 @@
 
 .notifications-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: -4px;
+  right: -4px;
   background: var(--color-danger);
   color: white;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
   font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  font-weight: 600;
 }
 
 .notifications-panel {

@@ -26,6 +26,13 @@ export const usePersistedFilters = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const normalizedTags = Array.isArray(parsed.tags)
+          ? parsed.tags.filter((tag: unknown): tag is string => typeof tag === 'string')
+          : typeof parsed.tags === 'string' && parsed.tags.trim()
+          ? [parsed.tags.trim()]
+          : DEFAULT_FILTERS.tags;
+        const normalizedSortBy = parsed.sortBy === 'title' ? 'title' : 'date';
+        const normalizedSortOrder = parsed.sortOrder === 'asc' ? 'asc' : 'desc';
 
         return {
           ...DEFAULT_FILTERS,
@@ -35,6 +42,10 @@ export const usePersistedFilters = () => {
             }
             return acc;
           }, {} as Partial<FilterState>)
+          ,
+          tags: normalizedTags,
+          sortBy: normalizedSortBy,
+          sortOrder: normalizedSortOrder,
         };
       }
     } catch (e) {

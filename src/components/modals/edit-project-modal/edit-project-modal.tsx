@@ -42,7 +42,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onClose }) 
       if (currentProject.name !== values.name) {
         await messageService.sendSystemMessage(
           currentProject.id,
-          `Название проекта изменено на: **${values.name}**`
+          `Название проекта изменено на: ${values.name}`
         );
       }
 
@@ -60,7 +60,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onClose }) 
     try {
       const projectName = currentProject.name;
       await projectService.deleteProject(currentProject.id);
-      await messageService.sendSystemMessage(currentProject.id, `Проект **${projectName}** был удалён`);
+      await messageService.sendSystemMessage(currentProject.id, `Проект ${projectName} был удалён`);
       onClose();
       closeEditProject();
     } catch (err: any) {

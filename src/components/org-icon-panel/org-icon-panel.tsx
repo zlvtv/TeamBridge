@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import SearchModal from '../../components/modals/search-modal/search-modal';
-import CreateProjectModal from '../../components/modals/create-project-modal/create-project-modal';
 import CreateTaskModal from '../../components/modals/create-task-modal/create-task-modal';
 import styles from './org-icon-panel.module.css';
 import { useUI } from '../../contexts/UIContext';
@@ -9,10 +8,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useProject } from '../../contexts/ProjectContext';
 import ProjectSelector from '../../components/project-selector/project-selector';
 
-const OrgIconPanel: React.FC = () => {
+interface OrgIconPanelProps {
+  compactMobile?: boolean;
+  onProjectSelected?: () => void;
+}
+
+const OrgIconPanel: React.FC<OrgIconPanelProps> = ({ compactMobile = false, onProjectSelected }) => {
   const {
     organizations: rawOrganizations,
     currentOrganization,
+    markOrganizationAsRead,
   } = useOrganization();
 
   const {
@@ -51,12 +56,12 @@ const OrgIconPanel: React.FC = () => {
     return a.name.localeCompare(b.name, 'ru');
   });
 
-  const { currentProject } = useProject();
-  const { refreshProjects } = useProject(); 
+  const { currentProject, refreshProjects, canCreateProjects } = useProject();
 
   const { user: currentUser } = useAuth();
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [organizationQuery, setOrganizationQuery] = useState('');
   const orgsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -108,8 +113,27 @@ const OrgIconPanel: React.FC = () => {
     setIsSearchModalOpen(false);
   };
 
+  useEffect(() => {
+    if (compactMobile) return;
+
+    const handleHotkey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setIsSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleHotkey);
+    return () => window.removeEventListener('keydown', handleHotkey);
+  }, [compactMobile]);
+
   const [projectSelectorAnchor, setProjectSelectorAnchor] = useState<HTMLElement | null>(null);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  const normalizedOrganizationQuery = organizationQuery.trim().toLocaleLowerCase('ru');
+  const filteredOrganizations = normalizedOrganizationQuery
+    ? organizations.filter((org) => org.name.toLocaleLowerCase('ru').includes(normalizedOrganizationQuery))
+    : organizations;
 
   const handleProjectSelectorClose = () => {
     setProjectSelectorAnchor(null);
@@ -155,16 +179,11 @@ const OrgIconPanel: React.FC = () => {
   };
 
   const isCreateModalOpen = isModalOpen('create');
-  const isCreateProjectOpen = isModalOpen('createProject');
   const isCreateTaskOpen = isModalOpen('createTask');
+  const canCreateProject = canCreateProjects();
 
   return (
     <>
-      <CreateProjectModal
-        isOpen={isCreateProjectOpen}
-        onClose={() => closeModal('createProject')}
-        refreshProjects={refreshProjects}
-      />
       <CreateTaskModal
         isOpen={isCreateTaskOpen}
         onClose={() => closeModal('createTask')}
@@ -192,9 +211,11 @@ const OrgIconPanel: React.FC = () => {
           <button onClick={handleCreateOrganization} className={styles['create-dropdown-item']}>
             Создать организацию
           </button>
-          <button onClick={handleCreateProject} className={styles['create-dropdown-item']}>
-            Создать проект
-          </button>
+          {canCreateProject ? (
+            <button onClick={handleCreateProject} className={styles['create-dropdown-item']}>
+              Создать проект
+            </button>
+          ) : null}
           <button onClick={handleCreateTask} className={styles['create-dropdown-item']}>
             Создать задачу
           </button>
@@ -203,29 +224,49 @@ const OrgIconPanel: React.FC = () => {
 
       <div
         ref={containerRef}
-        className={styles['org-icon-panel']}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        style={{ height: availableHeight }}
+        className={`${styles['org-icon-panel']} ${compactMobile ? styles['org-icon-panel--compact-mobile'] : ''}`}
+        onMouseEnter={compactMobile ? undefined : handleMouseEnter}
+        onMouseLeave={compactMobile ? undefined : handleMouseLeave}
+        style={compactMobile ? undefined : { height: availableHeight }}
       >
-        <button
-          className={styles['org-icon-panel__search-btn']}
-          onClick={handleSearchClick}
-          aria-label="Поиск по чатам"
-        >
-          🔍
-        </button>
+        {!compactMobile ? (
+          <>
+            <button
+              className={styles['org-icon-panel__search-btn']}
+              onClick={handleSearchClick}
+              aria-label="Поиск по чатам"
+            >
+              🔍
+            </button>
 
-        <button
-          className={styles['org-icon-panel__create-org-btn']}
-          onClick={handleCreateClick}
-          aria-label="Создать"
-        >
-          +
-        </button>
+            <button
+              className={styles['org-icon-panel__create-org-btn']}
+              onClick={handleCreateClick}
+              aria-label="Создать"
+            >
+              +
+            </button>
+          </>
+        ) : null}
 
-        <div ref={orgsRef} className={styles['org-icon-panel__orgs']}>
-          {organizations.map((org) => {
+        {compactMobile ? (
+          <div className={styles['org-icon-panel__search-field']}>
+            <input
+              type="text"
+              value={organizationQuery}
+              onChange={(e) => setOrganizationQuery(e.target.value)}
+              className={styles['org-icon-panel__search-input']}
+              placeholder="Поиск организации"
+              aria-label="Поиск организации"
+            />
+          </div>
+        ) : null}
+
+        <div
+          ref={orgsRef}
+          className={styles['org-icon-panel__orgs']}
+        >
+          {filteredOrganizations.map((org) => {
             const firstLetter = org.name?.charAt(0).toUpperCase() || 'O';
             return (
               <button
@@ -234,20 +275,27 @@ const OrgIconPanel: React.FC = () => {
                   currentOrganization?.id === org.id
                     ? styles['org-icon-panel__org-btn--active']
                     : ''
-                } ${org.hasUnreadMessages ? 'unread' : ''}`}
+                } ${org.hasUnreadMessages ? styles['org-icon-panel__org-btn--unread'] : ''}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  markOrganizationAsRead(org.id);
                   setProjectSelectorAnchor(e.currentTarget);
                   setSelectedOrgId(org.id);
                 }}
                 aria-label={org.name}
                 title={org.name}
+                data-initial={firstLetter}
               >
-                {firstLetter}
+                {compactMobile ? org.name : firstLetter}
               </button>
             );
           })}
+          {compactMobile && filteredOrganizations.length === 0 ? (
+            <div className={styles['org-icon-panel__empty']}>
+              Ничего не найдено
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -256,6 +304,7 @@ const OrgIconPanel: React.FC = () => {
           organizationId={selectedOrgId}
           onClose={handleProjectSelectorClose}
           anchorEl={projectSelectorAnchor}
+          onProjectSelected={onProjectSelected}
         />
       )}
     </>

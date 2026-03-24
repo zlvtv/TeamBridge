@@ -15,6 +15,8 @@ interface CreateOrganizationModalProps {
   onClose: () => void;
 }
 
+const ORGANIZATION_NAME_MAX_LENGTH = 40;
+
 const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpen, onClose }) => {
   const { createOrganization } = useOrganization();
   const [name, setName] = useState('');
@@ -75,8 +77,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       return;
     }
 
-    if (trimmedName.length > 50) {
-      setError('Название организации не должно превышать 50 символов');
+    if (trimmedName.length > ORGANIZATION_NAME_MAX_LENGTH) {
+      setError(`Название организации не должно превышать ${ORGANIZATION_NAME_MAX_LENGTH} символов`);
       return;
     }
 
@@ -107,7 +109,7 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
       isOpen={isOpen}
       onClose={onClose}
       title={isCreating ? "Создание организации..." : "Создать организацию"}
-      disableOutsideClick={true} 
+      disableOutsideClick={false} 
       disableEscape={false}       
       showCloseButton={true}
     >
@@ -118,8 +120,8 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({ isOpe
             id="org-name"
             placeholder="Введите название"
             value={name}
-            onChange={(e) => setName(e.target.value.slice(0, 50))}
-            maxLength={50}
+            onChange={(e) => setName(e.target.value.slice(0, ORGANIZATION_NAME_MAX_LENGTH))}
+            maxLength={ORGANIZATION_NAME_MAX_LENGTH}
             required
             error={error}
             disabled={isCreating}

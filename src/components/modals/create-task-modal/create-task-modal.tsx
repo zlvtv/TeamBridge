@@ -8,19 +8,32 @@ import { useProject } from '../../../contexts/ProjectContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { taskService } from '../../../services/taskService';
 import { messageService } from '../../../services/messageService';
+import { isDeletedUserProfile } from '../../../utils/user.utils';
+import { useOrganization } from '../../../contexts/OrganizationContext';
+import TaskTagsField from '../../task-tags-field/task-tags-field';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshProjects: () => Promise<void>;
+  refreshProjects?: () => Promise<void>;
+  sourceMessageId?: string;
+  initialContent?: string;
 }
+
+const TASK_REMINDER_OPTIONS = [
+  { value: '15', label: 'За 15 минут' },
+  { value: '60', label: 'За 1 час' },
+  { value: '1440', label: 'За 1 день' },
+];
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ 
   isOpen, 
   onClose, 
-  refreshProjects 
+  sourceMessageId,
+  initialContent = '',
 }) => {
   const { currentProject } = useProject();
+  const { currentOrganization } = useOrganization();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +41,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   if (!currentProject || !user) return null;
 
-  const projectMembers = currentProject.members || [];
+  const projectMembers = (currentProject.members || []).filter((member) => !isDeletedUserProfile(member.profile));
   const assigneeOptions = projectMembers.map(m => ({
     value: m.user_id,
     label: m.profile.full_name || m.profile.username || 'Пользователь'
@@ -44,19 +57,23 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         description: values.description || null,
         project_id: currentProject.id,
         organization_id: currentProject.organization_id,
+        created_by: user.id,
         assignees: values.assignees || [],
         due_date: values.due_date || null,
+        reminder_offsets_minutes: Array.isArray(values.reminder_offsets_minutes)
+          ? values.reminder_offsets_minutes.map((value: string) => Number(value)).filter(Number.isFinite)
+          : [],
         priority: values.priority || 'medium',
         status: values.status || 'todo',
-        tags: values.tags?.split(',').map((t: string) => t.trim()).filter(Boolean) || []
+        tags: Array.isArray(values.tags) ? values.tags : [],
+        source_message_id: sourceMessageId || null,
       });
 
       await messageService.sendSystemMessage(
         currentProject.id,
-        `Создана новая задача: **${values.title}**`
+        `Создана новая задача: ${values.title}`
       );
 
-      await refreshProjects();
       onClose();
     } catch (err: any) {
       setError(err.message || 'Не удалось создать задачу');
@@ -69,11 +86,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Создать задачу">
       <FormProvider
         initialValues={{
-          title: '',
+          title: initialContent
+            ? initialContent.trim().split('\n').find(Boolean)?.slice(0, 80) || ''
+            : '',
           description: '',
           due_date: '',
           assignees: [],
-          tags: '',
+          tags: [],
+          reminder_offsets_minutes: [],
           priority: 'medium',
           status: 'todo'
         }}
@@ -109,8 +129,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <Field
               name="due_date"
               label="Срок выполнения"
-              type="date"
-              placeholder="Выберите дату"
+              type="datetime-local"
+              placeholder="Выберите дату и время"
             />
           </div>
 
@@ -136,16 +156,27 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             type="select"
             multiple
             options={assigneeOptions}
+            hasSearch={false}
+          />
+        </div>
 
+        <div className={styles['create-task-modal__field']}>
+          <TaskTagsField
+            name="tags"
+            suggestions={currentOrganization?.task_tags || []}
+            disabled={isSubmitting}
           />
         </div>
 
         <div className={styles['create-task-modal__field']}>
           <Field
-            name="tags"
-            label="Теги"
-            placeholder="Введите теги через запятую"
-            description="Например: баг, фича, дизайн"
+            name="reminder_offsets_minutes"
+            label="Напоминания"
+            type="select"
+            multiple
+            options={TASK_REMINDER_OPTIONS}
+            hasSearch={false}
+            disabled={isSubmitting}
           />
         </div>
 

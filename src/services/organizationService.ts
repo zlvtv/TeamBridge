@@ -18,6 +18,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'; 
 import { buildUserFromSnapshot } from '../utils/user.utils';
+import { isDeletedUserProfile } from '../utils/user.utils';
 import { messageService } from './messageService';
 import { touchOrganizationActivity } from './activityService';
 
@@ -37,6 +38,8 @@ const getCurrentUser = () => {
   };
 };
 
+const normalizeRoleKey = (role: string) => role.trim().toLocaleLowerCase('ru');
+
 const getOrganizationMembers = async (organizationId: string): Promise<any[]> => {
   const membersQuery = query(
     collection(db, 'organization_members'),
@@ -50,6 +53,19 @@ const getOrganizationMembers = async (organizationId: string): Promise<any[]> =>
 const getUserProfile = async (userId: string) => {
   const userSnap = await getDocById('users', userId);
   return buildUserFromSnapshot(userSnap, userId);
+};
+
+const assertMemberIsNotDeleted = async (memberId: string) => {
+  const memberSnap = await getDocById<any>('organization_members', memberId);
+  if (!memberSnap?.user_id) {
+    throw new Error('Участник организации не найден');
+  }
+
+  const userSnap = await getDocById('users', memberSnap.user_id);
+  const profile = buildUserFromSnapshot(userSnap, memberSnap.user_id);
+  if (isDeletedUserProfile(profile)) {
+    throw new Error('Нельзя назначать роли или модерацию удаленному пользователю');
+  }
 };
 
 const buildMembersWithProfiles = async (members: any[]): Promise<OrganizationWithMembers['organization_members']> => {
@@ -67,14 +83,44 @@ const buildMembersWithProfiles = async (members: any[]): Promise<OrganizationWit
 
 export const organizationService = {
   async updateOrganization(id: string, data: UpdateOrganizationData): Promise<void> {
+    const nextRoleNames = Array.isArray(data.roles)
+      ? data.roles.map((role) => String(role.name || '').trim()).filter(Boolean)
+      : [];
+    const allowedRoleKeys = new Set(nextRoleNames.map(normalizeRoleKey));
+
     const orgRef = doc(db, 'organizations', id);
     await updateDoc(orgRef, {
       name: data.name,
       description: data.description,
       roles: data.roles,
       autoRemoveMembers: data.autoRemoveMembers,
+      autoAddRoleMembersToChats: data.autoAddRoleMembersToChats,
       updated_at: serverTimestamp(),
     });
+
+    const members = await getOrganizationMembers(id);
+    await Promise.all(
+      members.map(async (member) => {
+        const currentRoles = Array.isArray(member.roles)
+          ? member.roles.filter(Boolean).map((role: string) => String(role))
+          : typeof member.roles === 'string' && member.roles.trim()
+          ? [member.roles]
+          : [];
+
+        const filteredRoles = currentRoles.filter((role) => allowedRoleKeys.has(normalizeRoleKey(role)));
+        const rolesChanged =
+          filteredRoles.length !== currentRoles.length ||
+          filteredRoles.some((role, index) => role !== currentRoles[index]);
+
+        if (!rolesChanged) return;
+
+        await updateDoc(doc(db, 'organization_members', member.id), {
+          roles: filteredRoles,
+          updated_at: serverTimestamp(),
+        });
+      })
+    );
+
     await messageService.sendOrganizationSystemMessage(id, 'Обновлены настройки организации');
     await touchOrganizationActivity(id);
   },
@@ -108,22 +154,22 @@ export const organizationService = {
         updated_at: doc.updated_at instanceof Date ? doc.updated_at.toISOString() : null,
       })) as Organization[];
 
-      const result: OrganizationWithMembers[] = [];
+      const result: OrganizationWithMembers[] = await Promise.all(
+        organizations.map(async (org) => {
+          const members = await getOrganizationMembers(org.id);
+          const membersWithUsers = await buildMembersWithProfiles(members);
 
-      for (const org of organizations) {
-        const members = await getOrganizationMembers(org.id);
-        const membersWithUsers = await buildMembersWithProfiles(members);
+          const lastActivityAt = org.updated_at
+            ? new Date(org.updated_at).getTime()
+            : (org.created_at ? new Date(org.created_at).getTime() : Date.now());
 
-        const lastActivityAt = org.updated_at
-          ? new Date(org.updated_at).getTime()
-          : (org.created_at ? new Date(org.created_at).getTime() : Date.now());
-
-        result.push({
-          ...org,
-          organization_members: membersWithUsers,
-          lastActivityAt: new Date(lastActivityAt).toISOString(),
-        });
-      }
+          return {
+            ...org,
+            organization_members: membersWithUsers,
+            lastActivityAt: new Date(lastActivityAt).toISOString(),
+          };
+        })
+      );
 
       return result.sort((a, b) => {
         const dateA = new Date(a.lastActivityAt).getTime();
@@ -144,6 +190,9 @@ export const organizationService = {
       description: data.description || null,
       created_by: userId,
       roles: data.roles || [],
+      task_tags: [],
+      autoRemoveMembers: !!data.autoRemoveMembers,
+      autoAddRoleMembersToChats: !!data.autoAddRoleMembersToChats,
     };
 
     const newOrg = await createDoc('organizations', orgData);
@@ -172,7 +221,7 @@ export const organizationService = {
 
     await createDoc('project_members', projMemberData);
     try {
-      await messageService.sendSystemMessage(commonProject.id, `Организация **${data.name}** создана`);
+      await messageService.sendSystemMessage(commonProject.id, `Организация ${data.name} создана`);
     } catch (error) {
       console.error('Failed to send organization created system message:', error);
     }
@@ -233,6 +282,24 @@ export const organizationService = {
       status: 'member',
       joined_at: serverTimestamp(),
     });
+
+    const projects = await getDocs(
+      query(collection(db, 'projects'), where('organization_id', '==', organizationId))
+    );
+    const generalProject = projects.docs.find(
+      (projectDoc) => String(projectDoc.data().name || '').trim().toLocaleLowerCase('ru') === 'общий'
+    );
+
+    if (generalProject) {
+      await createDoc('project_members', {
+        project_id: generalProject.id,
+        user_id: userId,
+        status: 'member',
+        roles: [],
+        joined_at: serverTimestamp(),
+      });
+    }
+
     await messageService.sendOrganizationSystemMessage(organizationId, 'Новый участник присоединился к организации');
     await touchOrganizationActivity(organizationId);
 
@@ -359,6 +426,7 @@ export const organizationService = {
   },
 
   async updateMemberRoles(organizationId: string, memberId: string, roles: string[]): Promise<void> {
+    await assertMemberIsNotDeleted(memberId);
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { roles });
     await messageService.sendOrganizationSystemMessage(organizationId, 'Обновлены роли участника');
@@ -372,9 +440,21 @@ export const organizationService = {
   },
 
   async makeModerator(organizationId: string, memberId: string): Promise<void> {
+    await assertMemberIsNotDeleted(memberId);
     const memberDocRef = doc(db, 'organization_members', memberId);
     await updateDoc(memberDocRef, { status: 'admin' });
     await messageService.sendOrganizationSystemMessage(organizationId, 'Назначен модератор организации');
+    await touchOrganizationActivity(organizationId);
+  },
+
+  async updateMemberStatus(organizationId: string, memberId: string, status: 'admin' | 'member'): Promise<void> {
+    await assertMemberIsNotDeleted(memberId);
+    const memberDocRef = doc(db, 'organization_members', memberId);
+    await updateDoc(memberDocRef, { status });
+    await messageService.sendOrganizationSystemMessage(
+      organizationId,
+      status === 'admin' ? 'Назначен модератор организации' : 'Статус участника обновлен'
+    );
     await touchOrganizationActivity(organizationId);
   },
 };

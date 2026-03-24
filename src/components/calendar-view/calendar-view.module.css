@@ -7,18 +7,29 @@
   overflow: hidden;
   background: var(--color-surface);
   box-shadow: var(--shadow-small);
-  margin-top: 8px;
-  margin-left: 8px;
+}
+
+.calendar-view__viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.calendar-view__grid {
+  min-width: 100%;
+  min-height: 100%;
+  height: auto;
 }
 
 .calendar-view__navigation {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 8px;
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--color-background);
   border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 .calendar-view__nav-button {
@@ -69,6 +80,7 @@
   color: var(--color-text);
   min-width: 150px;
   text-align: center;
+  flex: 1;
 }
 
 .calendar-view__header {
@@ -118,26 +130,29 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  min-width: 100%;
+  overflow: visible;
 }
 
 .calendar-view__month-grid {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 .calendar-view__week-row {
   display: flex;
-  height: 100%;
+  height: auto;
+  min-height: 0;
 }
 
 .calendar-view__day-column {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   border-right: 1px solid var(--border-color);
-  overflow-y: auto;
-  min-height: 80px;
+  overflow: visible;
+  min-height: 120px;
 }
 
 .calendar-view__day-column:last-child {
@@ -153,10 +168,10 @@
 }
 
 .calendar-view__task {
-  background: white;
-  border: 2px solid var(--border-color);
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 8px 12px;
+  padding: 8px 10px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -169,17 +184,41 @@
 }
 
 .calendar-view__task--done {
-  opacity: 0.6;
-  text-decoration: line-through;
-  color: var(--color-text-light);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #16a34a 10%, var(--color-surface) 90%),
+    var(--color-surface)
+  );
+  border-color: rgba(22, 163, 74, 0.24);
+}
+
+.calendar-view__task--overdue {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-danger, #dc2626) 10%, var(--color-surface) 90%),
+    var(--color-surface)
+  );
+  border-color: rgba(220, 38, 38, 0.24);
 }
 
 .calendar-view__task-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.3;
+}
+
+.calendar-view__task-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.calendar-view__task-date {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
 }
 
 .calendar-view__task-assignees {
@@ -242,4 +281,45 @@
   font-size: 14px;
   max-width: 300px;
   line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .calendar-view__calendar {
+    min-height: 0;
+  }
+
+  .calendar-view__grid {
+    min-width: 760px;
+  }
+
+  .calendar-view__navigation {
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .calendar-view__week-range {
+    order: -1;
+    width: 100%;
+  }
+
+  .calendar-view__day-header {
+    padding: 8px 4px;
+  }
+
+  .calendar-view__day-column {
+    padding: 8px 6px;
+    min-height: 96px;
+  }
+
+  .calendar-view__task {
+    padding: 7px 8px;
+  }
+
+  .calendar-view__task-title {
+    font-size: 12px;
+  }
+
+  .calendar-view__task-date {
+    font-size: 10px;
+  }
 }

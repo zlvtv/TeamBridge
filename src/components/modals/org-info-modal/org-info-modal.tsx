@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useOrganization } from '../../../contexts/OrganizationContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -6,9 +6,11 @@ import Button from '../../ui/button/button';
 import Input from '../../ui/input/input';
 import Toast from '../../ui/toast/Toast';
 import styles from './org-info-modal.module.css';
-import EditOrganizationModal from '../../modals/edit-organization-modal/edit-organization-modal';
 import UserInfoModal from '../../user-info-modal/user-info-modal';
 import ConfirmationModal from '../../ui/confirmation-modal/confirmation-modal';
+import { getPresenceStatus } from '../../../utils/presence.utils';
+import { isDeletedUserProfile } from '../../../utils/user.utils';
+import { canManageOrganization, isOrganizationOwner } from '../../../utils/permissions';
 
 interface ToastState {
   message: string;
@@ -20,6 +22,8 @@ interface OrgInfoModalProps {
   anchorEl: HTMLElement;
   onClose: () => void;
 }
+
+const normalizeRoleKey = (role: string) => role.trim().toLocaleLowerCase('ru');
 
 const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -34,7 +38,6 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   const [isLeaving, setIsLeaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditOrgModalOpen, setIsEditOrgModalOpen] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -42,24 +45,46 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'members' | 'settings'>('members');
+  const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
 
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const toastId = useRef(0);
+  const [stableOrganization, setStableOrganization] = useState(currentOrganization);
 
-  const isOwner = currentOrganization?.created_by === user?.id;
-  const currentUserMember = currentOrganization?.organization_members?.find(
-    (m) => m.user_id === user?.id
-  );
-  const isModerator = isOwner || !!currentUserMember?.status === 'admin';
+  useEffect(() => {
+    if (currentOrganization) {
+      setStableOrganization(currentOrganization);
+    }
+  }, [currentOrganization]);
+
+  const resolvedOrganization = currentOrganization || stableOrganization;
+
+  const isOwner = isOrganizationOwner(resolvedOrganization, user?.id);
+  const currentUserMember = resolvedOrganization?.organization_members?.find((member) => member.user_id === user?.id);
+  const canEditOrganization = canManageOrganization(resolvedOrganization, user?.id);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const systemRoleFilters = [
+    { id: 'all', label: 'Все' },
+    { id: 'owner', label: 'Владельцы' },
+    { id: 'admin', label: 'Модераторы' },
+    { id: 'member', label: 'Участники' },
+  ];
+
+  const customRoleFilters = (resolvedOrganization?.roles || [])
+    .filter((role) => role?.name)
+    .map((role) => ({
+      id: `custom:${role.name}`,
+      label: role.name,
+      color: role.color,
+    }));
+
   const filteredMembers = useMemo(() => {
-    if (!currentOrganization?.organization_members) return [];
+    if (!resolvedOrganization?.organization_members) return [];
 
     const term = searchTerm.toLowerCase().trim();
-    if (!term) return currentOrganization.organization_members;
-
-    return currentOrganization.organization_members.filter((member) => {
+    return resolvedOrganization.organization_members.filter((member) => {
       const displayName = (member.user?.full_name || '').toLowerCase();
       const username = (member.user?.username || '').toLowerCase();
       const email = (member.user?.email || '').toLowerCase();
@@ -77,16 +102,42 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
         ? [member.roles.toLowerCase()]
         : [];
 
-      return (
+      const matchesSearch =
+        !term ||
         displayName.includes(term) ||
         username.includes(term) ||
         email.includes(term) ||
         systemRole.includes(term) ||
         memberStatus.includes(term) ||
-        customRoles.some((role) => role.includes(term))
-      );
+        customRoles.some((role) => role.includes(term));
+
+      const matchesRoleFilter =
+        activeRoleFilter === 'all' ||
+        (activeRoleFilter === 'owner' && member.status === 'owner') ||
+        (activeRoleFilter === 'admin' && member.status === 'admin') ||
+        (activeRoleFilter === 'member' && !['owner', 'admin'].includes(String(member.status || '').toLowerCase())) ||
+        (activeRoleFilter.startsWith('custom:') &&
+          customRoles.includes(activeRoleFilter.replace('custom:', '').toLowerCase()));
+
+      return matchesSearch && matchesRoleFilter;
     });
-  }, [currentOrganization?.organization_members, searchTerm]);
+  }, [activeRoleFilter, resolvedOrganization?.organization_members, searchTerm]);
+
+  const sortedMembers = useMemo(() => {
+    const rank = (member: any) => {
+      if (member.status === 'owner') return 0;
+      if (member.status === 'admin') return 1;
+      return 2;
+    };
+
+    return [...filteredMembers].sort((a, b) => {
+      const roleDiff = rank(a) - rank(b);
+      if (roleDiff !== 0) return roleDiff;
+      const aName = a.user?.full_name || a.user?.username || '';
+      const bName = b.user?.full_name || b.user?.username || '';
+      return aName.localeCompare(bName, 'ru');
+    });
+  }, [filteredMembers]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     const id = toastId.current++;
@@ -105,9 +156,10 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   };
 
   const confirmLeave = async () => {
+    if (!resolvedOrganization?.id) return;
     setIsLeaving(true);
     try {
-      await leaveOrganization(currentOrganization.id);
+      await leaveOrganization(resolvedOrganization.id);
       onClose();
       showToast('Вы вышли из организации', 'success');
     } catch (err: any) {
@@ -123,9 +175,10 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   };
 
   const confirmDelete = async () => {
+    if (!resolvedOrganization?.id) return;
     setIsDeleting(true);
     try {
-      await deleteOrganization(currentOrganization.id);
+      await deleteOrganization(resolvedOrganization.id);
       await refreshOrganizations();
       showToast('Организация удалена', 'success');
       onClose();
@@ -139,13 +192,13 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
   };
 
   const handleGenerateInvite = async () => {
-    if (!currentOrganization) return;
+    if (!resolvedOrganization) return;
 
     setIsGenerating(true);
     setError(null);
 
     try {
-      const data = await createOrganizationInvite(currentOrganization.id);
+      const data = await createOrganizationInvite(resolvedOrganization.id);
 
       if (data?.invite_link) {
         setInviteLink(data.invite_link);
@@ -171,13 +224,6 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
     }
   };
 
-  const anchorRect = anchorEl.getBoundingClientRect();
-  const modalWidth = 360;
-  const leftGap = 8;
-  let left = anchorRect.left - modalWidth - leftGap;
-  if (left < 0) left = anchorRect.left + leftGap;
-  const top = anchorRect.bottom + 8;
-
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [userInfoPosition, setUserInfoPosition] = useState({ x: 0, y: 0 });
 
@@ -189,17 +235,30 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
       y: rect.bottom + window.scrollY,
     });
 
+    const systemRole =
+      member.status === 'owner'
+        ? { name: 'Владелец', color: '#b45309' }
+        : member.status === 'admin'
+        ? { name: 'Модератор', color: 'var(--color-primary)' }
+        : { name: 'Участник' };
+    const customRoles = Array.isArray(member.roles)
+      ? member.roles
+          .filter(Boolean)
+          .map((roleName: string) => {
+            const foundRole = resolvedOrganization?.roles?.find((role) => role.name === roleName);
+            return { name: roleName, color: foundRole?.color };
+          })
+      : typeof member.roles === 'string' && member.roles.trim() !== ''
+      ? [{ name: member.roles, color: resolvedOrganization?.roles?.find((role) => role.name === member.roles)?.color }]
+      : [];
+
     setSelectedUser({
       id: member.user.id,
       email: member.user.email,
       username: member.user.username,
       full_name: member.user.full_name || member.user.username || 'Пользователь',
       avatar_url: member.user.avatar_url,
-      roles: Array.isArray(member.roles)
-        ? member.roles.filter(Boolean)
-        : typeof member.roles === 'string' && member.roles.trim() !== ''
-        ? [member.roles]
-        : [],
+      roles: [systemRole, ...customRoles],
       description: member.user.description || null,
     });
   };
@@ -208,7 +267,7 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
     setSelectedUser(null);
   };
 
-  if (!currentOrganization) return null;
+  if (!resolvedOrganization) return null;
 
   return createPortal(
     <div
@@ -220,21 +279,6 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
       }}
       style={{ position: 'fixed', inset: 0, zIndex: 1000 }}
     >
-      {isEditOrgModalOpen && (
-        <EditOrganizationModal
-          isOpen={isEditOrgModalOpen}
-          onClose={() => {
-            setIsEditOrgModalOpen(false);
-            onClose();
-          }}
-          organizationId={currentOrganization.id}
-          initialName={currentOrganization.name}
-          initialDescription={currentOrganization.description || ''}
-          initialRoles={currentOrganization.roles || []}
-          initialAutoRemove={currentOrganization.autoRemoveMembers || false}
-        />
-      )}
-
       {selectedUser && (
         <UserInfoModal
           user={selectedUser}
@@ -274,30 +318,72 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
       <div
         ref={modalRef}
         className={styles['org-info-modal']}
-        style={{ position: 'absolute', top: `${top}px`, left: `${left}px` }}
         role="dialog"
         aria-label="Информация об организации"
       >
-        <h3 className={styles['org-info-modal__title']}>
-          {currentOrganization.name}
-          {isOwner && (
+        <h3 className={styles['org-info-modal__title']}>{resolvedOrganization.name}</h3>
+        {resolvedOrganization.description ? (
+          <p className={styles['org-info-modal__title-description']}>{resolvedOrganization.description}</p>
+        ) : null}
+
+        <div className={styles['org-info-modal__tabs']}>
+          <button
+            type="button"
+            className={`${styles['org-info-modal__tab']} ${activeTab === 'members' ? styles['org-info-modal__tab--active'] : ''}`}
+            onClick={() => setActiveTab('members')}
+          >
+            Обзор
+          </button>
+          {canEditOrganization && (
             <button
-              className={styles['org-info-modal__edit-button']}
-              onClick={() => setIsEditOrgModalOpen(true)}
-              aria-label="Редактировать организацию"
+              type="button"
+              className={`${styles['org-info-modal__tab']} ${activeTab === 'settings' ? styles['org-info-modal__tab--active'] : ''}`}
+              onClick={() => setActiveTab('settings')}
             >
-              🔧
+              Настройки
             </button>
           )}
-        </h3>
+        </div>
 
-        {currentOrganization.description && (
-          <div className={styles['org-info-modal__section']}>
-            <div>{currentOrganization.description}</div>
-          </div>
-        )}
+        {activeTab === 'members' && (
+          <>
 
         <div className={styles['org-info-modal__section']}>
+          <div className={styles['org-info-modal__filter-group']}>
+            <div className={styles['org-info-modal__filter-label']}>Системные роли</div>
+            <div className={styles['org-info-modal__filter-row']}>
+              {systemRoleFilters.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  className={`${styles['org-info-modal__filter-chip']} ${activeRoleFilter === filter.id ? styles['org-info-modal__filter-chip--active'] : ''}`}
+                  onClick={() => setActiveRoleFilter((prev) => (prev === filter.id ? 'all' : filter.id))}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {customRoleFilters.length > 0 && (
+            <div className={styles['org-info-modal__filter-group']}>
+              <div className={styles['org-info-modal__filter-label']}>Кастомные роли</div>
+              <div className={styles['org-info-modal__filter-row']}>
+                {customRoleFilters.map((filter) => (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    className={`${styles['org-info-modal__filter-chip']} ${activeRoleFilter === filter.id ? styles['org-info-modal__filter-chip--active'] : ''}`}
+                    style={activeRoleFilter === filter.id ? { borderColor: filter.color, color: filter.color } : undefined}
+                    onClick={() => setActiveRoleFilter((prev) => (prev === filter.id ? 'all' : filter.id))}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -305,9 +391,9 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
             size="small"
             fullWidth
           />
-          <strong>Участники ({filteredMembers.length}):</strong>
+          <strong>Участники ({sortedMembers.length}):</strong>
           <div className={styles['org-info-modal__members']}>
-            {filteredMembers.map((member) => {
+            {sortedMembers.map((member) => {
               const displayName =
                 member.user?.full_name ||
                 (member.user?.username ? `@${member.user.username}` : `Пользователь ${member.id.slice(-5)}`);
@@ -324,6 +410,8 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
                 : typeof member.roles === 'string' && member.roles.trim() !== ''
                 ? [member.roles]
                 : [];
+              const presence = getPresenceStatus(member.user?.last_seen_at);
+              const deletedUser = isDeletedUserProfile(member.user);
 
               return (
                 <div
@@ -332,54 +420,116 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
                   onClick={(e) => handleAvatarClick(e, member)}
                 >
                   <div className={styles['org-info-modal__avatar']} title={displayName}>
-                    {displayName.charAt(0).toUpperCase()}
+                    {member.user?.avatar_url ? (
+                      <img src={member.user.avatar_url} alt={displayName} className={styles['org-info-modal__avatar-image']} />
+                    ) : (
+                      displayName.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className={styles['org-info-modal__member-info']}>
-                    <span className={styles['org-info-modal__member-name']}>{displayName}</span>
-                    <span
-                      className={`${styles['org-info-modal__status-badge']} ${
-                        styles[
-                          member.status === 'owner'
-                            ? 'org-info-modal__status-badge--owner'
-                            : member.status === 'admin'
-                            ? 'org-info-modal__status-badge--admin'
-                            : 'org-info-modal__status-badge--member'
-                        ]
-                      }`}
+                    <div className={styles['org-info-modal__member-topline']}>
+                      <span className={styles['org-info-modal__member-name']}>{displayName}</span>
+                    </div>
+                    {!deletedUser ? (
+                      <div className={styles['org-info-modal__member-secondary']}>
+                        @{member.user?.username || 'unknown'}
+                      </div>
+                    ) : null}
+                    <div
+                      className={`${styles['org-info-modal__member-last-seen']} ${styles[`org-info-modal__member-last-seen--${presence.tone}`]}`}
                     >
-                      {systemRoleLabel}
-                    </span>
-                  </div>
-                  <div className={styles['org-info-modal__member-roles']}>
-                    {customRoles.map((roleName) => {
-                      const role = currentOrganization.roles?.find((r) => r.name === roleName);
-                      return (
-                        <span
-                          key={roleName}
-                          className={styles['org-info-modal__role-badge']}
-                          style={{ backgroundColor: role?.color || 'var(--color-primary)' }}
-                        >
-                          {roleName}
-                        </span>
-                      );
-                    })}
+                      <span className={styles['org-info-modal__presence-dot']} />
+                      {presence.label}
+                    </div>
+                    <div className={styles['org-info-modal__member-roles']}>
+                      <span
+                        className={`${styles['org-info-modal__status-badge']} ${
+                          styles[
+                            member.status === 'owner'
+                              ? 'org-info-modal__status-badge--owner'
+                              : member.status === 'admin'
+                              ? 'org-info-modal__status-badge--admin'
+                              : 'org-info-modal__status-badge--member'
+                          ]
+                        }`}
+                      >
+                        {systemRoleLabel}
+                      </span>
+                      {customRoles.map((roleName) => {
+                        const role = resolvedOrganization.roles?.find(
+                          (r) => normalizeRoleKey(r.name) === normalizeRoleKey(roleName)
+                        );
+                        return (
+                          <span
+                            key={roleName}
+                            className={styles['org-info-modal__role-badge']}
+                            style={{ backgroundColor: role?.color || 'var(--color-primary)' }}
+                          >
+                            {roleName}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
 
-        {isOwner && (
+          {!isOwner && (
+            <div className={`${styles['org-info-modal__settings-card']} ${styles['org-info-modal__overview-action-card']}`}>
+              <div className={styles['org-info-modal__settings-copy']}>
+                <span className={styles['org-info-modal__settings-eyebrow']}>Участие</span>
+                <strong>Покинуть организацию</strong>
+                <p className={styles['org-info-modal__settings-text']}>
+                  После выхода вы потеряете доступ к проектам, участникам и переписке этой организации.
+                </p>
+              </div>
+              <Button variant="secondary" size="small" className={styles['org-info-modal__danger-button']} onClick={handleLeaveOrg}>
+                Покинуть организацию
+              </Button>
+            </div>
+          )}
+        </div>
+          </>
+        )}
+
+        {activeTab === 'settings' && canEditOrganization && (
           <div className={styles['org-info-modal__section']}>
+            <div className={styles['org-info-modal__settings-card']}>
+              <div className={styles['org-info-modal__settings-copy']}>
+                <span className={styles['org-info-modal__settings-eyebrow']}>Редактор</span>
+                <strong>Управление организацией</strong>
+                <p className={styles['org-info-modal__settings-text']}>
+                  Владельцы и модераторы могут редактировать организацию, роли и доступ участников.
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="small"
+                className={styles['org-info-modal__settings-button']}
+                onClick={() => {
+                  onClose();
+                  window.setTimeout(() => {
+                    const event = new CustomEvent('open-edit-organization');
+                    window.dispatchEvent(event);
+                  }, 0);
+                }}
+              >
+                Открыть редактор
+              </Button>
+            </div>
             {inviteLink ? (
-              <div className={styles['org-info-modal__link-container']}>
+              <div className={`${styles['org-info-modal__link-container']} ${styles['org-info-modal__settings-card']}`}>
+                <div className={styles['org-info-modal__settings-copy']}>
+                  <span className={styles['org-info-modal__settings-eyebrow']}>Приглашение</span>
+                  <strong>Ссылка для участников</strong>
+                </div>
                 <Input
                   value={inviteLink}
                   readOnly
                   fullWidth
                   size="small"
-                  style={{ marginBottom: '8px' }}
                   onClick={() => {
                     navigator.clipboard.writeText(inviteLink).then(
                       () => showToast('Скопировано!', 'success'),
@@ -388,13 +538,21 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
                   }}
                   title="Нажмите, чтобы скопировать"
                 />
-                {expiresAt && <small>Ссылка действительна 1 час.</small>}
+                {expiresAt && <small className={styles['org-info-modal__settings-note']}>Ссылка действительна 1 час.</small>}
               </div>
             ) : (
-              <div className={styles['org-info-modal__actions']}>
+              <div className={`${styles['org-info-modal__actions']} ${styles['org-info-modal__settings-card']}`}>
+                <div className={styles['org-info-modal__settings-copy']}>
+                  <span className={styles['org-info-modal__settings-eyebrow']}>Приглашение</span>
+                  <strong>Открыть доступ по ссылке</strong>
+                  <p className={styles['org-info-modal__settings-text']}>
+                    Создайте временную ссылку, чтобы пригласить нового участника в организацию.
+                  </p>
+                </div>
                 <Button
-                  variant="primary"
+                  variant="secondary"
                   size="small"
+                  className={styles['org-info-modal__settings-button']}
                   onClick={handleGenerateInvite}
                   disabled={isGenerating}
                 >
@@ -402,20 +560,22 @@ const OrgInfoModal: React.FC<OrgInfoModalProps> = ({ anchorEl, onClose }) => {
                 </Button>
               </div>
             )}
-            {error && <div style={{ color: 'var(--color-danger)', fontSize: '12px' }}>{error}</div>}
+            {error && <div className={styles['org-info-modal__settings-error']}>{error}</div>}
 
-            <div className={styles['org-info-modal__actions']}>
-              {!isOwner && (
-                <Button variant="danger" size="small" onClick={handleLeaveOrg}>
-                  Покинуть организацию
-                </Button>
-              )}
-              {isOwner && (
-                <Button variant="danger" size="small" onClick={handleDeleteOrg}>
+            {isOwner && (
+              <div className={`${styles['org-info-modal__actions']} ${styles['org-info-modal__settings-card']} ${styles['org-info-modal__settings-card--danger']}`}>
+              <div className={styles['org-info-modal__settings-copy']}>
+                <span className={styles['org-info-modal__settings-eyebrow']}>Доступ</span>
+                <strong>Удалить организацию</strong>
+                <p className={styles['org-info-modal__settings-text']}>
+                  Это действие удалит организацию со всеми проектами, задачами и сообщениями.
+                </p>
+              </div>
+                <Button variant="secondary" size="small" className={styles['org-info-modal__danger-button']} onClick={handleDeleteOrg}>
                   Удалить организацию
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>

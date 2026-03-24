@@ -1,5 +1,5 @@
 .task-card {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
   padding: 12px;
@@ -7,6 +7,24 @@
   transition: all 0.2s;
   position: relative;
   user-select: none;
+}
+
+.task-card--overdue {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-danger, #dc2626) 10%, var(--color-surface) 90%),
+    var(--color-surface)
+  );
+}
+
+.task-card--done {
+  border-color: rgba(22, 163, 74, 0.24);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #16a34a 10%, var(--color-surface) 90%),
+    var(--color-surface)
+  );
 }
 
 .task-card:hover {
@@ -28,6 +46,28 @@
   margin: 0;
   line-height: 1.3;
   flex: 1;
+}
+
+.task-card__context {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.task-card__context-item {
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.task-card__context-item strong {
+  color: var(--color-text);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .task-card__edit-button {
@@ -74,6 +114,29 @@
   gap: 4px;
 }
 
+.task-card__due-date--overdue {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.task-card__due-date--done {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.task-card__report-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--border-color) 78%);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface) 90%);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
 .task-card__assignees {
   font-size: 12px;
   color: var(--color-text);
@@ -94,6 +157,12 @@
   font-size: 12px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: white;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
+}
+
+.task-card__status-select:disabled {
+  cursor: default;
+  opacity: 0.7;
 }

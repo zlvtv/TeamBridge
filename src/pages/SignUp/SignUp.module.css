@@ -1,25 +1,5 @@
 @import '../../components/auth/AuthLayout.module.css';
 
-.auth {
-  composes: auth from '@/components/auth/AuthLayout.module.css';
-}
-
-.auth__wrapper {
-  composes: auth__wrapper from '@/components/auth/AuthLayout.module.css';
-}
-
-.auth__title {
-  composes: auth__title from '@/components/auth/AuthLayout.module.css';
-}
-
-.auth__subtitle {
-  composes: auth__subtitle from '@/components/auth/AuthLayout.module.css';
-}
-
-.auth__error {
-  composes: auth__error from '@/components/auth/AuthLayout.module.css';
-}
-
 .auth__form {
   composes: auth__form from '@/components/auth/AuthLayout.module.css';
 }
@@ -30,6 +10,14 @@
 
 .auth__label {
   composes: auth__label from '@/components/auth/AuthLayout.module.css';
+}
+
+.auth__helper {
+  composes: auth__helper from '@/components/auth/AuthLayout.module.css';
+}
+
+.auth__error {
+  composes: auth__error from '@/components/auth/AuthLayout.module.css';
 }
 
 .auth__footer {

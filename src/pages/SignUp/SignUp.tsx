@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import AuthShell from '../../components/auth/AuthShell';
 import Input from '../../components/ui/input/input';
 import Button from '../../components/ui/button/button';
 import styles from './SignUp.module.css';
+import {
+  sanitizeUsernameInput,
+  validateFullName,
+  validateUsername,
+  USERNAME_MAX_LENGTH,
+} from '../../utils/profileValidation';
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +19,9 @@ const SignUp: React.FC = () => {
   const [fullName, setFullName] = useState('');
 
   const [error, setError] = useState<string | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const [touched, setTouched] = useState({
     username: false,
@@ -22,18 +31,7 @@ const SignUp: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-
-  const validateUsername = (username: string): string | null => {
-    const trimmed = username.trim();
-    if (trimmed.length === 0) return 'Имя пользователя обязательно';
-    if (trimmed.length < 3) return 'Минимум 3 символа';
-    if (trimmed.length > 15) return 'Не более 15 символов';
-    if (!/^[a-zA-Z0-9_-]+$/i.test(trimmed)) {
-      return 'Только буквы, цифры, _, -';
-    }
-    return null;
-  };
+  const { signUp, checkUsernameAvailability } = useAuth();
 
   const validateEmail = (email: string): string | null => {
     const trimmed = email.trim();
@@ -49,16 +47,21 @@ const SignUp: React.FC = () => {
     return null;
   };
 
-  const validateFullName = (name: string): string | null => {
-    const trimmed = name.trim();
-    if (trimmed.length === 0) return 'Полное имя обязательно';
-    if (trimmed.length < 2) return 'Слишком короткое имя';
-    if (trimmed.length > 50) return 'Слишком длинное имя';
-    return null;
-  };
-
-  const handleBlur = (field: 'username' | 'email' | 'password' | 'fullName') => {
+  const handleBlur = async (field: 'username' | 'email' | 'password' | 'fullName') => {
     setTouched((prev) => ({ ...prev, [field]: true }));
+
+    if (field !== 'username') return;
+
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setUsernameStatus(null);
+      return;
+    }
+
+    setIsCheckingUsername(true);
+    const result = await checkUsernameAvailability(username);
+    setUsernameStatus(result.available ? 'Имя пользователя свободно' : result.message || 'Имя пользователя уже занято');
+    setIsCheckingUsername(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +86,13 @@ const SignUp: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const usernameAvailability = await checkUsernameAvailability(username);
+      if (!usernameAvailability.available) {
+        setUsernameStatus(usernameAvailability.message || 'Имя пользователя уже занято');
+        setIsLoading(false);
+        return;
+      }
+
       const result = await signUp(
         email.trim(),
         password,
@@ -93,7 +103,11 @@ const SignUp: React.FC = () => {
       if (result.data?.user) {
         navigate('/confirm', { replace: true });
       } else if (result.error) {
-        setError(result.error.message);
+        if (result.error.message.includes('Имя пользователя уже занято')) {
+          setUsernameStatus(result.error.message);
+        } else {
+          setError(result.error.message);
+        }
       }
     } catch (err) {
       setError('Не удалось зарегистрироваться. Попробуйте позже.');
@@ -102,40 +116,72 @@ const SignUp: React.FC = () => {
     }
   };
 
-  return (
-    <div className={styles.auth}>
-      <div className={styles['auth__wrapper']}>
-        <h1 className={styles['auth__title']}>Регистрация</h1>
-        <p className={styles['auth__subtitle']}>Создайте аккаунт, чтобы начать работу</p>
+  const usernameValidationError = touched.username ? validateUsername(username) ?? undefined : undefined;
+  const usernameAvailabilityError =
+    !usernameValidationError && usernameStatus && usernameStatus !== 'Имя пользователя свободно'
+      ? usernameStatus
+      : undefined;
 
+  return (
+    <AuthShell
+      compact
+      badge="Регистрация"
+      title="Создайте аккаунт TeamBridge"
+      subtitle=""
+      showcaseLabel="Setup"
+      showcaseTitle="Быстрый старт без лишнего шума"
+      showcaseDescription="После регистрации можно сразу перейти к проектам, ролям и задачам."
+      showcaseItems={[
+        'Кастомные роли и структура команды',
+        'Инвайты, задачи и уведомления в одном месте',
+      ]}
+      footer={(
+        <p className={styles['auth__footer']}>
+          Уже есть аккаунт?{' '}
+          <button
+            type="button"
+            className={styles['auth__link']}
+            onClick={() => navigate('/login')}
+            disabled={isLoading}
+          >
+            Войти
+          </button>
+        </p>
+      )}
+    >
         {error && <div className={styles['auth__error']}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles['auth__form']}>
-            <div className={styles['auth__field']}>
-  <label htmlFor="username" className={styles['auth__label']}>
-    Имя пользователя
-  </label>
-  <Input
-    id="username"
-    type="text"
-    value={username}
-    onChange={(e) => {
-      const value = e.target.value;
-      const filtered = value.replace(/[^a-zA-Z0-9_-]/g, '');
-      setUsername(filtered);
-    }}
-    onBlur={() => handleBlur('username')}
-    placeholder="ваше_имя"
-    required
-    minLength={3}
-    maxLength={15}
-    disabled={isLoading}
-    error={touched.username ? validateUsername(username) : undefined}
-  />
-  {touched.username && !validateUsername(username) && (
-    <small>3–15 символов. Только a–z, 0–9, _, -</small>
-  )}
-</div>
+          <div className={styles['auth__field']}>
+            <label htmlFor="username" className={styles['auth__label']}>
+              Имя пользователя
+            </label>
+            <Input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => {
+                setUsername(sanitizeUsernameInput(e.target.value));
+                setUsernameStatus(null);
+              }}
+              onBlur={() => handleBlur('username')}
+              placeholder="ваше_имя"
+              name="username"
+              autoComplete="username"
+              required
+              minLength={3}
+              maxLength={USERNAME_MAX_LENGTH}
+              disabled={isLoading || isCheckingUsername}
+              error={usernameValidationError || usernameAvailabilityError}
+            />
+            <span className={styles['auth__helper']}>
+              {touched.username && !usernameValidationError
+                ? isCheckingUsername
+                  ? 'Проверяем доступность имени...'
+                  : usernameStatus || '3-30 символов. Только буквы, цифры, _, -.'
+                : '3-30 символов. Только буквы, цифры, _, -.'}
+            </span>
+          </div>
 
           <div className={styles['auth__field']}>
             <label htmlFor="fullName" className={styles['auth__label']}>
@@ -148,13 +194,13 @@ const SignUp: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
               onBlur={() => handleBlur('fullName')}
               placeholder="Иван Иванов"
+              name="fullName"
+              autoComplete="name"
               required
               disabled={isLoading}
-              error={touched.fullName ? validateFullName(fullName) : undefined}
+              error={touched.fullName ? validateFullName(fullName) ?? undefined : undefined}
             />
-            {touched.fullName && !validateFullName(fullName) && (
-              <small>Введите ваше настоящее имя</small>
-            )}
+            <span className={styles['auth__helper']}>Это имя будет видно в команде и внутри проектов.</span>
           </div>
 
           <div className={styles['auth__field']}>
@@ -168,9 +214,11 @@ const SignUp: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => handleBlur('email')}
               placeholder="name@example.com"
+              name="email"
+              autoComplete="email"
               required
               disabled={isLoading}
-              error={touched.email ? validateEmail(email) : undefined}
+              error={touched.email ? validateEmail(email) ?? undefined : undefined}
             />
           </div>
 
@@ -185,33 +233,20 @@ const SignUp: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               onBlur={() => handleBlur('password')}
               placeholder="••••••••"
+              name="password"
+              autoComplete="new-password"
               required
               disabled={isLoading}
-              error={touched.password ? validatePassword(password) : undefined}
+              error={touched.password ? validatePassword(password) ?? undefined : undefined}
             />
-            {touched.password && !validatePassword(password) && (
-              <small>Минимум 6 символов</small>
-            )}
+            <span className={styles['auth__helper']}>Минимум 6 символов для безопасного входа.</span>
           </div>
 
           <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
             Зарегистрироваться
           </Button>
         </form>
-
-        <p className={styles['auth__footer']}>
-          Уже есть аккаунт?{' '}
-          <button
-            type="button"
-            className={styles['auth__link']}
-            onClick={() => navigate('/login')}
-            disabled={isLoading}
-          >
-            Войти
-          </button>
-        </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 };
 

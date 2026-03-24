@@ -18,6 +18,10 @@ export interface Organization {
   created_at: string;
   updated_at: string;
   hasUnreadMessages?: boolean;
+  autoRemoveMembers?: boolean;
+  autoAddRoleMembersToChats?: boolean;
+  roles?: Array<{ name: string; color: string }>;
+  task_tags?: string[];
 }
 
 export interface OrganizationWithMembers extends Organization {
@@ -35,6 +39,7 @@ export interface CreateOrganizationData {
   description?: string;
   roles?: Array<{ name: string; color: string }>; 
   autoRemoveMembers?: boolean;
+  autoAddRoleMembersToChats?: boolean;
 }
 
 export interface UpdateOrganizationData {
@@ -42,4 +47,5 @@ export interface UpdateOrganizationData {
   description?: string;
   roles?: Array<{ name: string; color: string }>;
   autoRemoveMembers?: boolean;
+  autoAddRoleMembersToChats?: boolean;
 }

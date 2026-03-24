@@ -1,0 +1,66 @@
+.task-info-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-info-modal__title {
+  margin: 0;
+  font-size: 18px;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.task-info-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.task-info-modal__due-date {
+  color: var(--color-text-light);
+  font-size: 13px;
+}
+
+.task-info-modal__project {
+  font-size: 13px;
+  color: var(--color-text-light);
+}
+
+.task-info-modal__description {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.task-info-modal__description-empty {
+  margin: 0;
+  color: var(--color-text-light);
+}
+
+.task-info-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-info-modal__section p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.task-info-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.task-info-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}

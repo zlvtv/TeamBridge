@@ -6,12 +6,14 @@ import Select, { SelectOption } from '../select/select';
 interface FieldProps {
   name: string;
   label: string;
-  type?: 'text' | 'email' | 'password' | 'textarea' | 'select';
+  type?: 'text' | 'email' | 'password' | 'textarea' | 'select' | 'date' | 'datetime-local';
   placeholder?: string;
   options?: SelectOption[];
+  multiple?: boolean;
   required?: boolean;
   multiline?: boolean;
   rows?: number;
+  resize?: 'none' | 'vertical' | 'horizontal' | 'both';
   disabled?: boolean;
   validators?: ((value: any) => string | null)[];
   className?: string;
@@ -24,9 +26,11 @@ const Field: React.FC<FieldProps> = ({
   type = 'text',
   placeholder,
   options,
+  multiple = false,
   required = false,
   multiline = false,
   rows = 3,
+  resize = 'vertical',
   disabled = false,
   validators = [],
   className,
@@ -77,8 +81,9 @@ const Field: React.FC<FieldProps> = ({
           onChange={handleSelectChange}
           options={options}
           placeholder={placeholder}
+          isMulti={multiple}
           hasSearch={hasSearch} 
-          disabled={disabled}
+          isDisabled={disabled}
         />
       );
     }
@@ -93,6 +98,7 @@ const Field: React.FC<FieldProps> = ({
         placeholder={placeholder}
         textarea={multiline}
         rows={rows}
+        resize={resize}
         disabled={disabled}
         error={touched[name] && errors[name] ? errors[name] : undefined}
       />
@@ -105,11 +111,6 @@ const Field: React.FC<FieldProps> = ({
         {label} {required && <span style={{ color: 'var(--color-danger)' }}>*</span>}
       </label>
       {renderInput()}
-      {touched[name] && errors[name] && (
-        <div style={{ color: 'var(--color-danger)', fontSize: '13px', marginTop: '4px' }}>
-          {errors[name]}
-        </div>
-      )}
     </div>
   );
 };

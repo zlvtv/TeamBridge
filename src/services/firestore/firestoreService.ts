@@ -13,7 +13,7 @@ export interface FirestoreDocument {
 type CollectionName = 
   | 'organizations' | 'projects' | 'messages' | 'tasks' 
   | 'users' | 'invitations' | 'files' | 'polls'
-  | 'organization_invites';
+  | 'organization_invites' | 'task_messages' | 'notifications';
 
 interface QueryOptions {
   whereClauses?: Array<{ field: string; operator: any; value: any }>;

@@ -4,11 +4,12 @@
   --modal-border-radius: var(--border-radius-lg);
   --modal-shadow: var(--shadow-large);
   --modal-background: var(--color-surface);
-  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --modal-overlay: rgba(255, 255, 255, 0.02);
   --modal-title-color: var(--color-text);
   --modal-content-color: var(--color-text-light);
   --modal-close-color: var(--color-text);
-  --modal-transition-duration: 0.35s; 
+  --modal-transition-duration: 0.32s;
+  --modal-base-font-size: 14px;
 }
 
 .modal__overlay {
@@ -22,21 +23,23 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: modal-overlay-fade-in var(--modal-transition-duration) cubic-bezier(0.3, 0.0, 0.3, 1.0);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  animation: modal-overlay-fade-in var(--modal-transition-duration) cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(6px) saturate(112%);
+  -webkit-backdrop-filter: blur(6px) saturate(112%);
 }
 
 @keyframes modal-overlay-fade-in {
   from {
     opacity: 0;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background-color: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(2px) saturate(106%);
+    -webkit-backdrop-filter: blur(2px) saturate(106%);
   }
   to {
     opacity: 1;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background-color: var(--modal-overlay);
+    backdrop-filter: blur(6px) saturate(112%);
+    -webkit-backdrop-filter: blur(6px) saturate(112%);
   }
 }
 
@@ -52,41 +55,19 @@
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  animation: modal-scale-in var(--modal-transition-duration) cubic-bezier(0.16, 1.0, 0.3, 1.0);
+  animation: modal-surface-in var(--modal-transition-duration) cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center;
-  scrollbar-width: thin; 
-  scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+  font-size: var(--modal-base-font-size);
 }
 
-.modal::-webkit-scrollbar {
-  width: 2px; 
-}
-
-.modal::-webkit-scrollbar-thumb {
-  background: rgba(120, 120, 120, 0.25);
-  border-radius: 1px;
-}
-
-.modal::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 100, 100, 0.35);
-}
-
-.modal::-webkit-scrollbar-track {
-  background: transparent; 
-  border-radius: 2px;
-}
-
-@keyframes modal-scale-in {
+@keyframes modal-surface-in {
   0% {
     opacity: 0;
-    transform: scale(0.85) translateY(-10px);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.02) translateY(4px);
+    transform: translateY(18px) scale(0.96);
   }
   100% {
-    transform: scale(1) translateY(0);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -119,9 +100,10 @@
 }
 
 .modal__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 16px 0;
+  font-size: 1.08rem;
+  font-weight: 500;
+  line-height: 1.35;
+  margin: 0 0 14px 0;
   color: var(--modal-title-color);
   padding: 24px 24px 0 24px;
 }
@@ -129,6 +111,8 @@
 .modal__content {
   padding: 0 24px 24px 24px;
   color: var(--modal-content-color);
+  font-size: var(--modal-base-font-size);
+  line-height: 1.45;
 }
 
 .modal__footer {

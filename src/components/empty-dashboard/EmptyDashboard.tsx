@@ -34,7 +34,7 @@ const EmptyDashboard: React.FC = () => {
 
       <div className={styles['empty-dashboard__content']}>
         <h1 className={styles['empty-dashboard__title']}>
-          Добро пожаловать, {user?.username || user?.email?.split('@')[0] || 'Пользователь'}!
+          Добро пожаловать, {user?.full_name || user?.username || user?.email?.split('@')[0] || 'Пользователь'}!
         </h1>
         <p className={styles['empty-dashboard__subtitle']}>
           Вы ещё не состоите ни в одной организации.

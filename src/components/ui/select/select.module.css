@@ -1,6 +1,6 @@
 .selectContainer {
   position: relative;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .selectControl {
@@ -13,6 +13,12 @@
   min-height: 40px;
   background-color: var(--color-surface, #f8fafc);
   transition: border-color 0.2s;
+}
+
+.singleValue {
+  color: var(--color-text, #1e293b);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .selectControl:hover:not(.disabled):not(.error) {
@@ -52,6 +58,7 @@
 
 .placeholder {
   color: var(--color-text-secondary, #94a3b8);
+  font-size: 13px;
 }
 
 .multiValueContainer {
@@ -68,8 +75,21 @@
   border: 1px solid var(--color-primary);
   border-radius: 6px;
   padding: 2px 6px;
-  font-size: 13px;
+  font-size: 12px;
   gap: 4px;
+}
+
+.multiValueSummary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface) 90%);
+  color: var(--color-text-secondary, #64748b);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .multiValue .avatar {
@@ -132,7 +152,7 @@
   border: 1px solid var(--border-color, #e2e8f0); 
   border-radius: 6px;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 13px;
   outline: none;
 }
 
@@ -153,6 +173,25 @@
   padding: 8px 12px;
   cursor: pointer;
   gap: 8px;
+  font-size: 13px;
+}
+
+.optionCheckbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.optionCheckboxSelected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .option:hover {

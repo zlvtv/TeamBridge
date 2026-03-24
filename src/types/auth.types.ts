@@ -5,6 +5,7 @@ export interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
   description: string | null;
+  last_seen_at?: string | null;
 }
 
 export interface AuthContextType {
@@ -27,5 +28,24 @@ export interface AuthContextType {
     success: boolean;
     message: string;
   }>;
+  checkUsernameAvailability: (username: string) => Promise<{
+    available: boolean;
+    message?: string;
+  }>;
+  updateCurrentUserProfile: (payload: {
+    username: string;
+    fullName: string;
+    description?: string;
+    avatarFile?: File | null;
+    removeAvatar?: boolean;
+  }) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+  deleteCurrentUserAccount: () => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+  refreshEmailVerificationStatus: () => Promise<boolean>;
   signInAnonymously: () => Promise<void>;
 }

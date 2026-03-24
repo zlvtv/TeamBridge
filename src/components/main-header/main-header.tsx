@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useProject } from '../../contexts/ProjectContext';
 import { useUI } from '../../contexts/UIContext';
 import OrgInfoModal from '../../components/modals/org-info-modal/org-info-modal';
+import EditOrganizationModal from '../../components/modals/edit-organization-modal/edit-organization-modal';
 import styles from './main-header.module.css';
+import type { Organization } from '../../types/organization.types';
 
 const MainHeader: React.FC = () => {
   const { currentOrganization } = useOrganization();
@@ -14,17 +16,18 @@ const MainHeader: React.FC = () => {
   const openOrgInfo = () => openModal('orgInfo');
   const closeOrgInfo = () => closeModal('orgInfo');
 
-  const infoBtnElRef = useRef<HTMLButtonElement | null>(null);
+  const orgInfoAnchorRef = useRef<HTMLElement | null>(null);
   const [titleEl, setTitleEl] = useState<HTMLHeadingElement | null>(null);
+  const [isEditOrgModalOpen, setIsEditOrgModalOpen] = useState(false);
+  const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
 
 
   const handleInfoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log('Info btn clicked', e.currentTarget);
     if (isOrgInfoOpen) {
       closeOrgInfo();
-      infoBtnElRef.current = null;
+      orgInfoAnchorRef.current = null;
     } else {
-      infoBtnElRef.current = e.currentTarget;
+      orgInfoAnchorRef.current = e.currentTarget;
       openOrgInfo(); 
     }
   };
@@ -38,9 +41,39 @@ const MainHeader: React.FC = () => {
       return;
     }
 
+    orgInfoAnchorRef.current = target;
     setTitleEl(target);
     openOrgInfo();
   };
+
+  useEffect(() => {
+    const handleOpenEditor = () => {
+      if (!currentOrganization) return;
+      closeOrgInfo();
+      setEditingOrganization(currentOrganization);
+      setIsEditOrgModalOpen(true);
+    };
+
+    window.addEventListener('open-edit-organization', handleOpenEditor);
+    return () => window.removeEventListener('open-edit-organization', handleOpenEditor);
+  }, [closeOrgInfo, currentOrganization]);
+
+  useEffect(() => {
+    if (isEditOrgModalOpen && currentOrganization) {
+      setEditingOrganization(currentOrganization);
+    }
+  }, [currentOrganization, isEditOrgModalOpen]);
+
+  useEffect(() => {
+    const handleOpenOrgInfo = () => {
+      if (!currentOrganization) return;
+      orgInfoAnchorRef.current = titleEl;
+      openOrgInfo();
+    };
+
+    window.addEventListener('open-org-info', handleOpenOrgInfo);
+    return () => window.removeEventListener('open-org-info', handleOpenOrgInfo);
+  }, [currentOrganization, openOrgInfo, titleEl]);
 
   return (
     <>
@@ -56,7 +89,9 @@ const MainHeader: React.FC = () => {
         {currentOrganization && (
           <button
             ref={(el) => {
-              infoBtnElRef.current = el;
+              if (el) {
+                orgInfoAnchorRef.current = el;
+              }
             }}
             className={styles['main-header__info-btn']}
             onClick={handleInfoClick}
@@ -67,10 +102,26 @@ const MainHeader: React.FC = () => {
         )}
       </header>
 
-      {isOrgInfoOpen && infoBtnElRef.current && (
+      {isOrgInfoOpen && orgInfoAnchorRef.current && (
         <OrgInfoModal
-          anchorEl={infoBtnElRef.current}
+          anchorEl={orgInfoAnchorRef.current}
           onClose={closeOrgInfo}
+        />
+      )}
+
+      {editingOrganization && isEditOrgModalOpen && (
+        <EditOrganizationModal
+          isOpen={isEditOrgModalOpen}
+          onClose={() => {
+            setIsEditOrgModalOpen(false);
+            setEditingOrganization(null);
+          }}
+          organizationId={editingOrganization.id}
+          initialName={editingOrganization.name}
+          initialDescription={editingOrganization.description || ''}
+          initialRoles={editingOrganization.roles || []}
+          initialAutoRemove={editingOrganization.autoRemoveMembers || false}
+          initialAutoAddRoleMembersToChats={editingOrganization.autoAddRoleMembersToChats || false}
         />
       )}
     </>

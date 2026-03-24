@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import AuthShell from '../../components/auth/AuthShell';
 import Input from '../../components/ui/input/input';
 import Button from '../../components/ui/button/button';
 import styles from './Login.module.css';
@@ -41,11 +42,32 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={styles.auth}>
-      <div className={styles['auth__wrapper']}>
-        <h1 className={styles['auth__title']}>Войти в аккаунт</h1>
-        <p className={styles['auth__subtitle']}>Введите свои данные, чтобы продолжить</p>
-
+    <AuthShell
+      compact
+      badge="Вход"
+      title="Войдите в TeamBridge"
+      subtitle="Продолжите работу с проектами, задачами и командной коммуникацией."
+      showcaseLabel="Workspace"
+      showcaseTitle="Рабочее пространство снова под рукой"
+      showcaseDescription="После входа вы сразу возвращаетесь к активным обсуждениям, задачам и срокам."
+      showcaseItems={[
+        'Чат, kanban и календарь в одном интерфейсе',
+        'Упоминания и уведомления помогают быстро включиться в работу',
+      ]}
+      footer={(
+        <p className={styles['auth__footer']}>
+          Нет аккаунта?{' '}
+          <button
+            type="button"
+            className={styles['auth__link']}
+            onClick={() => navigate('/signup')}
+            disabled={isLoading}
+          >
+            Зарегистрироваться
+          </button>
+        </p>
+      )}
+    >
         {error && <div className={styles['auth__error']}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles['auth__form']}>
@@ -59,6 +81,8 @@ const Login: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
+              name="email"
+              autoComplete="email"
               required
               disabled={isLoading}
             />
@@ -74,12 +98,14 @@ const Login: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              name="password"
+              autoComplete="current-password"
               required
               disabled={isLoading}
             />
           </div>
 
-          <div style={{ marginTop: '-8px' }}>
+          <div className={styles['auth__linkRow']}>
             <button
               type="button"
               className={styles['auth__link']}
@@ -94,20 +120,7 @@ const Login: React.FC = () => {
             Войти
           </Button>
         </form>
-
-        <p className={styles['auth__footer']}>
-          Нет аккаунта?{' '}
-          <button
-            type="button"
-            className={styles['auth__link']}
-            onClick={() => navigate('/signup')}
-            disabled={isLoading}
-          >
-            Зарегистрироваться
-          </button>
-        </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 };
 

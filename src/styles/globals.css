@@ -1,10 +1,51 @@
 @import './variables.css';
 @import './shared/animations.css';
 
+:root {
+  --app-scrollbar-size: 8px;
+  --app-scrollbar-thumb: color-mix(in srgb, var(--color-primary) 34%, rgba(255, 255, 255, 0.08));
+  --app-scrollbar-thumb-hover: color-mix(in srgb, var(--color-primary) 52%, rgba(255, 255, 255, 0.12));
+  --app-scrollbar-track: transparent;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--app-scrollbar-size);
+  height: var(--app-scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--app-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--app-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--app-scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -14,7 +55,12 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   overflow-x: hidden;
+  overflow-y: auto;
   transition: background-color 0.3s ease;
+}
+
+#root {
+  height: auto;
 }
 
 input:focus, button:focus, select:focus, textarea:focus {

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './modal.module.css';
 
 interface ModalProps {
@@ -13,6 +14,7 @@ interface ModalProps {
   className?: string;
   overlayClassName?: string;
   role?: string;
+  usePortal?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -27,6 +29,7 @@ const Modal: React.FC<ModalProps> = ({
   className = '',
   overlayClassName = '',
   role = 'dialog',
+  usePortal = true,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +62,7 @@ const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalNode = (
     <div
       className={`${styles['modal__overlay']} ${overlayClassName}`}
       onClick={disableOutsideClick ? undefined : onClose}
@@ -91,6 +94,12 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  if (usePortal && typeof document !== 'undefined') {
+    return createPortal(modalNode, document.body);
+  }
+
+  return modalNode;
 };
 
 export default Modal;

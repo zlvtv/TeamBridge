@@ -2,25 +2,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  padding: var(--button-padding, 8px 16px);
   border: 1px solid transparent;
-  border-radius: var(--border-radius);
+  border-radius: var(--button-radius, var(--border-radius));
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-height: 40px;
+  min-height: var(--button-min-height, 40px);
 }
 
 .button--primary {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background: var(--button-primary-background, var(--color-primary));
+  color: var(--button-primary-color, white);
+  border-color: var(--button-primary-border, var(--color-primary));
+  box-shadow: var(--button-primary-shadow, none);
 }
 
 .button--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background: var(--button-primary-hover-background, var(--color-primary-hover));
+  border-color: var(--button-primary-hover-border, var(--color-primary-hover));
 }
 
 .button--secondary {

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './select.module.css';
-import { ChevronDown, X } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 
 export interface SelectOption {
   value: string;
@@ -72,7 +72,9 @@ const Select: React.FC<SelectProps> = ({
   const getLabel = () => {
     if (isMulti) {
       const selected = options.filter((o) => selectedValues.includes(o.value));
-      return selected.length > 0 ? `${selected.length} выбрано` : placeholder;
+      if (selected.length === 0) return placeholder;
+      if (selected.length === 1) return selected[0].label;
+      return `Выбрано: ${selected.length}`;
     } else {
       const selected = options.find((o) => o.value === value);
       return selected ? selected.label : placeholder;
@@ -99,7 +101,7 @@ const Select: React.FC<SelectProps> = ({
         <div className={styles.valueContainer}>
           {isMulti && (
             <div className={styles.multiValueContainer}>
-              {selectedValues.map((val) => {
+              {selectedValues.slice(0, 2).map((val) => {
                 const option = options.find((o) => o.value === val);
                 if (!option) return null;
                 return (
@@ -118,12 +120,22 @@ const Select: React.FC<SelectProps> = ({
                   </div>
                 );
               })}
+              {selectedValues.length > 2 ? (
+                <div className={styles.multiValueSummary}>+{selectedValues.length - 2}</div>
+              ) : null}
+              {selectedValues.length === 0 ? (
+                <span className={styles.placeholder}>{placeholder}</span>
+              ) : null}
             </div>
           )}
 
-          {!isMulti && !selectedValues.length && (
-            <span className={styles.placeholder}>{placeholder}</span>
-          )}
+          {!isMulti ? (
+            selectedValues.length ? (
+              <span className={styles.singleValue}>{getLabel()}</span>
+            ) : (
+              <span className={styles.placeholder}>{placeholder}</span>
+            )
+          ) : null}
         </div>
         <div className={styles.indicators}>
           <ChevronDown size={16} className={`${styles.chevron} ${isOpen ? styles.rotate : ''}`} />
@@ -170,11 +182,16 @@ const Select: React.FC<SelectProps> = ({
                     className={`${styles.option} ${isSelected ? styles.selected : ''}`}
                     onClick={() => handleSelect(option.value)}
                   >
+                    {isMulti ? (
+                      <span className={`${styles.optionCheckbox} ${isSelected ? styles.optionCheckboxSelected : ''}`}>
+                        {isSelected ? <Check size={12} /> : null}
+                      </span>
+                    ) : null}
                     {showAvatar && option.avatar_url && (
                       <img src={option.avatar_url} alt="" className={styles.avatar} />
                     )}
                     <span>{option.label}</span>
-                    {isSelected && <div className={styles.checkmark}>✓</div>}
+                    {!isMulti && isSelected ? <div className={styles.checkmark}>✓</div> : null}
                   </div>
                 );
               })

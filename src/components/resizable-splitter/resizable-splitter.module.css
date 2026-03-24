@@ -66,3 +66,9 @@
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+@media (max-width: 1024px) {
+  .resizable-splitter {
+    display: none;
+  }
+}

@@ -1,42 +1,41 @@
-.profile-modal {
-  background: var(--color-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-medium);
-  overflow: hidden;
-  font-size: 14px;
-  color: var(--color-text);
-  min-width: 240px;
-}
-
 .profile-modal__content {
   display: flex;
   flex-direction: column;
-}
-
-.profile-modal__header {
-  padding: 12px 16px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.profile-modal__header h3 {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text);
+  gap: 18px;
 }
 
 .profile-modal__body {
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--color-surface);
+  gap: 14px;
 }
 
-.profile-modal__notifications {
-  margin-top: 8px;
+.profile-modal__hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-background) 8%);
+}
+
+.profile-modal__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profile-modal__identity strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.profile-modal__identity span {
+  color: var(--color-text-light);
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .profile-modal__checkbox {
@@ -54,79 +53,96 @@
 }
 
 .profile-modal__avatar {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 78%, var(--color-secondary) 22%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  margin: 0 auto 8px;
+  font-size: 28px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
 }
 
-.profile-modal__body p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-text);
+.profile-modal__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.profile-modal__body strong {
-  color: var(--color-text);
-  font-weight: 500;
+.profile-modal__infoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-background) 84%, var(--color-surface) 16%);
+}
+
+.profile-modal__infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.profile-modal__infoRow span {
+  color: var(--color-text-light);
+  font-size: 0.88rem;
+}
+
+.profile-modal__infoRow strong {
+  text-align: right;
+  font-size: 0.92rem;
+  word-break: break-word;
 }
 
 .profile-modal__actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
 }
 
-.profile-modal__btn {
-  padding: 8px 16px;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-  border: none;
+.profile-modal__actions > * {
+  flex: 1 1 0;
 }
 
-.profile-modal__btn_edit {
-  background: var(--color-primary);
-  color: white;
+.profile-modal__notifications {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
 }
 
-.profile-modal__btn_edit:hover {
-  background: #0056b3;
-}
-
-.profile-modal__btn_delete {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.profile-modal__btn_delete:hover {
-  background: #fecaca;
+.profile-modal__checkbox input {
+  accent-color: var(--color-primary);
 }
 
 .profile-modal__footer {
-  padding: 12px 16px;
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid var(--border-color);
-  background: var(--color-surface);
-  gap: 8px;
+  padding-top: 2px;
 }
 
-.profile-modal__btn_logout {
-  background: #fee2e2;
-  color: #dc2626;
-}
+@media (max-width: 640px) {
+  .profile-modal__hero {
+    padding: 16px;
+  }
 
-.profile-modal__btn_logout:hover {
-  background: #fecaca;
-}
+  .profile-modal__infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 
+  .profile-modal__infoRow strong {
+    text-align: left;
+  }
+
+  .profile-modal__actions {
+    flex-direction: column;
+  }
+}

@@ -2,87 +2,320 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-width: 360px;
+}
+
+.create-project-modal__hero,
+.create-project-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+}
+
+.create-project-modal__eyebrow {
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+}
+
+.create-project-modal__headline {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.create-project-modal__description,
+.create-project-modal__section-copy {
+  margin: 0;
+  color: var(--color-text-light);
+  line-height: 1.5;
 }
 
 .create-project-modal__field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
-.create-project-modal__label {
-  font-size: 14px;
+.create-project-modal__label,
+.create-project-modal__section-title {
+  margin: 0;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-text);
 }
 
-.create-project-modal__input {
-  padding: 10px 12px;
+.create-project-modal__section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.create-project-modal__counter {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
   border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  background: var(--color-surface);
+  background: color-mix(in srgb, var(--color-background) 76%, var(--color-surface) 24%);
   color: var(--color-text);
-  transition: border 0.2s, box-shadow 0.2s;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
-.create-project-modal__input:focus {
-  outline: none;
+.create-project-modal__toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-background) 76%, var(--color-surface) 24%);
+}
+
+.create-project-modal__toggle-row strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.create-project-modal__toggle-row span {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-text-light);
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.create-project-modal__switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.create-project-modal__switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.create-project-modal__switch span {
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text-light) 26%, var(--color-surface) 74%);
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.create-project-modal__switch span::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+  transition: transform 0.2s ease;
+}
+
+.create-project-modal__switch input:checked + span {
+  background: color-mix(in srgb, var(--color-primary) 80%, white 20%);
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.create-project-modal__input::placeholder {
+.create-project-modal__switch input:checked + span::after {
+  transform: translateX(20px);
+}
+
+.create-project-modal__lead-grid,
+.create-project-modal__members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-project-modal__member-role-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-project-modal__lead-card,
+.create-project-modal__member-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-background) 76%, var(--color-surface) 24%);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.create-project-modal__lead-card--active,
+.create-project-modal__member-card--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface) 92%);
+}
+
+.create-project-modal__lead-name,
+.create-project-modal__member-main strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+.create-project-modal__lead-meta,
+.create-project-modal__member-main span,
+.create-project-modal__member-state {
+  font-size: 0.8rem;
   color: var(--color-text-light);
 }
 
+.create-project-modal__member-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.create-project-modal__member-role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-background) 76%, var(--color-surface) 24%);
+}
+
+.create-project-modal__member-role-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.create-project-modal__role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.create-project-modal__role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--color-background) 76%, var(--color-surface) 24%);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.create-project-modal__role-chip--active {
+  box-shadow: 0 0 0 1px currentColor inset;
+}
+
+.create-project-modal__role-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.create-project-modal__role-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-project-modal__role-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.create-project-modal__role-name {
+  flex: 1;
+}
+
+.create-project-modal__color-picker {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  position: relative;
+  background: var(--color-surface);
+}
+
+.create-project-modal__color-picker input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.create-project-modal__color-preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.create-project-modal__add-role-btn {
+  align-self: flex-start;
+}
+
 .create-project-modal__error-message {
-  color: var(--color-error);
-  font-size: 13px;
-  margin-top: -4px;
-  padding: 4px 8px;
-  background: var(--color-background);
-  border-radius: var(--border-radius);
-  border-left: 3px solid var(--color-error);
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 20%, transparent);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
 }
 
 .create-project-modal__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-color);
+  gap: 10px;
 }
 
-.create-project-modal__tag {
-  padding: 4px 8px;
-  background: var(--color-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  font-size: 12px;
-  color: var(--color-text);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
+@media (max-width: 720px) {
+  .create-project-modal__section-header,
+  .create-project-modal__toggle-row,
+  .create-project-modal__lead-card,
+  .create-project-modal__member-card,
+  .create-project-modal__member-role-header,
+  .create-project-modal__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.create-project-modal__tag.selected {
-  background: var(--color-primary);
-  color: white;
-}
+  .create-project-modal__counter {
+    align-self: flex-start;
+  }
 
-.create-project-modal__tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.create-project-modal__creating-feedback {
-  text-align: center;
-  margin-top: 12px;
-  color: var(--color-text-secondary);
+  .create-project-modal__role-field {
+    flex-direction: row;
+    align-items: center;
+  }
 }

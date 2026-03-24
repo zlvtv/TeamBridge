@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './TaskCard.module.css';
-import { format, parseISO } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import DOMPurify from 'dompurify';
 import Tag from '../../ui/tag/Tag';
 
 interface TaskCardProps {
@@ -13,10 +10,14 @@ interface TaskCardProps {
     priority: 'low' | 'medium' | 'high';
     status: 'todo' | 'in_progress' | 'done';
     tags?: string[];
+    report_text?: string | null;
   };
+  projectName?: string | null;
+  organizationName?: string | null;
   assignees: any[];
   onStatusChange: (status: 'todo' | 'in_progress' | 'done') => void;
   onEdit: () => void;
+  canManageStatus?: boolean;
   hideActions?: boolean;
   draggable?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
@@ -34,22 +35,36 @@ const statusLabels = {
   done: 'Готово'
 };
 
+const formatDueDate = (value: string) =>
+  new Date(value).toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
+  projectName,
+  organizationName,
   assignees,
   onStatusChange,
   onEdit,
+  canManageStatus = true,
   hideActions = false,
   draggable = false,
   onDragStart
 }) => {
+  const isOverdue = !!task.due_date && task.status !== 'done' && new Date(task.due_date).getTime() < Date.now();
+
   const handleDragStart = (e: React.DragEvent) => {
     if (onDragStart) onDragStart(e);
   };
 
   return (
     <div 
-      className={styles['task-card']}
+      className={`${styles['task-card']} ${task.status === 'done' ? styles['task-card--done'] : ''} ${isOverdue ? styles['task-card--overdue'] : ''}`}
       draggable={draggable}
       onDragStart={handleDragStart}
       onClick={onEdit}
@@ -70,6 +85,21 @@ const TaskCard: React.FC<TaskCardProps> = ({
         )}
       </div>
 
+      {(projectName || organizationName) && (
+        <div className={styles['task-card__context']}>
+          {projectName ? (
+            <span className={styles['task-card__context-item']}>
+              Проект: <strong>{projectName}</strong>
+            </span>
+          ) : null}
+          {organizationName ? (
+            <span className={styles['task-card__context-item']}>
+              Организация: <strong>{organizationName}</strong>
+            </span>
+          ) : null}
+        </div>
+      )}
+
       <div className={styles['task-card__tags']}>
         {task.tags && task.tags.length > 0 ? (
           task.tags.map((tag, index) => (
@@ -84,10 +114,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
       <div className={styles['task-card__meta']}>
         {task.due_date && (
-          <span className={styles['task-card__due-date']}>
-            🔔 {new Date(task.due_date).toLocaleDateString('ru-RU')}
+          <span className={`${styles['task-card__due-date']} ${isOverdue ? styles['task-card__due-date--overdue'] : ''} ${task.status === 'done' ? styles['task-card__due-date--done'] : ''}`}>
+            {isOverdue ? 'Просрочена' : task.status === 'done' ? 'Выполнена' : 'Срок'}: {formatDueDate(task.due_date)}
           </span>
         )}
+
+        {task.report_text?.trim() ? (
+          <span className={styles['task-card__report-indicator']}>Есть отчет</span>
+        ) : null}
 
         <Tag variant={priorityColors[task.priority]} size="small">
           {task.priority === 'low' ? 'Низкий' : task.priority === 'medium' ? 'Средний' : 'Высокий'}
@@ -107,6 +141,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             onChange={(e) => onStatusChange(e.target.value as any)}
             className={styles['task-card__status-select']}
             onClick={(e) => e.stopPropagation()}
+            disabled={!canManageStatus}
           >
             <option value="todo">{statusLabels.todo}</option>
             <option value="in_progress">{statusLabels.in_progress}</option>
