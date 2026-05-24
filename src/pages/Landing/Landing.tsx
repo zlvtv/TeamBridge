@@ -59,7 +59,7 @@ const Landing: React.FC = () => {
     )
     : (
       <>
-        <Link to="/signup" className="landing-button landing-button--primary">Попробовать бесплатно</Link>
+        <Link to="/signup" className="landing-button landing-button--primary">Зарегистрироваться</Link>
         <Link to="/login" className="landing-button landing-button--secondary">Войти</Link>
       </>
     );

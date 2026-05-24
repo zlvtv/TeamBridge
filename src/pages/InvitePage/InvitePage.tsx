@@ -19,9 +19,8 @@ const InvitePage = () => {
   const [status, setStatus] = useState<'checking' | 'already-member' | 'joined' | 'error'>('checking');
   const [orgName, setOrgName] = useState<string>('');
 
-  if (!isInitialized) return <LoadingState />;
-
   useEffect(() => {
+    if (!isInitialized) return;
     const checkAndJoin = async () => {
       if (!token) {
         setError('Неверная ссылка');
@@ -109,7 +108,9 @@ const InvitePage = () => {
     };
 
     checkAndJoin();
-  }, [token, user, navigate, refreshOrganizations, setCurrentOrganization]);
+  }, [token, user, isInitialized, navigate, refreshOrganizations, setCurrentOrganization]);
+
+  if (!isInitialized) return <LoadingState />;
 
   return (
     <div className={styles.container}>
