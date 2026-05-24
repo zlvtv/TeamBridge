@@ -10,6 +10,8 @@ import { Project, ProjectMember, ProjectRole, Task } from '../types/project.type
 import { messageService } from './messageService';
 import { touchOrganizationActivity, touchOrganizationActivityByProject } from './activityService';
 import { buildUserFromSnapshot, isDeletedUserProfile } from '../utils/user.utils';
+import { normalizeTaskRecords } from '../utils/taskData';
+import { serverTimestamp } from 'firebase/firestore';
 
 export interface CreateProjectData {
   name: string;
@@ -96,7 +98,7 @@ export const projectService = {
             user_id: userId,
             status,
             roles: [],
-            joined_at: new Date().toISOString(),
+            joined_at: serverTimestamp(),
           })
         )
     );
@@ -235,6 +237,11 @@ export const projectService = {
         const userData = await getDocById('users', m.user_id);
         return {
           ...m,
+          joined_at: m.joined_at?.toDate
+            ? m.joined_at.toDate().toISOString()
+            : typeof m.joined_at === 'string'
+              ? m.joined_at
+              : new Date().toISOString(),
           roles: Array.isArray(m.roles) ? m.roles.filter(Boolean) : [],
           profile: {
             id: m.user_id,
@@ -263,7 +270,7 @@ export const projectService = {
       user_id: userId,
       status,
       roles: options.roles || [],
-      joined_at: new Date().toISOString()
+      joined_at: serverTimestamp()
     });
     if (status !== 'owner' && !options.suppressSystemMessage) {
       const userData = options.displayName ? null : await getDocById('users', userId);
@@ -352,10 +359,11 @@ export const projectService = {
   },
 
   async getTasks(projectId: string): Promise<Task[]> {
-    return await getCollection<Task>('tasks', {
+    const tasks = await getCollection<Task>('tasks', {
       whereClauses: [{ field: 'project_id', operator: '==', value: projectId }],
       order: { field: 'created_at', direction: 'desc' }
     });
+    return normalizeTaskRecords(tasks);
   },
 
   subscribeToProjects(

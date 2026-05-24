@@ -11,7 +11,8 @@ import { touchOrganizationActivityByProject } from './activityService';
 import { encryptMessage, decryptMessage } from '../lib/crypto';
 import { buildUserFromSnapshot, isDeletedUserProfile } from '../utils/user.utils';
 import { db } from '../lib/firebase';
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, deleteField, doc, updateDoc } from 'firebase/firestore';
+import { normalizeTaskRecord, normalizeTaskRecords } from '../utils/taskData';
 
 const normalizeTaskTagKey = (tag: string) => tag.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru');
 const normalizeTaskTags = (tags: string[] | undefined): string[] => {
@@ -89,6 +90,13 @@ const emitTaskEvent = (
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent('teambridge:task-changed', { detail }));
 };
+
+const withTaskLegacyCleanup = (data: Record<string, any>) => ({
+  ...data,
+  assignee_ids: deleteField(),
+  createdAt: deleteField(),
+  updatedAt: deleteField(),
+});
 
 export interface CreateTaskData {
   title: string;
@@ -179,14 +187,16 @@ const createTaskSystemMessage = async (taskId: string, projectId: string, text: 
 
 export const taskService = {
   async getTaskById(taskId: string): Promise<Task | null> {
-    return getDocById<Task>('tasks', taskId);
+    const task = await getDocById<Task>('tasks', taskId);
+    return task ? normalizeTaskRecord(task) : null;
   },
 
   async getTasksByProject(projectId: string): Promise<Task[]> {
-    return await getCollection<Task>('tasks', {
+    const tasks = await getCollection<Task>('tasks', {
       whereClauses: [{ field: 'project_id', operator: '==', value: projectId }],
       order: { field: 'created_at', direction: 'desc' }
     });
+    return normalizeTaskRecords(tasks);
   },
 
   async getUserTasks(userId: string, orgIds: string[]): Promise<Task[]> {
@@ -198,7 +208,7 @@ export const taskService = {
       const projectIds = projects.map(p => p.id);
       if (projectIds.length === 0) return [];
 
-      const tasks = await getCollection<Task>('tasks', {
+      const modernTasks = await getCollection<Task>('tasks', {
         whereClauses: [
           { field: 'project_id', operator: 'in', value: projectIds },
           { field: 'assignees', operator: 'array-contains', value: userId }
@@ -206,7 +216,23 @@ export const taskService = {
         order: { field: 'due_date', direction: 'asc' }
       });
 
-      return tasks;
+      const legacyTasks = await getCollection<Task>('tasks', {
+        whereClauses: [
+          { field: 'project_id', operator: 'in', value: projectIds },
+          { field: 'assignee_ids', operator: 'array-contains', value: userId }
+        ],
+        order: { field: 'due_date', direction: 'asc' }
+      }).catch(() => []);
+
+      const uniqueTasks = new Map(
+        normalizeTaskRecords([...modernTasks, ...legacyTasks]).map((task) => [task.id, task] as const)
+      );
+
+      return Array.from(uniqueTasks.values()).sort((left, right) => {
+        const leftTime = left.due_date ? new Date(left.due_date).getTime() : 0;
+        const rightTime = right.due_date ? new Date(right.due_date).getTime() : 0;
+        return leftTime - rightTime;
+      });
     } catch (error) {
       console.error('Error fetching user tasks:', error);
       return [];
@@ -242,12 +268,12 @@ export const taskService = {
     await touchOrganizationActivityByProject(data.project_id);
     emitTaskEvent({
       type: 'created',
-      task: {
+      task: normalizeTaskRecord({
         id: created.id,
         ...taskData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      } as Task,
+      }),
     });
     return created.id;
   },
@@ -282,7 +308,7 @@ export const taskService = {
       Object.entries(rawUpdateData).filter(([, value]) => value !== undefined)
     );
 
-    await updateDocById('tasks', taskId, updateData);
+    await updateDocById('tasks', taskId, withTaskLegacyCleanup(updateData));
     await syncOrganizationTaskTags(currentTask?.organization_id, tags as string[] | undefined);
     const task = (await this.getTaskById(taskId)) || currentTask;
     const actorName = formatActorName(data.actor_name);
@@ -394,10 +420,10 @@ export const taskService = {
       throw new Error('Задача не найдена');
     }
 
-    await updateDocById('tasks', taskId, {
+    await updateDocById('tasks', taskId, withTaskLegacyCleanup({
       archived_at: new Date().toISOString(),
       archived_by: actor?.id || null,
-    });
+    }));
 
     await createTaskSystemMessage(
       taskId,
@@ -422,7 +448,7 @@ export const taskService = {
     actor?: { id?: string | null; name?: string | null }
   ): Promise<void> {
     const previousTask = await this.getTaskById(taskId);
-    await updateDocById('tasks', taskId, { status });
+    await updateDocById('tasks', taskId, withTaskLegacyCleanup({ status }));
     const task = await this.getTaskById(taskId);
     if (task && previousTask && previousTask.status !== status) {
       await createTaskSystemMessage(
@@ -445,7 +471,7 @@ export const taskService = {
     const assignees = task?.project_id
       ? await resolveAssignableUserIds(task.project_id, userIds)
       : [];
-    await updateDocById('tasks', taskId, { assignees });
+    await updateDocById('tasks', taskId, withTaskLegacyCleanup({ assignees }));
     const updatedTask = await this.getTaskById(taskId);
     if (updatedTask) {
       emitTaskEvent({
@@ -463,7 +489,7 @@ export const taskService = {
   ) {
     return subscribeToCollection(
       'tasks',
-      onNext,
+      (tasks) => onNext(normalizeTaskRecords(tasks)),
       {
         whereClauses: [{ field: 'project_id', operator: '==', value: projectId }],
         order: { field: 'created_at', direction: 'desc' }
@@ -493,7 +519,7 @@ export const taskService = {
     return tasks.filter(task => {
       if (filters.status && task.status !== filters.status) return false;
       if (filters.priority && task.priority !== filters.priority) return false;
-      if (filters.assigneeId && task.assignees?.includes(filters.assigneeId)) return false;
+      if (filters.assigneeId && !task.assignees?.includes(filters.assigneeId)) return false;
       if (filters.dueDateFrom && task.due_date) {
         if (new Date(task.due_date) < new Date(filters.dueDateFrom)) return false;
       }

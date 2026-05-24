@@ -22,7 +22,7 @@ interface EditTaskData {
   title: string;
   description: string | null;
   due_date: string | null;
-  assignee_ids: string[];
+  assignees: string[];
   tags: string[];
   reminder_offsets_minutes: number[];
   priority: 'low' | 'medium' | 'high';
@@ -225,7 +225,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         title: values.title,
         description: values.description || null,
         due_date: values.due_date || null,
-        assignee_ids: values.assignees || [],
+        assignees: values.assignees || [],
         tags: Array.isArray(values.tags) ? values.tags : [],
         reminder_offsets_minutes: Array.isArray(values.reminder_offsets_minutes)
           ? values.reminder_offsets_minutes.map((value: string) => Number(value)).filter(Number.isFinite)
@@ -238,7 +238,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         title: updateData.title,
         description: updateData.description,
         due_date: updateData.due_date,
-        assignees: updateData.assignee_ids,
+        assignees: updateData.assignees,
         tags: updateData.tags,
         reminder_offsets_minutes: updateData.reminder_offsets_minutes,
         priority: updateData.priority,

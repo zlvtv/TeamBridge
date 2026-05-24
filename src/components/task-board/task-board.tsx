@@ -24,7 +24,7 @@ interface EditTaskData {
   title: string;
   description: string | null;
   due_date: string | null;
-  assignee_ids: string[];
+  assignees: string[];
   tags: string[];
   priority: 'low' | 'medium' | 'high';
   status: 'todo' | 'in_progress' | 'done';
@@ -437,7 +437,7 @@ const TaskBoard: React.FC = () => {
         title: data.title,
         description: data.description,
         due_date: data.due_date,
-        assignees: data.assignee_ids,
+        assignees: data.assignees,
         tags: data.tags,
         priority: data.priority,
         status: data.status,

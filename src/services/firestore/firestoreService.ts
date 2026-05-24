@@ -11,9 +11,9 @@ export interface FirestoreDocument {
 }
 
 type CollectionName = 
-  | 'organizations' | 'projects' | 'messages' | 'tasks' 
+  | 'organizations' | 'organization_members' | 'projects' | 'project_members' | 'messages' | 'tasks'
   | 'users' | 'invitations' | 'files' | 'polls'
-  | 'organization_invites' | 'task_messages' | 'notifications';
+  | 'usernames' | 'organization_invites' | 'notifications';
 
 interface QueryOptions {
   whereClauses?: Array<{ field: string; operator: any; value: any }>;

@@ -26,7 +26,7 @@ export interface CreateTaskData {
   description?: string;
   due_date?: string;
   source_message_id?: string;
-  assignee_ids: string[];
+  assignees: string[];
   tags?: string[];
   priority: 'low' | 'medium' | 'high';
   status: 'todo' | 'in_progress' | 'done';

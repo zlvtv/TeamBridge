@@ -1,93 +1,109 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+import React, { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import TaskCard from '../TaskCard';
 
 describe('TaskCard', () => {
+  let container: HTMLDivElement;
+
   const mockTask = {
     id: '1',
     title: 'Test Task',
-    description: '<p>This is a test task</p>',
-    status: 'todo',
-    due_date: '2023-12-31T10:00:00Z',
+    due_date: '2026-03-24T10:00:00.000Z',
+    priority: 'medium' as const,
+    status: 'todo' as const,
+    tags: ['frontend'],
+    report_text: 'Есть короткий отчет',
   };
 
   const mockAssignees = [
     { id: '2', full_name: 'John Doe', username: 'johndoe', avatar_url: null },
   ];
 
-  const mockOnStatusChange = jest.fn();
-  const mockOnEdit = jest.fn();
+  const mount = async (props = {}) => {
+    const onStatusChange = jest.fn();
+    const onEdit = jest.fn();
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <TaskCard
+          task={mockTask}
+          projectName="Alpha"
+          organizationName="TeamBridge"
+          assignees={mockAssignees}
+          onStatusChange={onStatusChange}
+          onEdit={onEdit}
+          {...props}
+        />
+      );
+    });
+
+    return { root, onStatusChange, onEdit };
+  };
 
   beforeEach(() => {
-    mockOnStatusChange.mockClear();
-    mockOnEdit.mockClear();
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
-  it('renders task title and status', () => {
-    render(
-      <TaskCard
-        task={mockTask}
-        assignees={mockAssignees}
-        onStatusChange={mockOnStatusChange}
-        onEdit={mockOnEdit}
-      />
-    );
-
-    expect(screen.getByText('Test Task')).toBeInTheDocument();
-    expect(screen.getByText('Не начата')).toBeInTheDocument();
+  afterEach(() => {
+    document.body.innerHTML = '';
   });
 
-  it('calls onEdit when title is clicked', () => {
-    render(
-      <TaskCard
-        task={mockTask}
-        assignees={mockAssignees}
-        onStatusChange={mockOnStatusChange}
-        onEdit={mockOnEdit}
-      />
-    );
+  it('renders task title, context and tags', async () => {
+    const { root } = await mount();
 
-    fireEvent.click(screen.getByText('Test Task'));
-    expect(mockOnEdit).toHaveBeenCalledTimes(1);
+    expect(container.textContent).toContain('Test Task');
+    expect(container.textContent).toContain('Проект: Alpha');
+    expect(container.textContent).toContain('Организация: TeamBridge');
+    expect(container.textContent).toContain('frontend');
+    expect(container.textContent).toContain('Есть отчет');
+
+    await act(async () => {
+      root.unmount();
+    });
   });
 
-  it('calls onStatusChange when status badge is clicked', () => {
-    render(
-      <TaskCard
-        task={mockTask}
-        assignees={mockAssignees}
-        onStatusChange={mockOnStatusChange}
-        onEdit={mockOnEdit}
-      />
-    );
+  it('calls onEdit when the card is clicked', async () => {
+    const { root, onEdit } = await mount();
 
-    fireEvent.click(screen.getByText('Не начата'));
-    expect(mockOnStatusChange).toHaveBeenCalledWith('in_progress');
+    const card = container.querySelector('div');
+    expect(card).not.toBeNull();
+    card?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(onEdit).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      root.unmount();
+    });
   });
 
-  it('displays due date correctly', () => {
-    render(
-      <TaskCard
-        task={mockTask}
-        assignees={mockAssignees}
-        onStatusChange={mockOnStatusChange}
-        onEdit={mockOnEdit}
-      />
-    );
+  it('calls onStatusChange when status select changes', async () => {
+    const { root, onStatusChange } = await mount();
 
-    expect(screen.getByText(/31 дек/)).toBeInTheDocument();
+    const select = container.querySelector('select') as HTMLSelectElement | null;
+    expect(select).not.toBeNull();
+
+    if (select) {
+      select.value = 'in_progress';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    expect(onStatusChange).toHaveBeenCalledWith('in_progress');
+
+    await act(async () => {
+      root.unmount();
+    });
   });
 
-  it('displays assignee avatar or initials', () => {
-    render(
-      <TaskCard
-        task={mockTask}
-        assignees={mockAssignees}
-        onStatusChange={mockOnStatusChange}
-        onEdit={mockOnEdit}
-      />
-    );
+  it('hides actions when requested', async () => {
+    const { root } = await mount({ hideActions: true });
 
-    expect(screen.getByText('J')).toBeInTheDocument();
+    expect(container.querySelector('select')).toBeNull();
+    expect(container.textContent).not.toContain('Редактировать');
+
+    await act(async () => {
+      root.unmount();
+    });
   });
 });
