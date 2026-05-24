@@ -1017,7 +1017,7 @@ const ProjectChat: React.FC = () => {
     try {
       const photoUrl = await withTimeout(
         messageService.uploadPhoto(currentProject.id, user.id, file),
-        5000,
+        20000,
         'Истекло время ожидания загрузки изображения'
       );
       await withTimeout(
@@ -1038,56 +1038,8 @@ const ProjectChat: React.FC = () => {
       setPendingPhotoFile(null);
       setPendingPhotoPreviewUrl(null);
     } catch {
-      try {
-        const fallbackPhotoUrl = await withTimeout(new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const base = String(reader.result || '');
-            const img = new Image();
-            img.onload = () => {
-              const maxSide = 1280;
-              const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
-              const w = Math.max(1, Math.floor(img.width * ratio));
-              const h = Math.max(1, Math.floor(img.height * ratio));
-              const canvas = document.createElement('canvas');
-              canvas.width = w;
-              canvas.height = h;
-              const ctx = canvas.getContext('2d');
-              if (!ctx) {
-                resolve(base);
-                return;
-              }
-              ctx.drawImage(img, 0, 0, w, h);
-              const compressed = canvas.toDataURL('image/jpeg', 0.78);
-              resolve(compressed || base);
-            };
-            img.onerror = () => resolve(base);
-            img.src = base;
-          };
-          reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
-          reader.readAsDataURL(file);
-        }), 8000, 'Истекло время ожидания подготовки изображения');
-        await withTimeout(
-          messageService.sendMessage(
-            currentProject.id,
-            captionText || 'Фото',
-            user.id,
-            'photo',
-            fallbackPhotoUrl,
-            undefined,
-            showThread ? activeThreadId : undefined
-          ),
-          10000,
-          'Истекло время ожидания отправки изображения'
-        );
-        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
-        setIsPhotoComposerOpen(false);
-        setPendingPhotoFile(null);
-        setPendingPhotoPreviewUrl(null);
-      } catch {
-        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
-        setError('Ошибка загрузки изображения');
-      }
+      setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+      setError('Ошибка загрузки изображения');
     } finally {
       setPendingPhotoUpload(false);
       URL.revokeObjectURL(localPreviewUrl);

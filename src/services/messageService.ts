@@ -1,4 +1,4 @@
-import { db } from '../lib/firebase';
+import { db, storage } from '../lib/firebase';
 import {
   collection,
   doc,
@@ -12,6 +12,7 @@ import {
   writeBatch,
   arrayUnion,
 } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { createDoc, deleteDocById, getDocById } from './firestore/firestoreService';
 import { encryptMessage, decryptMessage } from '../lib/crypto';
 import { getCommonProjectId, touchOrganizationActivityByProject } from './activityService';
@@ -31,6 +32,7 @@ interface PollOptionStored {
 const PHOTO_UPLOAD_MAX_SIDE = 1280;
 const PHOTO_UPLOAD_TARGET_BYTES = 550 * 1024;
 const PHOTO_UPLOAD_JPEG_QUALITY = 0.72;
+const PHOTO_STORAGE_ROOT = 'project-chat';
 
 export interface Message {
   id: string;
@@ -102,14 +104,6 @@ const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality?: number)
     );
   });
 
-const fileToDataUrl = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Не удалось прочитать изображение'));
-    reader.readAsDataURL(file);
-  });
-
 const compressImageForUpload = async (file: File): Promise<File> => {
   if (!file.type.startsWith('image/')) {
     return file;
@@ -123,7 +117,7 @@ const compressImageForUpload = async (file: File): Promise<File> => {
   const needsResize =
     image.width > PHOTO_UPLOAD_MAX_SIDE ||
     image.height > PHOTO_UPLOAD_MAX_SIDE;
-  const needsCompression = file.size > 280 * 1024;
+  const needsCompression = file.size > PHOTO_UPLOAD_TARGET_BYTES;
 
   if (!needsResize && !needsCompression) {
     return file;
@@ -152,6 +146,23 @@ const compressImageForUpload = async (file: File): Promise<File> => {
     file.name.replace(/\.[^.]+$/, '') + `.${outputExtension}`,
     { type: outputType, lastModified: Date.now() }
   );
+};
+
+const sanitizeStorageSegment = (value: string): string =>
+  String(value || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9а-яА-Я._-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 90) || 'file';
+
+const buildPhotoStoragePath = (projectId: string, senderId: string, file: File): string => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).slice(2, 10);
+  const safeProjectId = sanitizeStorageSegment(projectId);
+  const safeSenderId = sanitizeStorageSegment(senderId);
+  const safeFileName = sanitizeStorageSegment(file.name || `photo_${timestamp}.jpg`);
+
+  return `${PHOTO_STORAGE_ROOT}/${safeProjectId}/${safeSenderId}/${timestamp}_${random}_${safeFileName}`;
 };
 
 export const messageService = {
@@ -292,7 +303,17 @@ export const messageService = {
 
   async uploadPhoto(projectId: string, senderId: string, file: File): Promise<string> {
     const preparedFile = await compressImageForUpload(file);
-    return await fileToDataUrl(preparedFile);
+    const storageRef = ref(storage, buildPhotoStoragePath(projectId, senderId, preparedFile));
+    const snapshot = await uploadBytes(storageRef, preparedFile, {
+      contentType: preparedFile.type || file.type || 'image/jpeg',
+      customMetadata: {
+        projectId,
+        senderId,
+        originalName: file.name || preparedFile.name,
+      },
+    });
+
+    return getDownloadURL(snapshot.ref);
   },
 
   async voteInPoll(messageId: string, userId: string, optionIndex: number): Promise<void> {

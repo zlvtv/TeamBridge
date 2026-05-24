@@ -13,17 +13,15 @@ import {
   deleteUser,
 } from 'firebase/auth';
 import {
+  deleteField,
   doc,
   getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
   updateDoc,
   deleteDoc,
   runTransaction,
 } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { UserProfile, AuthContextType } from '../types/auth.types';
 import {
   validateUsername,
@@ -122,15 +120,12 @@ const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality?: number)
     }, type, quality);
   });
 
-const blobToDataUrl = (blob: Blob): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Не удалось прочитать аватар'));
-    reader.readAsDataURL(blob);
-  });
-
-const prepareAvatarDataUrl = async (file: File): Promise<string> => {
+/**
+ * Кадрирует и масштабирует аватар до AVATAR_MAX_SIDE×AVATAR_MAX_SIDE,
+ * затем загружает результат в Firebase Storage и возвращает публичный URL.
+ * Старый аватар удаляется при наличии.
+ */
+const prepareAndUploadAvatar = async (file: File, userId: string, oldAvatarUrl?: string | null): Promise<string> => {
   const image = await loadImageFromFile(file);
   const side = Math.min(image.width, image.height);
   const cropX = Math.max(0, Math.round((image.width - side) / 2));
@@ -144,20 +139,24 @@ const prepareAvatarDataUrl = async (file: File): Promise<string> => {
     throw new Error('Не удалось обработать аватар');
   }
 
-  context.drawImage(
-    image,
-    cropX,
-    cropY,
-    side,
-    side,
-    0,
-    0,
-    AVATAR_MAX_SIDE,
-    AVATAR_MAX_SIDE
-  );
+  context.drawImage(image, cropX, cropY, side, side, 0, 0, AVATAR_MAX_SIDE, AVATAR_MAX_SIDE);
 
   const blob = await canvasToBlob(canvas, 'image/jpeg', AVATAR_JPEG_QUALITY);
-  return await blobToDataUrl(blob);
+
+  // Удаляем старый аватар из Storage, если он там хранится (не base64)
+  if (oldAvatarUrl && oldAvatarUrl.startsWith('https://firebasestorage.googleapis.com')) {
+    try {
+      const oldRef = ref(storage, oldAvatarUrl);
+      await deleteObject(oldRef);
+    } catch {
+      // Файл мог быть уже удалён — не критично
+    }
+  }
+
+  // Загружаем новый аватар
+  const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
+  await uploadBytes(avatarRef, blob, { contentType: 'image/jpeg' });
+  return await getDownloadURL(avatarRef);
 };
 
 const USERNAME_RESERVATIONS_COLLECTION = 'usernames';
@@ -227,7 +226,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await updateDoc(userRef, {
           last_seen_at: new Date(),
-          updatedAt: new Date(),
+          updated_at: new Date(),
+          createdAt: deleteField(),
+          updatedAt: deleteField(),
         });
       } catch (error) {
         console.error('Не удалось обновить last_seen_at:', error);
@@ -293,14 +294,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const usernameRef = doc(db, USERNAME_RESERVATIONS_COLLECTION, normalized);
-    const usersRef = collection(db, 'users');
-    const [usernameReservationSnapshot, normalizedSnapshot, exactSnapshot] = await Promise.all([
-      getDoc(usernameRef),
-      getDocs(query(usersRef, where('username_lowercase', '==', normalized))),
-      getDocs(query(usersRef, where('username', '==', trimmed))),
-    ]);
+    const usernameReservationSnapshot = await getDoc(usernameRef);
 
-    if (usernameReservationSnapshot.exists() || !normalizedSnapshot.empty || !exactSnapshot.empty) {
+    if (usernameReservationSnapshot.exists()) {
       return { available: false, message: 'Имя пользователя уже занято' };
     }
 
@@ -362,9 +358,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (payload.avatarFile) {
         avatarUrl = await withTimeout(
-          prepareAvatarDataUrl(payload.avatarFile),
-          5000,
-          'Слишком долго обрабатывается аватар'
+          prepareAndUploadAvatar(payload.avatarFile, currentUser.id, currentUser.avatar_url),
+          15000,
+          'Слишком долго загружается аватар'
         );
       }
 
@@ -390,7 +386,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             full_name: nextFullName,
             description: trimmedDescription || null,
             avatar_url: avatarUrl,
-            updatedAt: new Date(),
+            updated_at: new Date(),
+            createdAt: deleteField(),
+            updatedAt: deleteField(),
             last_seen_at: new Date(),
           });
 
@@ -398,7 +396,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user_id: currentUser.id,
             username: trimmedUsername,
             username_lowercase: normalizedUsername,
-            updatedAt: new Date(),
+            updated_at: new Date(),
           });
 
           if (normalizedUsername !== currentNormalizedUsername && currentNormalizedUsername) {
@@ -540,8 +538,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user_id: user.uid,
             username: trimmedUsername,
             username_lowercase: normalizedUsername,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            created_at: new Date(),
+            updated_at: new Date(),
           });
 
           transaction.set(doc(db, 'users', user.uid), {
@@ -551,8 +549,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             username_lowercase: normalizedUsername,
             full_name: trimmedFullName || trimmedUsername,
             avatar_url: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            created_at: new Date(),
+            updated_at: new Date(),
             last_seen_at: new Date(),
             description: null,
           });
