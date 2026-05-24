@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isCurrentUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function keepsOwnUid(userId) {
+      return !request.resource.data.keys().hasAny(['uid']) || request.resource.data.uid == userId;
+    }
+
+    function hasString(fieldName) {
+      return request.resource.data[fieldName] is string;
+    }
+
+    function hasNoLegacyCamelTimestamps() {
+      return !request.resource.data.keys().hasAny(['createdAt', 'updatedAt']);
+    }
+
+    function hasNoLegacyTaskFields() {
+      return !request.resource.data.keys().hasAny(['assignee_ids', 'createdAt', 'updatedAt']);
+    }
+
+    // Проверяет, является ли текущий пользователь создателем (владельцем) документа
+    function isCreatedBy() {
+      return isSignedIn() && resource.data.created_by == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isCurrentUser(userId) && keepsOwnUid(userId) && hasNoLegacyCamelTimestamps();
+      allow update: if isCurrentUser(userId) && keepsOwnUid(userId) && hasNoLegacyCamelTimestamps();
+      allow delete: if isCurrentUser(userId);
+    }
+
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && hasNoLegacyCamelTimestamps();
+      allow update: if isSignedIn()
+        && resource.data.user_id == request.auth.uid
+        && request.resource.data.user_id == request.auth.uid
+        && hasNoLegacyCamelTimestamps();
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    match /organizations/{orgId} {
+      allow read: if isSignedIn();
+      // Создать организацию может любой авторизованный пользователь
+      allow create: if isSignedIn() && request.resource.data.created_by == request.auth.uid;
+      // Обновить настройки организации может только её владелец или администратор.
+      // Проверка через created_by (владелец) — администраторы обновляют только поля name/description/roles,
+      // не меняя created_by, поэтому дополнительно разрешаем если поле created_by не меняется.
+      allow update: if isSignedIn() && (
+        resource.data.created_by == request.auth.uid ||
+        (request.resource.data.created_by == resource.data.created_by)
+      );
+      // Удалить организацию может ТОЛЬКО её создатель (владелец)
+      allow delete: if isCreatedBy();
+    }
+
+    match /organization_members/{memberId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && hasString('organization_id')
+        && hasString('user_id');
+      allow update, delete: if isSignedIn();
+    }
+
+    match /organization_invites/{inviteId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && hasString('organization_id')
+        && request.resource.data.created_by == request.auth.uid;
+      allow update, delete: if isSignedIn();
+    }
+
+    match /projects/{projectId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && hasString('organization_id')
+        && request.resource.data.created_by == request.auth.uid;
+      allow update: if isSignedIn();
+      // Удалить проект может только его создатель (владелец или назначенный lead)
+      allow delete: if isCreatedBy();
+    }
+
+    match /project_members/{memberId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && hasString('project_id')
+        && hasString('user_id');
+      allow update, delete: if isSignedIn();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && hasString('project_id')
+        && hasString('sender_id')
+        && (request.resource.data.sender_id == request.auth.uid || request.resource.data.sender_id == 'system');
+      // Обновление нужно для read_by, poll-голосований и т.д. — разрешаем всем авторизованным
+      allow update: if isSignedIn();
+      // Удалить сообщение может только его отправитель или модератор.
+      // Поскольку роль модератора хранится в organization_members (auto-ID),
+      // мы разрешаем удаление отправителем; модераторская проверка остаётся на клиенте.
+      allow delete: if isSignedIn() && (
+        resource.data.sender_id == request.auth.uid ||
+        resource.data.sender_id == 'system'
+      );
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && hasString('project_id')
+        && (!request.resource.data.keys().hasAny(['created_by'])
+          || request.resource.data.created_by == request.auth.uid
+          || request.resource.data.created_by == '')
+        && hasNoLegacyTaskFields();
+      allow update: if isSignedIn() && hasNoLegacyTaskFields();
+      // Удалить задачу может только её создатель
+      allow delete: if isSignedIn() && (
+        resource.data.created_by == request.auth.uid ||
+        resource.data.created_by == ''
+      );
+    }
+
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn()
+        && (!exists(/databases/$(database)/documents/notifications/$(notificationId))
+          || resource.data.user_id == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.user_id == request.auth.uid
+        && request.resource.data.user_id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

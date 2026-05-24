@@ -2,12 +2,24 @@ services:
   - type: web
     name: TeamBridge
     runtime: static
-    buildCommand: npm run build
-    publishPath: dist
+    buildCommand: pnpm install --frozen-lockfile && pnpm run build
+    staticPublishPath: dist
     envVars:
-      - key: REACT_APP_BASE_URL
-        value: https://teambridge-c991.onrender.com
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+      - key: VITE_MESSAGE_PEPPER
+        sync: false
     routes:
       - type: rewrite
-        src: /(.*)
-        dest: /
+        source: /*
+        destination: /index.html
