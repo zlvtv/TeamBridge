@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useOrganization } from './OrganizationContext';
 import { useAuth } from './AuthContext';
 import { projectService } from '../services/projectService';
@@ -101,6 +101,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
 
+  // Чат текущего проекта открыт у пользователя => по UX-логике в нём не может
+  // быть «непрочитанных» — даже если Firestore-снэпшот ещё не успел подхватить
+  // последний markProjectMessagesAsRead. Используется в подписке ниже как
+  // override, чтобы не было визуального «мигания» индикатора при входе в чат.
+  const currentProjectIdRef = useRef<string | null>(null);
+
   const fetchProjects = useCallback(async (): Promise<Project[]> => {
     if (!currentOrganization || !user) {
       setProjects([]);
@@ -162,22 +168,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       setIsLoading(false);
 
-      Promise.all(
-        sortedProjects.map(async (proj) => ({
-          id: proj.id,
-          hasUnreadMessages: await messageService.hasUnreadProjectMessages(proj.id, user.id),
-        }))
-      )
-        .then((unreadByProject) => {
-          setProjects(prev => {
-            const unreadMap = new Map(unreadByProject.map(item => [item.id, item.hasUnreadMessages]));
-            return prev.map(project => ({
-              ...project,
-              hasUnreadMessages: unreadMap.get(project.id) ?? project.hasUnreadMessages,
-            }));
-          });
-        })
-        .catch(() => undefined);
+      // hasUnreadMessages теперь обновляется realtime-подпиской в отдельном
+      // useEffect ниже (subscribeToProjectsUnread на коллекцию messages).
+      // Здесь async-пересчёт через Promise.all удалён, чтобы не дублировать.
 
       return sortedProjects as Project[];
     } catch (err: any) {
@@ -284,12 +277,23 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await messageService.sendSystemMessage(projectId, `**${action}**: ${details}`);
   };
 
+  // Оптимистично сбрасывает индикатор в UI. Фактическая запись «прочитано»
+  // в Firestore (Message.read_by[]) делается компонентом чата через
+  // messageService.markProjectMessagesAsRead — после её snapshot’а
+  // subscribeToProjectsUnread всё равно вернёт false, что подтвердит сброс.
   const markProjectAsRead = useCallback((id: string) => {
-    messageService.markProjectAsRead(id);
     setProjects(prev =>
       prev.map(p => (p.id === id ? { ...p, hasUnreadMessages: false } : p))
     );
+    setCurrentProject(prev =>
+      prev && prev.id === id ? { ...prev, hasUnreadMessages: false } : prev
+    );
   }, []);
+
+  // Поддерживаем актуальный currentProjectIdRef для guard в подписке выше
+  useEffect(() => {
+    currentProjectIdRef.current = currentProject?.id || null;
+  }, [currentProject?.id]);
 
   const value = useMemo(() => ({
     projects,
@@ -467,6 +471,54 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       unsubscribe?.();
     };
   }, [currentProject?.id]);
+
+  // Realtime-подписка на «непрочитанность» проектов текущей орг.
+  // Источник истины — Message.read_by[]. При появлении нового сообщения или
+  // при добавлении меня в read_by индикатор обновится автоматически.
+  //
+  // Зависимость — стабильный ключ из ID проектов (а не массив объектов),
+  // чтобы эффект не пересоздавал подписку при обновлении hasUnreadMessages
+  // (иначе получится бесконечный цикл).
+  const projectIdsKey = useMemo(
+    () => projects.map(p => p.id).sort().join(','),
+    [projects]
+  );
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const ids = projectIdsKey ? projectIdsKey.split(',') : [];
+    if (ids.length === 0) return;
+
+    const unsubscribe = messageService.subscribeToProjectsUnread(
+      ids,
+      user.id,
+      (unreadByProject) => {
+        const resolveUnread = (projectId: string, raw: boolean) =>
+          projectId === currentProjectIdRef.current ? false : raw;
+
+        setProjects(prev =>
+          prev.map(project => {
+            if (!Object.prototype.hasOwnProperty.call(unreadByProject, project.id)) {
+              return project;
+            }
+            const nextUnread = resolveUnread(project.id, !!unreadByProject[project.id]);
+            if (project.hasUnreadMessages === nextUnread) return project;
+            return { ...project, hasUnreadMessages: nextUnread };
+          })
+        );
+
+        setCurrentProject(prev => {
+          if (!prev) return prev;
+          if (!Object.prototype.hasOwnProperty.call(unreadByProject, prev.id)) return prev;
+          // currentProject всегда «прочитан» — пользователь сейчас в нём
+          if (prev.hasUnreadMessages === false) return prev;
+          return { ...prev, hasUnreadMessages: false };
+        });
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user?.id, projectIdsKey]);
 
   useEffect(() => {
     if (!currentProject?.id) return;

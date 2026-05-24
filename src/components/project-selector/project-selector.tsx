@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './project-selector.module.css';
 import '@/components/ui/modal/modal.module.css';
 import { createPortal } from 'react-dom';
@@ -41,13 +41,31 @@ interface ProjectSelectorProps {
 
 const ProjectSelector: React.FC<ProjectSelectorProps> = ({ organizationId, onClose, anchorEl, onProjectSelected }) => {
   const navigate = useNavigate();
-  const { setCurrentProject } = useProject();
+  const { setCurrentProject, projects: contextProjects } = useProject();
+  const { currentOrganization, organizations, setCurrentOrganization } = useOrganization();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, boolean>>({});
   const selectorRef = useRef<HTMLDivElement>(null);
   const isMobileLayout = typeof window !== 'undefined' ? window.innerWidth <= 760 : false;
+
+  // Для текущей орг берём индикаторы прямо из ProjectContext —
+  // там стоит realtime-подписка subscribeToProjectsUnread, и значение
+  // меняется синхронно с приходом/прочтением сообщений.
+  const isCurrentOrg = currentOrganization?.id === organizationId;
+  const reactiveUnreadMap = useMemo(() => {
+    if (!isCurrentOrg) return null;
+    const map: Record<string, boolean> = {};
+    contextProjects.forEach((proj) => {
+      map[proj.id] = !!proj.hasUnreadMessages;
+    });
+    return map;
+  }, [isCurrentOrg, contextProjects]);
+
+  // Эффективный источник индикаторов: для current org — реактивный,
+  // для других орг — локальный one-shot ниже в useEffect.
+  const effectiveUnreadMap = reactiveUnreadMap ?? unreadMap;
 
   useEffect(() => {
     let cancelled = false;
@@ -105,7 +123,11 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ organizationId, onClo
     };
   }, [organizationId, user?.id]);
 
+  // Для НЕ-current org делаем one-shot подсчёт через read_by[] — открытие
+  // селектора чужой орг происходит редко, лишняя realtime-подписка избыточна.
+  // Для current org этот блок пропускается, индикаторы берутся из ProjectContext.
   useEffect(() => {
+    if (isCurrentOrg) return;
     if (!user?.id || projects.length === 0) return;
     Promise.all(
       projects.map(async (project) => ({
@@ -121,7 +143,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ organizationId, onClo
         setUnreadMap(next);
       })
       .catch(() => undefined);
-  }, [projects, user?.id]);
+  }, [isCurrentOrg, projects, user?.id]);
 
   useEffect(() => {
     const onMouseDown = (event: MouseEvent) => {
@@ -136,7 +158,6 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ organizationId, onClo
     };
   }, [onClose]);
 
-  const { organizations, setCurrentOrganization } = useOrganization();
   const handleProjectClick = useCallback((projectId: string) => {
     localStorage.setItem('currentOrgId', organizationId);
     localStorage.setItem('currentProjectId', projectId);
@@ -202,7 +223,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ organizationId, onClo
             projects.map(project => (
               <button
                 key={project.id}
-                className={`${styles['project-selector__project']} ${unreadMap[project.id] ? styles['project-selector__project--unread'] : ''}`}
+                className={`${styles['project-selector__project']} ${effectiveUnreadMap[project.id] ? styles['project-selector__project--unread'] : ''}`}
                 onClick={() => handleProjectClick(project.id)}
               >
                 {project.name}

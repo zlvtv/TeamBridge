@@ -268,6 +268,34 @@ const ProjectChat: React.FC = () => {
     return currentOrganization.organization_members.find(m => m.user_id === userId) || null;
   };
 
+  // Карта name(lowercase) -> color из настроек ролей организации
+  const getOrgRoleColorMap = (): Map<string, string> => {
+    const map = new Map<string, string>();
+    const rolesRaw = (currentOrganization as any)?.roles;
+    if (!Array.isArray(rolesRaw)) return map;
+    rolesRaw.forEach((role: any) => {
+      if (!role) return;
+      const name = typeof role === 'string' ? role : (role.name || '');
+      const color = typeof role === 'string' ? '' : (role.color || '');
+      const trimmed = String(name).trim();
+      if (!trimmed) return;
+      if (color) map.set(trimmed.toLowerCase(), color);
+    });
+    return map;
+  };
+
+  // Возвращает роли участника как [{name, color}] — цвета берутся из настроек организации
+  const getMemberColoredRoles = (userId?: string): Array<{ name: string; color?: string }> => {
+    const member = getOrgMember(userId);
+    const rawRoles = Array.isArray(member?.roles) ? member!.roles : [];
+    if (rawRoles.length === 0) return [];
+    const colorMap = getOrgRoleColorMap();
+    return rawRoles
+      .map((role) => String(role || '').trim())
+      .filter(Boolean)
+      .map((name) => ({ name, color: colorMap.get(name.toLowerCase()) }));
+  };
+
   const getRoleNames = () => {
     const rolesRaw = (currentOrganization as any)?.roles;
     if (!Array.isArray(rolesRaw)) return [] as string[];
@@ -485,50 +513,55 @@ const ProjectChat: React.FC = () => {
     }
   }, [currentProject?.id]);
 
+  // При входе в проект оптимистично сбрасываем индикатор — фактическую
+  // запись в Firestore (read_by[]) делает эффект ниже, когда messages загрузились.
   useEffect(() => {
     if (currentProject?.id) markProjectAsRead(currentProject.id);
   }, [currentProject?.id, markProjectAsRead]);
 
-  useEffect(() => {
-    if (!currentProject?.id) return;
-
-    const syncReadNow = () => {
-      if (document.visibilityState !== 'visible') return;
-      messageService.markProjectAsRead(currentProject.id);
-      markProjectAsRead(currentProject.id);
-    };
-
-    syncReadNow();
-    window.addEventListener('focus', syncReadNow);
-    document.addEventListener('visibilitychange', syncReadNow);
-    return () => {
-      window.removeEventListener('focus', syncReadNow);
-      document.removeEventListener('visibilitychange', syncReadNow);
-    };
-  }, [currentProject?.id, markProjectAsRead]);
-
-  useEffect(() => {
-    if (!currentProject?.id || !user?.id || messages.length === 0) return;
-    const timer = setTimeout(() => {
-      messageService.markProjectMessagesAsRead(currentProject.id, user.id).catch(() => undefined);
-    }, 120);
-    return () => clearTimeout(timer);
-  }, [currentProject?.id, user?.id, messages]);
-
+  // Главный mark-as-read: пишем себя в Message.read_by[] для всех входящих
+  // непрочитанных сообщений проекта. Источник истины — Firestore: после
+  // batch.commit подписка subscribeToProjectsUnread в ProjectContext получит
+  // снэпшот и индикатор пропадёт на всех вкладках/устройствах синхронно.
+  //
+  // Срабатывает на:
+  //  - смену проекта (currentProject?.id)
+  //  - изменение списка сообщений (новое входящее → перепомечаем)
+  //  - возвращение фокуса/видимости вкладки (через инкремент visibilityTick)
   useEffect(() => {
     if (!currentProject?.id || !user?.id || messages.length === 0) return;
     if (document.visibilityState !== 'visible') return;
 
     const hasUnreadIncoming = messages.some((msg) => {
       if (msg.sender_id === user.id) return false;
-      const readBy = new Set(msg.read_by || []);
-      return !readBy.has(user.id);
+      if (msg.type === 'system') return false;
+      const readBy = Array.isArray(msg.read_by) ? msg.read_by : [];
+      return !readBy.includes(user.id);
     });
     if (!hasUnreadIncoming) return;
 
-    messageService.markProjectAsRead(currentProject.id);
+    messageService.markProjectMessagesAsRead(currentProject.id, user.id).catch(() => undefined);
     markProjectAsRead(currentProject.id);
-  }, [messages, currentProject?.id, user?.id, markProjectAsRead]);
+  }, [currentProject?.id, user?.id, messages, markProjectAsRead]);
+
+  // Перепомечаем при возвращении вкладки/окна в активное состояние —
+  // на случай, если за время отсутствия фокуса пришли новые сообщения.
+  useEffect(() => {
+    if (!currentProject?.id || !user?.id) return;
+
+    const sync = () => {
+      if (document.visibilityState !== 'visible') return;
+      messageService.markProjectMessagesAsRead(currentProject.id, user.id).catch(() => undefined);
+      markProjectAsRead(currentProject.id);
+    };
+
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      window.removeEventListener('focus', sync);
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, [currentProject?.id, user?.id, markProjectAsRead]);
 
   useEffect(() => {
     if (!user?.id || !messages.length) return;
@@ -914,7 +947,7 @@ const ProjectChat: React.FC = () => {
       email: sender?.email || '',
       avatar_url: sender?.avatar_url || null,
       description: sender?.description || '',
-      roles: getOrgMember(msg.sender_id)?.roles || [],
+      roles: getMemberColoredRoles(msg.sender_id),
     });
   };
 
@@ -933,7 +966,7 @@ const ProjectChat: React.FC = () => {
       email: sender?.email || '',
       avatar_url: sender?.avatar_url || null,
       description: sender?.description || '',
-      roles: member.roles || [],
+      roles: getMemberColoredRoles(member.user_id),
     });
   };
 
@@ -1138,6 +1171,7 @@ const ProjectChat: React.FC = () => {
             const isSystemMessage = msg.sender_id === 'system' || msg.type === 'system';
             const sender = resolveSender(msg);
             const senderName = sender?.full_name || sender?.username || sender?.email || 'Пользователь';
+            const senderRoles = isSystemMessage ? [] : getMemberColoredRoles(msg.sender_id);
             const repliesCount = threadMessages[msg.id]?.length || 0;
 
             const pollOptionsNormalized = Array.isArray(msg.poll?.options)
@@ -1177,6 +1211,24 @@ const ProjectChat: React.FC = () => {
 
                       <div className={styles['project-chat__message-content']}>
                         <div className={styles['project-chat__message-sender']}>{senderName}</div>
+                        {senderRoles.length > 0 && (
+                          <div className={styles['project-chat__message-roles']}>
+                            {senderRoles.map((role, roleIndex) => (
+                              <span
+                                key={`${msg.id}-role-${role.name}-${roleIndex}`}
+                                className={styles['project-chat__message-role']}
+                                style={role.color ? {
+                                  background: `${role.color}20`,
+                                  color: role.color,
+                                  borderColor: `${role.color}55`,
+                                } : undefined}
+                                title={role.name}
+                              >
+                                {role.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
                         {msg.type === 'photo' && msg.photo_url ? (
                           <div className={styles['project-chat__photo-message']}>

@@ -275,22 +275,94 @@ export const messageService = {
   },
 
   async hasUnreadProjectMessages(projectId: string, userId: string): Promise<boolean> {
-    if (!projectId) return false;
-    const lastVisit = localStorage.getItem(`lastVisit_project_${projectId}`);
-    const lastVisitTime = lastVisit ? new Date(lastVisit).getTime() : 0;
-
+    if (!projectId || !userId) return false;
     try {
       const q = query(collection(db, 'messages'), where('project_id', '==', projectId));
       const snapshot = await getDocs(q);
       return snapshot.docs.some(docItem => {
-        const data = docItem.data();
-        if (data.sender_id === userId) return false;
-        const messageTime = getMessageTimestamp(data);
-        return messageTime > lastVisitTime;
+        const data = docItem.data() as any;
+        if (data?.sender_id === userId) return false;
+        if (data?.type === 'system') return false;
+        const readBy = Array.isArray(data?.read_by) ? data.read_by : [];
+        return !readBy.includes(userId);
       });
     } catch {
       return false;
     }
+  },
+
+  /**
+   * Realtime-подписка на «непрочитанность» по списку проектов.
+   * Источник истины — Message.read_by[]: проект unread, если есть хоть одно
+   * сообщение, где sender_id !== userId, type !== 'system', и userId не в read_by.
+   *
+   * Firestore-оператор 'in' принимает до 30 значений, поэтому projectIds
+   * разбиваются на чанки и слушаются параллельно.
+   */
+  subscribeToProjectsUnread(
+    projectIds: string[],
+    userId: string,
+    callback: (unreadByProject: Record<string, boolean>) => void
+  ): () => void {
+    if (!projectIds.length || !userId) {
+      callback({});
+      return () => undefined;
+    }
+
+    const CHUNK_SIZE = 30;
+    const chunks: string[][] = [];
+    for (let i = 0; i < projectIds.length; i += CHUNK_SIZE) {
+      chunks.push(projectIds.slice(i, i + CHUNK_SIZE));
+    }
+
+    const perChunk: Record<number, Record<string, boolean>> = {};
+
+    const emit = () => {
+      const merged: Record<string, boolean> = {};
+      projectIds.forEach((pid) => {
+        merged[pid] = false;
+      });
+      Object.values(perChunk).forEach((chunkResult) => {
+        Object.entries(chunkResult).forEach(([pid, isUnread]) => {
+          if (isUnread) merged[pid] = true;
+        });
+      });
+      callback(merged);
+    };
+
+    const unsubs = chunks.map((chunk, chunkIndex) => {
+      const q = query(collection(db, 'messages'), where('project_id', 'in', chunk));
+      return onSnapshot(
+        q,
+        (snapshot) => {
+          const localUnread: Record<string, boolean> = {};
+          chunk.forEach((pid) => {
+            localUnread[pid] = false;
+          });
+          snapshot.docs.forEach((docItem) => {
+            const data = docItem.data() as any;
+            if (data?.sender_id === userId) return;
+            if (data?.type === 'system') return;
+            const readBy = Array.isArray(data?.read_by) ? data.read_by : [];
+            if (readBy.includes(userId)) return;
+            const pid = String(data?.project_id || '');
+            if (pid && Object.prototype.hasOwnProperty.call(localUnread, pid)) {
+              localUnread[pid] = true;
+            }
+          });
+          perChunk[chunkIndex] = localUnread;
+          emit();
+        },
+        () => {
+          perChunk[chunkIndex] = {};
+          emit();
+        }
+      );
+    });
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
   },
 
   async deleteMessage(messageId: string): Promise<void> {
@@ -379,11 +451,18 @@ export const messageService = {
     }
   },
 
-  markAsRead(organizationId: string) {
-    localStorage.setItem(`lastVisit_org_${organizationId}`, new Date().toISOString());
+  /**
+   * Историческое API: раньше писало localStorage('lastVisit_org_*'), который
+   * использовался для проверки непрочитанных по timestamp. Сейчас источник
+   * истины — Message.read_by[], поэтому функция оставлена как no-op для
+   * совместимости с местами вызова. Удалить вместе с markProjectAsRead, когда
+   * все вызовы заменены на markProjectMessagesAsRead.
+   */
+  markAsRead(_organizationId: string) {
+    void _organizationId;
   },
 
-  markProjectAsRead(projectId: string) {
-    localStorage.setItem(`lastVisit_project_${projectId}`, new Date().toISOString());
+  markProjectAsRead(_projectId: string) {
+    void _projectId;
   },
 };

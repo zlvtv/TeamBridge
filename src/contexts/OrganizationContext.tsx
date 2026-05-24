@@ -198,10 +198,12 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     ...org,
                     updated_at: activityIso,
                     lastActivityAt: activityIso,
-                    hasUnreadMessages:
-                      hasInitialSnapshot && orgId !== currentOrganizationIdRef.current
-                        ? true
-                        : org.hasUnreadMessages,
+                    // hasUnreadMessages не выставляем оптимистично —
+                    // org.updated_at меняется не только от новых сообщений
+                    // (переименование, изменение ролей и т.п.), и optimistic
+                    // true давал false-positive. Реальное значение придёт через
+                    // scheduleRefresh() → hasUnreadMessages(orgId) по read_by[].
+                    hasUnreadMessages: org.hasUnreadMessages,
                   }
                 : org
             );
