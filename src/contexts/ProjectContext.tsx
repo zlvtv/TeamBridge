@@ -8,6 +8,7 @@ import type { Project, ProjectMember } from '../types/project.types';
 import type { Task } from '../types/task.types';
 import {
   canCreateOrganizationProjects,
+  canManageOrganization,
   canManageProject,
   canManageProjectMembers,
 } from '../utils/permissions';
@@ -132,8 +133,13 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
           members: await projectService.getProjectMembers(proj.id),
         }))
       );
+      // Доступ к проекту: либо ты в его участниках, либо ты владелец/админ
+      // организации — тогда видишь все проекты этой орг, даже если формально
+      // не добавлен в project_members. Иначе админ орг управлял бы проектами
+      // только через permissions-проверки, не видя их в боковой панели.
+      const isOrgManager = canManageOrganization(currentOrganization, user.id);
       const accessibleProjects = projectsWithMembers.filter((project) =>
-        project.members.some((member) => member.user_id === user.id)
+        isOrgManager || project.members.some((member) => member.user_id === user.id)
       );
       const sortedProjects = sortProjectsWithPinnedGeneral(accessibleProjects);
 

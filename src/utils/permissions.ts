@@ -25,7 +25,7 @@ export const canManageOrganization = (organization: MaybeOrganization, userId?: 
   isOrganizationOwner(organization, userId) || isOrganizationAdmin(organization, userId);
 
 export const canCreateOrganizationProjects = (organization: MaybeOrganization, userId?: string | null) =>
-  isOrganizationOwner(organization, userId);
+  isOrganizationOwner(organization, userId) || isOrganizationAdmin(organization, userId);
 
 export const isProjectLead = (project: MaybeProject, userId?: string | null) =>
   !!project && !!userId && project.lead_user_id === userId;
