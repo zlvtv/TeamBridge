@@ -97,6 +97,19 @@ const Dashboard: React.FC = () => {
     markOrganizationAsRead(currentOrganization.id);
   }, [currentOrganization?.id, currentProject?.id, markOrganizationAsRead]);
 
+  // На мобильной раскладке чат и доска задач рендерятся как отдельные «вкладки»
+  // (mobileView = 'chat' | 'board'). Когда пользователь жмёт «Перейти к
+  // исходному сообщению» в EditTaskModal, EditTaskModal публикует событие —
+  // здесь его перехватываем и принудительно переключаемся на чат, иначе
+  // подсветка сообщения сработает «за кулисами» на скрытой панели.
+  useEffect(() => {
+    const handleFocusChatMessage = () => {
+      setMobileView('chat');
+    };
+    window.addEventListener('teambridge:focus-chat-message', handleFocusChatMessage as EventListener);
+    return () => window.removeEventListener('teambridge:focus-chat-message', handleFocusChatMessage as EventListener);
+  }, []);
+
   if (orgLoading) {
     return <LoadingState message="Загрузка организаций..." />;
   }

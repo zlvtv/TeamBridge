@@ -47,6 +47,8 @@ interface EditTaskModalProps {
     report_text?: string | null;
     report_updated_by?: string | null;
     report_updated_at?: string | null;
+    source_message_id?: string | null;
+    project_id?: string;
   };
   refreshProjects: () => Promise<void>;
 }
@@ -181,6 +183,30 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     return 'Напишите сообщение по задаче...';
   }, [canUseTaskChat]);
 
+  // Переход к исходному сообщению в проектном чате — то самому, из которого
+  // эта задача была создана через «Сделать задачей». Реализует прослеживаемость
+  // «задача → исходное обсуждение». Использует существующий механизм focusMessageId
+  // в ProjectChat: записывает id в localStorage и опционально переключает мобильный
+  // вид на чат через CustomEvent. ProjectChat подхватит, проскроллит и подсветит.
+  const sourceProjectId = task.project_id || currentProject?.id || '';
+  const canJumpToSourceMessage =
+    !!task.source_message_id && !!sourceProjectId && sourceProjectId === currentProject?.id;
+
+  const handleJumpToSourceMessage = () => {
+    if (!task.source_message_id || !sourceProjectId) return;
+    try {
+      localStorage.setItem('focusMessageId', task.source_message_id);
+      localStorage.setItem('focusMessageProjectId', sourceProjectId);
+    } catch {
+      /* localStorage может быть недоступен — не критично, просто не подсветит */
+    }
+    // На мобильной раскладке Dashboard переключает видимый раздел на чат
+    window.dispatchEvent(new CustomEvent('teambridge:focus-chat-message', {
+      detail: { projectId: sourceProjectId, messageId: task.source_message_id },
+    }));
+    onClose();
+  };
+
   const reportUpdatedByName = useMemo(() => {
     if (!task.report_updated_by) return null;
 
@@ -308,6 +334,26 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Редактировать задачу">
+      {task.source_message_id ? (
+        <div className={styles['edit-task-modal__source']}>
+          <span className={styles['edit-task-modal__source-label']}>
+            Создана из обсуждения в чате проекта
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="small"
+            onClick={handleJumpToSourceMessage}
+            disabled={!canJumpToSourceMessage}
+            title={canJumpToSourceMessage
+              ? 'Перейти к исходному сообщению в чате'
+              : 'Исходное сообщение в другом проекте — откройте этот проект, чтобы перейти'}
+          >
+            ↗ Перейти к сообщению
+          </Button>
+        </div>
+      ) : null}
+
       <FormProvider
         key={task.id}
         initialValues={{
