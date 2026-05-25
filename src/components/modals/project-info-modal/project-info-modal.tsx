@@ -41,10 +41,19 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
   const { currentProject, projects, refreshProjects } = useProject();
   const { user } = useAuth();
 
-  const resolvedProject = useMemo(
-    () => projects.find((project) => project.id === currentProject?.id) || currentProject,
-    [currentProject, projects]
-  );
+  // Оптимистичный override для смены куратора: пока refreshProjects не подтянет
+  // новые данные из Firestore, мы локально подменяем lead_user_id, чтобы UI
+  // мгновенно отражал передачу кураторства.
+  const [optimisticLeadUserId, setOptimisticLeadUserId] = useState<string | null>(null);
+
+  const resolvedProject = useMemo(() => {
+    const base = projects.find((project) => project.id === currentProject?.id) || currentProject;
+    if (!base) return base;
+    if (optimisticLeadUserId !== null) {
+      return { ...base, lead_user_id: optimisticLeadUserId };
+    }
+    return base;
+  }, [currentProject, projects, optimisticLeadUserId]);
 
   const [members, setMembers] = useState<any[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
@@ -423,6 +432,29 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
     }
     const displayName = sourceMember?.user?.full_name || sourceMember?.user?.username || sourceMember?.user?.email || 'Участник';
 
+    // Оптимистичное обновление: сразу добавляем участника в локальный список,
+    // чтобы пользователь увидел изменения мгновенно, не дожидаясь Firestore.
+    // ID начинается с 'optimistic-', чтобы при rollback или после refresh
+    // его можно было отличить и заменить на реальную запись из БД.
+    const optimisticId = `optimistic-add-${userId}-${Date.now()}`;
+    const optimisticMember: any = {
+      id: optimisticId,
+      project_id: resolvedProject.id,
+      user_id: userId,
+      status: 'member',
+      roles: [],
+      joined_at: new Date().toISOString(),
+      profile: {
+        id: userId,
+        username: sourceMember.user?.username || 'unknown',
+        full_name: sourceMember.user?.full_name || displayName,
+        avatar_url: sourceMember.user?.avatar_url || null,
+        description: sourceMember.user?.description || null,
+        last_seen_at: sourceMember.user?.last_seen_at || null,
+      },
+    };
+    setMembers((prev) => [...prev, optimisticMember]);
+
     setIsMutatingMemberId(userId);
     setMemberActionError(null);
     setMemberActionInfo(null);
@@ -435,6 +467,8 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
       setMembers(Array.isArray(refreshed) ? refreshed : []);
       await refreshProjects();
     } catch (err: any) {
+      // Rollback: удаляем оптимистичную запись, если запись в Firestore упала
+      setMembers((prev) => prev.filter((m) => m.id !== optimisticId));
       setMemberActionError(err.message || 'Не удалось добавить участника');
     } finally {
       setIsMutatingMemberId(null);
@@ -446,6 +480,10 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
     const member = members.find((item) => item.id === memberId);
     if (!member || member.user_id === resolvedProject.created_by) return;
 
+    // Оптимистичное удаление: сразу убираем из локального списка
+    const previousMembers = members;
+    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+
     setIsMutatingMemberId(memberId);
     setMemberActionError(null);
     setMemberActionInfo(null);
@@ -456,6 +494,8 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
       setMembers(Array.isArray(refreshed) ? refreshed : []);
       await refreshProjects();
     } catch (err: any) {
+      // Rollback: возвращаем участника обратно
+      setMembers(previousMembers);
       setMemberActionError(err.message || 'Не удалось удалить участника');
     } finally {
       setIsMutatingMemberId(null);
@@ -484,6 +524,15 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
   const handleTransferLead = async (memberId: string) => {
     if (!resolvedProject) return;
 
+    // Оптимистично подменяем куратора в локальном overide, чтобы UI
+    // мгновенно отразил передачу — иначе пользователь видит «зависание»
+    // до тех пор, пока refreshProjects не подтянет данные из Firestore.
+    const targetMember = members.find((item) => item.id === memberId);
+    const previousOptimistic = optimisticLeadUserId;
+    if (targetMember?.user_id) {
+      setOptimisticLeadUserId(targetMember.user_id);
+    }
+
     setIsMutatingMemberId(memberId);
     setMemberActionError(null);
     setMemberActionInfo('Передаем кураторство...');
@@ -493,8 +542,12 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ isOpen, onClose }) 
       const refreshed = await projectService.getProjectMembers(resolvedProject.id);
       setMembers(Array.isArray(refreshed) ? refreshed : []);
       await refreshProjects();
+      // Контекст обновился — снимаем оптимистичный override
+      setOptimisticLeadUserId(null);
       setMemberActionInfo(null);
     } catch (err: any) {
+      // Rollback: возвращаем предыдущий override (или снимаем его)
+      setOptimisticLeadUserId(previousOptimistic);
       setMemberActionError(err.message || 'Не удалось передать кураторство');
       setMemberActionInfo(null);
     } finally {
