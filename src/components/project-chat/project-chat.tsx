@@ -583,10 +583,25 @@ const ProjectChat: React.FC = () => {
 
     requestAnimationFrame(() => {
       const node = document.getElementById(`project-chat-message-${focusMessageId}`);
-      if (!node) return;
+      const container = messagesContainerRef.current;
+      if (!node || !container) return;
       initialPositionResolvedRef.current = true;
       shouldAutoScrollRef.current = false;
-      node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // ВАЖНО: не используем node.scrollIntoView() — он скроллит ВСЕ
+      // прокручиваемые контейнеры вверх по дереву (включая window и
+      // .dashboard__content), из-за чего страница «прыгает вниз» и не
+      // возвращается обратно. Скроллим только сам контейнер сообщений,
+      // явно вычисляя позицию, чтобы сообщение оказалось по центру.
+      const containerRect = container.getBoundingClientRect();
+      const nodeRect = node.getBoundingClientRect();
+      const offsetWithinContainer = nodeRect.top - containerRect.top + container.scrollTop;
+      const targetScrollTop = Math.max(
+        0,
+        offsetWithinContainer - container.clientHeight / 2 + node.clientHeight / 2
+      );
+      container.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+
       setFocusedMessageId(focusMessageId);
       window.setTimeout(() => setFocusedMessageId(null), 2200);
       localStorage.removeItem('focusMessageId');
