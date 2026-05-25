@@ -49,6 +49,7 @@ interface EditTaskModalProps {
     report_updated_at?: string | null;
     source_message_id?: string | null;
     project_id?: string;
+    organization_id?: string;
   };
   refreshProjects: () => Promise<void>;
 }
@@ -79,8 +80,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   task, 
   refreshProjects 
 }) => {
-  const { currentProject } = useProject();
-  const { currentOrganization } = useOrganization();
+  const { currentProject, projects, setCurrentProject } = useProject();
+  const { currentOrganization, organizations, setCurrentOrganization } = useOrganization();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -183,27 +184,86 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     return 'Напишите сообщение по задаче...';
   }, [canUseTaskChat]);
 
-  // Переход к исходному сообщению в проектном чате — то самому, из которого
+  // Переход к исходному сообщению в проектном чате — тому самому, из которого
   // эта задача была создана через «Сделать задачей». Реализует прослеживаемость
-  // «задача → исходное обсуждение». Использует существующий механизм focusMessageId
-  // в ProjectChat: записывает id в localStorage и опционально переключает мобильный
-  // вид на чат через CustomEvent. ProjectChat подхватит, проскроллит и подсветит.
+  // «задача → исходное обсуждение». Использует существующий механизм
+  // focusMessageId в ProjectChat: пишем ID в localStorage, переключаем при
+  // необходимости проект/организацию — ProjectChat сам подхватит, проскроллит
+  // и подсветит сообщение, как только его коллекция messages загрузится.
   const sourceProjectId = task.project_id || currentProject?.id || '';
-  const canJumpToSourceMessage =
-    !!task.source_message_id && !!sourceProjectId && sourceProjectId === currentProject?.id;
+  const sourceOrganizationId = task.organization_id || currentOrganization?.id || '';
+  const canJumpToSourceMessage = !!task.source_message_id && !!sourceProjectId;
+
+  const emitFocusEvent = () => {
+    window.dispatchEvent(new CustomEvent('teambridge:focus-chat-message', {
+      detail: { projectId: sourceProjectId, messageId: task.source_message_id },
+    }));
+  };
 
   const handleJumpToSourceMessage = () => {
     if (!task.source_message_id || !sourceProjectId) return;
+
+    // Фокус-маркер для ProjectChat — он сам подхватит при загрузке сообщений
     try {
       localStorage.setItem('focusMessageId', task.source_message_id);
       localStorage.setItem('focusMessageProjectId', sourceProjectId);
     } catch {
       /* localStorage может быть недоступен — не критично, просто не подсветит */
     }
-    // На мобильной раскладке Dashboard переключает видимый раздел на чат
-    window.dispatchEvent(new CustomEvent('teambridge:focus-chat-message', {
-      detail: { projectId: sourceProjectId, messageId: task.source_message_id },
-    }));
+
+    // Сценарий 1 — мы уже в нужном проекте. Просто закрываем модалку,
+    // эффект focusMessageId в ProjectChat сработает сразу.
+    if (currentProject?.id === sourceProjectId) {
+      emitFocusEvent();
+      onClose();
+      return;
+    }
+
+    // Сценарий 2 — другой проект, но в той же организации. Переключаем
+    // currentProject — ProjectChat пересоберёт подписку на messages, и при
+    // их загрузке эффект focusMessageId проскроллит к нужному сообщению.
+    if (
+      currentOrganization?.id &&
+      (!sourceOrganizationId || currentOrganization.id === sourceOrganizationId)
+    ) {
+      const targetProject = projects.find((p) => p.id === sourceProjectId);
+      if (targetProject) {
+        try {
+          localStorage.setItem('currentProjectId', sourceProjectId);
+        } catch { /* noop */ }
+        setCurrentProject(targetProject);
+        emitFocusEvent();
+        onClose();
+        return;
+      }
+    }
+
+    // Сценарий 3 — другая организация. Меняем currentOrganization и
+    // используем pendingProjectSelection — ProjectContext подхватит его при
+    // загрузке проектов новой орг и выставит нужный currentProject.
+    if (sourceOrganizationId && sourceOrganizationId !== currentOrganization?.id) {
+      const targetOrg = organizations.find((o) => o.id === sourceOrganizationId);
+      if (targetOrg) {
+        try {
+          sessionStorage.setItem(
+            'pendingProjectSelection',
+            JSON.stringify({
+              organizationId: sourceOrganizationId,
+              projectId: sourceProjectId,
+            })
+          );
+          localStorage.setItem('currentOrgId', sourceOrganizationId);
+        } catch { /* noop */ }
+        setCurrentOrganization(targetOrg);
+        emitFocusEvent();
+        onClose();
+        return;
+      }
+    }
+
+    // Fallback — пытаемся хотя бы запустить событие, вдруг где-то слушатель
+    // обработает; и закрываем модалку, чтобы UI не подвисал.
+    emitFocusEvent();
     onClose();
   };
 
@@ -345,9 +405,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             size="small"
             onClick={handleJumpToSourceMessage}
             disabled={!canJumpToSourceMessage}
-            title={canJumpToSourceMessage
-              ? 'Перейти к исходному сообщению в чате'
-              : 'Исходное сообщение в другом проекте — откройте этот проект, чтобы перейти'}
+            title="Перейти к исходному сообщению в чате (при необходимости переключит проект)"
           >
             ↗ Перейти к сообщению
           </Button>
