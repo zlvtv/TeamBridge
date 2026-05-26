@@ -135,14 +135,8 @@ const SignUp: React.FC = () => {
       compact
       badge="Регистрация"
       title="Создайте аккаунт TeamBridge"
-      subtitle=""
-      showcaseLabel="Setup"
       showcaseTitle="Быстрый старт без лишнего шума"
       showcaseDescription="После регистрации можно сразу перейти к проектам, ролям и задачам."
-      showcaseItems={[
-        'Кастомные роли и структура команды',
-        'Инвайты, задачи и уведомления в одном месте',
-      ]}
       footer={(
         <p className={styles['auth__footer']}>
           Уже есть аккаунт?{' '}

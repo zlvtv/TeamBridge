@@ -46,7 +46,6 @@ const Login: React.FC = () => {
       compact
       badge="Вход"
       title="Войдите в TeamBridge"
-      subtitle="Продолжите работу с проектами, задачами и командной коммуникацией."
       showcaseLabel="Workspace"
       showcaseTitle="Рабочее пространство снова под рукой"
       showcaseDescription="После входа вы сразу возвращаетесь к активным обсуждениям, задачам и срокам."
