@@ -553,6 +553,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             updated_at: new Date(),
             last_seen_at: new Date(),
             description: null,
+            consent_accepted_at: new Date(),
+            consent_policy_version: '2026-05-26',
           });
         });
       } catch (transactionError: any) {

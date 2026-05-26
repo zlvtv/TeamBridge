@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthShell from '../../components/auth/AuthShell';
 import Input from '../../components/ui/input/input';
@@ -22,6 +22,8 @@ const SignUp: React.FC = () => {
   const [usernameStatus, setUsernameStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
 
   const [touched, setTouched] = useState({
     username: false,
@@ -82,6 +84,12 @@ const SignUp: React.FC = () => {
     if (usernameError || emailError || passwordError || fullNameError) {
       return;
     }
+
+    if (!consentChecked) {
+      setConsentError('Необходимо согласие на обработку персональных данных');
+      return;
+    }
+    setConsentError(null);
 
     setIsLoading(true);
 
@@ -242,7 +250,38 @@ const SignUp: React.FC = () => {
             <span className={styles['auth__helper']}>Минимум 6 символов для безопасного входа.</span>
           </div>
 
-          <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
+          <div className={styles['auth__consent']}>
+            <label className={styles['auth__consent-label']}>
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => {
+                  setConsentChecked(e.target.checked);
+                  if (e.target.checked) setConsentError(null);
+                }}
+                disabled={isLoading}
+                className={styles['auth__consent-checkbox']}
+              />
+              <span className={styles['auth__consent-text']}>
+                Я согласен с обработкой персональных данных в соответствии с{' '}
+                <Link to="/privacy" target="_blank" className={styles['auth__consent-link']}>
+                  Политикой конфиденциальности
+                </Link>
+              </span>
+            </label>
+            {consentError && (
+              <span className={styles['auth__consent-error']}>{consentError}</span>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="large"
+            fullWidth
+            loading={isLoading}
+            disabled={!consentChecked || isLoading}
+          >
             Зарегистрироваться
           </Button>
         </form>
