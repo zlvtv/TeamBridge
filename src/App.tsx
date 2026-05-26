@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Confirm from './pages/Confirm/Confirm';
 import InvitePage from './pages/InvitePage/InvitePage';
 import Landing from './pages/Landing/Landing';
+import Privacy from './pages/Privacy/Privacy';
 import LoadingState from './components/ui/loading/LoadingState';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
@@ -96,10 +97,10 @@ const App: React.FC = () => {
 
                     <Route path="/recovery/callback" element={<RecoveryCallback />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
-
                     <Route path="/confirm" element={<ConfirmRoute><Confirm /></ConfirmRoute>} />
                     <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                     <Route path="/invite/:token" element={<InviteRoute><InvitePage /></InviteRoute>} />
+                    <Route path="/privacy" element={<Privacy />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                   <ToastContainer />
